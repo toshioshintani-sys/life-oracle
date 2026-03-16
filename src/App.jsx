@@ -19,8 +19,25 @@ const ACCENT = "#C4940A";
 const TEXT = "#e8e0d0";
 const TEXT_MUTED = "#8a7a6a";
 
+function primaryBtnStyle(enabled) {
+  return {
+    width: "100%",
+    padding: 14,
+    background: enabled ? ACCENT : "#333",
+    border: "none",
+    borderRadius: 10,
+    color: enabled ? "#0f0f1a" : "#666",
+    fontSize: 14,
+    cursor: enabled ? "pointer" : "not-allowed",
+  };
+}
+
+function getTypeName(results) {
+  return results.isLight ? results.jungInfo?.light : results.jungInfo?.shadow;
+}
+
 function generatePersonalPrompt(results, typeProfile, occupationLabel, generationLabel) {
-  const typeName = results.isLight ? results.jungInfo?.light : results.jungInfo?.shadow;
+  const typeName = getTypeName(results);
   const lightShadow = results.isLight ? "光" : "影";
   const praise = typeProfile?.praiseText ?? "";
   const habit = typeProfile?.habitText ?? "";
@@ -73,7 +90,7 @@ export default function App() {
   const answeredQ = Object.keys(answers).length;
   const progress = totalQ > 0 ? (answeredQ / totalQ) * 100 : 0;
 
-  const results = phase === "result" ? calcResults(answers) : null;
+  const results = phase === "result" ? (() => { try { return calcResults(answers); } catch { return null; } })() : null;
   const typeId = results ? `${results.topJung}-${results.isLight ? "光" : "影"}` : "";
   const occupationLabel = occupation ? occupations.find((o) => o.id === occupation)?.label : "";
   const generationLabel = generation ? generations.find((g) => g.id === generation)?.label : "";
@@ -107,14 +124,15 @@ export default function App() {
       setAnimating(false);
 
       if (!jungDone) {
-        if (currentQ + 1 < QUESTIONS.jung.length) setCurrentQ(currentQ + 1);
+        if (currentQ + 1 < QUESTIONS.jung.length) setCurrentQ((prev) => prev + 1);
         else {
           setJungDone(true);
           setCurrentQ(0);
+          setSelected(null);
           setPhase("bias_intro");
         }
       } else {
-        if (currentQ + 1 < QUESTIONS.bias.length) setCurrentQ(currentQ + 1);
+        if (currentQ + 1 < QUESTIONS.bias.length) setCurrentQ((prev) => prev + 1);
         else setPhase("result");
       }
     }, 400);
@@ -136,14 +154,32 @@ export default function App() {
 
   function handleCopyPrompt() {
     const prompt = generatePersonalPrompt(results, typeProfile, occupationLabel, generationLabel);
-    navigator.clipboard?.writeText(prompt).then(() => {
+    const onSuccess = () => {
       setPromptCopied(true);
       setTimeout(() => setPromptCopied(false), 2000);
-    });
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(prompt).then(onSuccess).catch(() => fallbackCopy(prompt, onSuccess));
+    } else {
+      fallbackCopy(prompt, onSuccess);
+    }
+  }
+
+  function fallbackCopy(text, onSuccess) {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.cssText = "position:fixed;top:-9999px;left:-9999px";
+    document.body.appendChild(el);
+    el.select();
+    try {
+      if (document.execCommand("copy")) onSuccess();
+    } finally {
+      document.body.removeChild(el);
+    }
   }
 
   const shareText = results
-    ? `${results.isLight ? results.jungInfo?.light : results.jungInfo?.shadow}（${results.jungInfo?.name}） #ライフオラクル`
+    ? `${getTypeName(results)}（${results.jungInfo?.name}） #ライフオラクル`
     : "";
   const shareUrl = typeof window !== "undefined" ? encodeURIComponent(window.location.href) : "";
 
@@ -222,16 +258,7 @@ export default function App() {
             <button
               onClick={() => occupation && setPhase("generation")}
               disabled={!occupation}
-              style={{
-                width: "100%",
-                padding: 14,
-                background: occupation ? ACCENT : "#333",
-                border: "none",
-                borderRadius: 10,
-                color: occupation ? "#0f0f1a" : "#666",
-                fontSize: 14,
-                cursor: occupation ? "pointer" : "not-allowed",
-              }}
+              style={primaryBtnStyle(occupation)}
             >
               次へ
             </button>
@@ -266,30 +293,23 @@ export default function App() {
             <button
               onClick={() => generation && setPhase("jung")}
               disabled={!generation}
-              style={{
-                width: "100%",
-                padding: 14,
-                background: generation ? ACCENT : "#333",
-                border: "none",
-                borderRadius: 10,
-                color: generation ? "#0f0f1a" : "#666",
-                fontSize: 14,
-                cursor: generation ? "pointer" : "not-allowed",
-              }}
+              style={primaryBtnStyle(generation)}
             >
               診断を開始する
             </button>
           </div>
         )}
 
-        {/* Step 4: Jung 15 */}
-        {phase === "jung" && currentQuestion && (
+        {/* Step 4 & 5: Question */}
+        {(phase === "jung" || phase === "bias") && currentQuestion && (
           <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1 }}>
             <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 12 }}>
               <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 2, transition: "width 0.3s" }} />
             </div>
             <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 16 }}>{answeredQ} / {totalQ} 問</div>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 3 / 4 — ユング診断</div>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>
+              {phase === "jung" ? "Step 3 / 4 — ユング診断" : "Step 4 / 4 — バイアス診断"}
+            </div>
             <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 12 }}>テーマ：{currentQuestion.theme}</div>
             <p style={{ fontSize: 17, lineHeight: 1.7, marginBottom: 24 }}>{currentQuestion.question}</p>
             {currentQuestion.options.map((opt) => (
@@ -343,48 +363,20 @@ export default function App() {
           </div>
         )}
 
-        {/* Step 5: Bias 16 */}
-        {phase === "bias" && currentQuestion && (
-          <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1 }}>
-            <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 12 }}>
-              <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 2, transition: "width 0.3s" }} />
-            </div>
-            <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 16 }}>{answeredQ} / {totalQ} 問</div>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 4 / 4 — バイアス診断</div>
-            <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 12 }}>テーマ：{currentQuestion.theme}</div>
-            <p style={{ fontSize: 17, lineHeight: 1.7, marginBottom: 24 }}>{currentQuestion.question}</p>
-            {currentQuestion.options.map((opt) => (
-              <button
-                key={opt.label}
-                onClick={() => handleAnswer(opt.type)}
-                style={{
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "14px 16px",
-                  marginBottom: 10,
-                  background: selected === opt.type ? "rgba(196,148,10,0.12)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${selected === opt.type ? ACCENT : "rgba(196,148,10,0.2)"}`,
-                  borderRadius: 10,
-                  color: TEXT,
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  cursor: "pointer",
-                }}
-              >
-                <span style={{ color: ACCENT, marginRight: 8 }}>{opt.label}</span>
-                {opt.text}
-              </button>
-            ))}
+        {/* Step 6: Result - Loading */}
+        {phase === "result" && results && (!typeProfiles || !prescriptions) && (
+          <div style={{ ...CARD_STYLE, textAlign: "center", padding: "40px 20px" }}>
+            <div style={{ fontSize: 14, color: TEXT_MUTED }}>結果を読み込み中...</div>
           </div>
         )}
 
         {/* Step 6: Result */}
-        {phase === "result" && results && (
+        {phase === "result" && results && typeProfiles && prescriptions && (
           <>
             <div style={CARD_STYLE}>
               <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Your Life Oracle Profile</div>
               <h2 style={{ fontSize: 26, textAlign: "center", marginBottom: 8 }}>
-                {results.isLight ? results.jungInfo?.light : results.jungInfo?.shadow}
+                {getTypeName(results)}
               </h2>
               <div
                 style={{
@@ -425,7 +417,7 @@ export default function App() {
 
             {/* 処方箋 */}
             <div style={CARD_STYLE}>
-              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>処方箋（{occupationLabel} × {results.isLight ? results.jungInfo?.light : results.jungInfo?.shadow} × {generationLabel}）</h3>
+              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>処方箋（{occupationLabel} × {getTypeName(results)} × {generationLabel}）</h3>
               {prescriptionText ? (
                 <div style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-wrap" }}>{prescriptionText}</div>
               ) : (
