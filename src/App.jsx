@@ -19,6 +19,15 @@ const ACCENT = "#C4940A";
 const TEXT = "#e8e0d0";
 const TEXT_MUTED = "#8a7a6a";
 
+const backBtnStyle = {
+  background: "none",
+  border: "none",
+  color: TEXT_MUTED,
+  fontSize: 12,
+  cursor: "pointer",
+  padding: "0 0 12px 0",
+};
+
 function primaryBtnStyle(enabled) {
   return {
     width: "100%",
@@ -138,6 +147,44 @@ export default function App() {
     }, 400);
   }
 
+  function handleBack() {
+    if (phase === "occupation") {
+      setPhase("intro");
+    } else if (phase === "generation") {
+      setPhase("occupation");
+    } else if (phase === "jung") {
+      if (currentQ > 0) {
+        const prevQ = QUESTIONS.jung[currentQ - 1];
+        const newAnswers = { ...answers };
+        delete newAnswers[prevQ.id];
+        setAnswers(newAnswers);
+        setCurrentQ((prev) => prev - 1);
+        setSelected(null);
+      } else {
+        setPhase("generation");
+      }
+    } else if (phase === "bias_intro") {
+      const lastJungQ = QUESTIONS.jung[QUESTIONS.jung.length - 1];
+      const newAnswers = { ...answers };
+      delete newAnswers[lastJungQ.id];
+      setAnswers(newAnswers);
+      setJungDone(false);
+      setCurrentQ(QUESTIONS.jung.length - 1);
+      setPhase("jung");
+    } else if (phase === "bias") {
+      if (currentQ > 0) {
+        const prevQ = QUESTIONS.bias[currentQ - 1];
+        const newAnswers = { ...answers };
+        delete newAnswers[prevQ.id];
+        setAnswers(newAnswers);
+        setCurrentQ((prev) => prev - 1);
+        setSelected(null);
+      } else {
+        setPhase("bias_intro");
+      }
+    }
+  }
+
   function handleReset() {
     setPhase("intro");
     setOccupation(null);
@@ -233,13 +280,14 @@ export default function App() {
         {/* Step 2: Occupation (18) */}
         {phase === "occupation" && (
           <div style={CARD_STYLE}>
+            <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
             <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 1 / 4</div>
             <h2 style={{ fontSize: 18, marginBottom: 8, textAlign: "center" }}>あなたの職種に近いのは？</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {occupations.map((o) => (
                 <button
                   key={o.id}
-                  onClick={() => setOccupation(o.id)}
+                  onClick={() => { setOccupation(o.id); setPhase("generation"); }}
                   style={{
                     padding: 14,
                     background: occupation === o.id ? "rgba(196,148,10,0.15)" : "rgba(255,255,255,0.04)",
@@ -255,26 +303,20 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => occupation && setPhase("generation")}
-              disabled={!occupation}
-              style={primaryBtnStyle(occupation)}
-            >
-              次へ
-            </button>
           </div>
         )}
 
         {/* Step 3: Generation (7) */}
         {phase === "generation" && (
           <div style={CARD_STYLE}>
+            <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
             <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 2 / 4</div>
             <h2 style={{ fontSize: 18, marginBottom: 16, textAlign: "center" }}>あなたの年代は？</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {generations.map((g) => (
                 <button
                   key={g.id}
-                  onClick={() => setGeneration(g.id)}
+                  onClick={() => { setGeneration(g.id); setPhase("jung"); }}
                   style={{
                     padding: 14,
                     background: generation === g.id ? "rgba(196,148,10,0.15)" : "rgba(255,255,255,0.04)",
@@ -290,19 +332,13 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => generation && setPhase("jung")}
-              disabled={!generation}
-              style={primaryBtnStyle(generation)}
-            >
-              診断を開始する
-            </button>
           </div>
         )}
 
         {/* Step 4 & 5: Question */}
         {(phase === "jung" || phase === "bias") && currentQuestion && (
           <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1 }}>
+            <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
             <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 12 }}>
               <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 2, transition: "width 0.3s" }} />
             </div>
@@ -340,6 +376,7 @@ export default function App() {
         {/* Bias intro */}
         {phase === "bias_intro" && (
           <div style={{ ...CARD_STYLE, textAlign: "center" }}>
+            <button onClick={handleBack} style={{ ...backBtnStyle, display: "block", textAlign: "left" }}>← 戻る</button>
             <div style={{ fontSize: 36, marginBottom: 16 }}>⚖️</div>
             <h2 style={{ fontSize: 18, marginBottom: 12 }}>次のフェーズへ</h2>
             <p style={{ fontSize: 14, color: TEXT_MUTED, lineHeight: 1.8, marginBottom: 24 }}>
