@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
+import { questions } from "./data/questions.js";
+import { calcScore, getTypeName, getTendencyLabel } from "./utils/scoring.js";
 import {
-  QUESTIONS,
-  JUNG_TYPE_MAP,
   BIAS_MAP,
   OCCUPATIONS_18,
   GENERATIONS_7,
-  calcResults,
 } from "../life_oracle_questions_data.js";
 
 const CARD_STYLE = {
@@ -28,48 +27,34 @@ const backBtnStyle = {
   padding: "0 0 12px 0",
 };
 
-function primaryBtnStyle(enabled) {
-  return {
-    width: "100%",
-    padding: 14,
-    background: enabled ? ACCENT : "#333",
-    border: "none",
-    borderRadius: 10,
-    color: enabled ? "#0f0f1a" : "#666",
-    fontSize: 14,
-    cursor: enabled ? "pointer" : "not-allowed",
-  };
-}
+const ANSWER_LABELS = ["強くそう", "ややそう", "ややちがう", "強くちがう"];
+// 値: 0=強くそう, 1=ややそう, 2=ややちがう, 3=強くちがう
 
-function getTypeName(results) {
-  return results.isLight ? results.jungInfo?.light : results.jungInfo?.shadow;
-}
-
-function generatePersonalPrompt(results, typeProfile, occupationLabel, generationLabel) {
-  const typeName = getTypeName(results);
-  const lightShadow = results.isLight ? "光" : "影";
+function generatePersonalPrompt(mbtiType, axisScores, typeProfile, occupationLabel, generationLabel) {
   const praise = typeProfile?.praiseText ?? "";
   const habit = typeProfile?.habitText ?? "";
-  const bias1 = results.biasInfo?.name ?? "";
-  const bias1Desc = results.biasInfo?.desc ?? "";
-  const bias2 = results.biasInfo2 ? `${results.biasInfo2.name}（${results.biasInfo2.desc}）` : "";
+  const axes = [
+    `EI: ${axisScores.EI}点（${axisScores.EI >= 13 ? "E寄り" : "I寄り"}）`,
+    `SN: ${axisScores.SN}点（${axisScores.SN >= 13 ? "S寄り" : "N寄り"}）`,
+    `TF: ${axisScores.TF}点（${axisScores.TF >= 13 ? "T寄り" : "F寄り"}）`,
+    `JP: ${axisScores.JP}点（${axisScores.JP >= 13 ? "J寄り" : "P寄り"}）`,
+  ].join("\n");
 
   return `あなたは私の性格と行動傾向をよく理解したAIアシスタントです。
 以下が私のプロフィールです。
 
-【性格タイプ】${typeName}（${lightShadow}）
-【特徴】${results.jungInfo?.name}（${results.topJung}）
+【MBTIタイプ】${mbtiType}
 【職種】${occupationLabel ?? "未選択"}
 【年代】${generationLabel ?? "未選択"}
+
+【軸ごとのスコア（各軸8問×最大3点=最大24点）】
+${axes}
 
 【私の強み】
 ${praise}
 
 【私が持ちやすい心の癖】
 ${habit}
-
-【私の行動バイアス傾向】
-最も強いバイアス：${bias1}（${bias1Desc}）${bias2 ? `\n次に：${bias2}` : ""}
 
 このプロフィールを踏まえた上で、私の相談に寄り添いながら答えてください。
 断定せず、「〜かもしれません」「〜ではないでしょうか」という表現を使ってください。
@@ -82,25 +67,27 @@ export default function App() {
   const [generation, setGeneration] = useState(null);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [jungDone, setJungDone] = useState(false);
   const [selected, setSelected] = useState(null);
   const [animating, setAnimating] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
 
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
+  const [biasMessages, setBiasMessages] = useState(null);
 
   const occupations = OCCUPATIONS_18;
   const generations = GENERATIONS_7;
 
-  const currentPhaseQuestions = jungDone ? QUESTIONS.bias : QUESTIONS.jung;
-  const currentQuestion = currentPhaseQuestions[currentQ];
-  const totalQ = QUESTIONS.jung.length + QUESTIONS.bias.length;
+  const totalQ = questions.length; // 32
+  const currentQuestion = questions[currentQ];
   const answeredQ = Object.keys(answers).length;
   const progress = totalQ > 0 ? (answeredQ / totalQ) * 100 : 0;
 
-  const results = phase === "result" ? (() => { try { return calcResults(answers); } catch { return null; } })() : null;
-  const typeId = results ? `${results.topJung}-${results.isLight ? "光" : "影"}` : "";
+  const scoreResult = phase === "result" ? (() => {
+    try { return calcScore(answers); } catch { return null; }
+  })() : null;
+  const mbtiType = scoreResult ? getTypeName(scoreResult) : "";
+  const typeId = mbtiType; // "ESTJ" 等
   const occupationLabel = occupation ? occupations.find((o) => o.id === occupation)?.label : "";
   const generationLabel = generation ? generations.find((g) => g.id === generation)?.label : "";
   const prescriptionKey =
@@ -109,6 +96,8 @@ export default function App() {
       : "";
   const typeProfile = typeProfiles?.[typeId] ?? null;
   const prescriptionText = prescriptions?.[prescriptionKey]?.text ?? null;
+  const biasMsg1 = null; // バイアス質問は新フォーマットでは別途設計
+  const biasMsg2 = null;
 
   useEffect(() => {
     if (phase !== "result") return;
@@ -120,31 +109,28 @@ export default function App() {
       .then((r) => r.json())
       .then(setPrescriptions)
       .catch(() => setPrescriptions({}));
+    fetch("/data/bias_messages.json")
+      .then((r) => r.json())
+      .then(setBiasMessages)
+      .catch(() => setBiasMessages({}));
   }, [phase]);
 
-  function handleAnswer(type) {
+  function handleAnswer(value) {
+    // value: 0=強くそう, 1=ややそう, 2=ややちがう, 3=強くちがう
     if (animating) return;
-    setSelected(type);
+    setSelected(value);
     setAnimating(true);
     setTimeout(() => {
-      const newAnswers = { ...answers, [currentQuestion.id]: type };
+      const newAnswers = { ...answers, [currentQuestion.id]: value };
       setAnswers(newAnswers);
       setSelected(null);
       setAnimating(false);
-
-      if (!jungDone) {
-        if (currentQ + 1 < QUESTIONS.jung.length) setCurrentQ((prev) => prev + 1);
-        else {
-          setJungDone(true);
-          setCurrentQ(0);
-          setSelected(null);
-          setPhase("bias_intro");
-        }
+      if (currentQ + 1 < questions.length) {
+        setCurrentQ((prev) => prev + 1);
       } else {
-        if (currentQ + 1 < QUESTIONS.bias.length) setCurrentQ((prev) => prev + 1);
-        else setPhase("result");
+        setPhase("result");
       }
-    }, 400);
+    }, 300);
   }
 
   function handleBack() {
@@ -152,9 +138,9 @@ export default function App() {
       setPhase("intro");
     } else if (phase === "generation") {
       setPhase("occupation");
-    } else if (phase === "jung") {
+    } else if (phase === "quiz") {
       if (currentQ > 0) {
-        const prevQ = QUESTIONS.jung[currentQ - 1];
+        const prevQ = questions[currentQ - 1];
         const newAnswers = { ...answers };
         delete newAnswers[prevQ.id];
         setAnswers(newAnswers);
@@ -162,25 +148,6 @@ export default function App() {
         setSelected(null);
       } else {
         setPhase("generation");
-      }
-    } else if (phase === "bias_intro") {
-      const lastJungQ = QUESTIONS.jung[QUESTIONS.jung.length - 1];
-      const newAnswers = { ...answers };
-      delete newAnswers[lastJungQ.id];
-      setAnswers(newAnswers);
-      setJungDone(false);
-      setCurrentQ(QUESTIONS.jung.length - 1);
-      setPhase("jung");
-    } else if (phase === "bias") {
-      if (currentQ > 0) {
-        const prevQ = QUESTIONS.bias[currentQ - 1];
-        const newAnswers = { ...answers };
-        delete newAnswers[prevQ.id];
-        setAnswers(newAnswers);
-        setCurrentQ((prev) => prev - 1);
-        setSelected(null);
-      } else {
-        setPhase("bias_intro");
       }
     }
   }
@@ -191,16 +158,23 @@ export default function App() {
     setGeneration(null);
     setCurrentQ(0);
     setAnswers({});
-    setJungDone(false);
     setSelected(null);
     setAnimating(false);
     setPromptCopied(false);
     setTypeProfiles(null);
     setPrescriptions(null);
+    setBiasMessages(null);
   }
 
   function handleCopyPrompt() {
-    const prompt = generatePersonalPrompt(results, typeProfile, occupationLabel, generationLabel);
+    if (!scoreResult) return;
+    const prompt = generatePersonalPrompt(
+      mbtiType,
+      scoreResult.scores,
+      typeProfile,
+      occupationLabel,
+      generationLabel
+    );
     const onSuccess = () => {
       setPromptCopied(true);
       setTimeout(() => setPromptCopied(false), 2000);
@@ -225,9 +199,7 @@ export default function App() {
     }
   }
 
-  const shareText = results
-    ? `${getTypeName(results)}（${results.jungInfo?.name}） #ライフオラクル`
-    : "";
+  const shareText = mbtiType ? `MBTIタイプ：${mbtiType} #ライフオラクル` : "";
   const shareUrl = typeof window !== "undefined" ? encodeURIComponent(window.location.href) : "";
 
   return (
@@ -256,7 +228,7 @@ export default function App() {
               あなただけの処方箋と個人専用プロンプトを生成します。
               <br />
               <br />
-              所要時間：約10〜12分（全31問）
+              所要時間：約8〜10分（全32問）
             </p>
             <button
               onClick={() => setPhase("occupation")}
@@ -277,11 +249,11 @@ export default function App() {
           </div>
         )}
 
-        {/* Step 2: Occupation (18) */}
+        {/* Step 2: Occupation */}
         {phase === "occupation" && (
           <div style={CARD_STYLE}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 1 / 4</div>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 1 / 3</div>
             <h2 style={{ fontSize: 18, marginBottom: 8, textAlign: "center" }}>あなたの職種に近いのは？</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {occupations.map((o) => (
@@ -306,17 +278,17 @@ export default function App() {
           </div>
         )}
 
-        {/* Step 3: Generation (7) */}
+        {/* Step 3: Generation */}
         {phase === "generation" && (
           <div style={CARD_STYLE}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 2 / 4</div>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 2 / 3</div>
             <h2 style={{ fontSize: 18, marginBottom: 16, textAlign: "center" }}>あなたの年代は？</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {generations.map((g) => (
                 <button
                   key={g.id}
-                  onClick={() => { setGeneration(g.id); setPhase("jung"); }}
+                  onClick={() => { setGeneration(g.id); setPhase("quiz"); }}
                   style={{
                     padding: 14,
                     background: generation === g.id ? "rgba(196,148,10,0.15)" : "rgba(255,255,255,0.04)",
@@ -335,130 +307,175 @@ export default function App() {
           </div>
         )}
 
-        {/* Step 4 & 5: Question */}
-        {(phase === "jung" || phase === "bias") && currentQuestion && (
-          <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1 }}>
+        {/* Step 4: Quiz（32問・4段階横並び） */}
+        {phase === "quiz" && currentQuestion && (
+          <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 12 }}>
-              <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 2, transition: "width 0.3s" }} />
-            </div>
-            <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 16 }}>{answeredQ} / {totalQ} 問</div>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>
-              {phase === "jung" ? "Step 3 / 4 — ユング診断" : "Step 4 / 4 — バイアス診断"}
-            </div>
-            <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 12 }}>テーマ：{currentQuestion.theme}</div>
-            <p style={{ fontSize: 17, lineHeight: 1.7, marginBottom: 24 }}>{currentQuestion.question}</p>
-            {currentQuestion.options.map((opt) => (
-              <button
-                key={opt.label}
-                onClick={() => handleAnswer(opt.type)}
-                style={{
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "14px 16px",
-                  marginBottom: 10,
-                  background: selected === opt.type ? "rgba(196,148,10,0.12)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${selected === opt.type ? ACCENT : "rgba(196,148,10,0.2)"}`,
-                  borderRadius: 10,
-                  color: TEXT,
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  cursor: "pointer",
-                }}
-              >
-                <span style={{ color: ACCENT, marginRight: 8 }}>{opt.label}</span>
-                {opt.text}
-              </button>
-            ))}
-          </div>
-        )}
 
-        {/* Bias intro */}
-        {phase === "bias_intro" && (
-          <div style={{ ...CARD_STYLE, textAlign: "center" }}>
-            <button onClick={handleBack} style={{ ...backBtnStyle, display: "block", textAlign: "left" }}>← 戻る</button>
-            <div style={{ fontSize: 36, marginBottom: 16 }}>⚖️</div>
-            <h2 style={{ fontSize: 18, marginBottom: 12 }}>次のフェーズへ</h2>
-            <p style={{ fontSize: 14, color: TEXT_MUTED, lineHeight: 1.8, marginBottom: 24 }}>
-              ユング診断が完了しました。次は「意思決定パターン」の診断です。
+            {/* プログレスバー */}
+            <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 10 }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progress}%`,
+                  background: ACCENT,
+                  borderRadius: 2,
+                  transition: "width 0.3s",
+                }}
+              />
+            </div>
+
+            {/* 問番号 */}
+            <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 4 }}>
+              {currentQ + 1} / {totalQ}
+            </div>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 6 }}>
+              Step 3 / 3 — 性格診断
+            </div>
+            <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 14 }}>
+              テーマ：{currentQuestion.tag}
+            </div>
+
+            {/* 質問文 */}
+            <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 20 }}>
+              {currentQuestion.stem}
             </p>
-            <button
-              onClick={() => setPhase("bias")}
+
+            {/* 軸ラベル */}
+            <div
               style={{
-                width: "100%",
-                padding: 16,
-                background: "rgba(196,148,10,0.2)",
-                border: `1px solid ${ACCENT}`,
-                borderRadius: 12,
-                color: TEXT,
-                fontSize: 14,
-                cursor: "pointer",
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: 11,
+                color: TEXT_MUTED,
+                marginBottom: 12,
+                padding: "0 2px",
               }}
             >
-              続ける
-            </button>
+              <span style={{ color: ACCENT }}>{currentQuestion.leftLabel} 寄り</span>
+              <span>←──────────→</span>
+              <span style={{ color: ACCENT }}>{currentQuestion.rightLabel} 寄り</span>
+            </div>
+
+            {/* 4段階ボタン（横並び） */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {ANSWER_LABELS.map((label, i) => {
+                const isSelected = selected === i || answers[currentQuestion.id] === i;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleAnswer(i)}
+                    style={{
+                      padding: "12px 4px",
+                      background: isSelected ? "rgba(196,148,10,0.18)" : "rgba(255,255,255,0.04)",
+                      border: `1px solid ${isSelected ? ACCENT : "rgba(196,148,10,0.2)"}`,
+                      borderRadius: 10,
+                      color: isSelected ? ACCENT : TEXT,
+                      fontSize: 12,
+                      lineHeight: 1.4,
+                      cursor: "pointer",
+                      textAlign: "center",
+                      fontWeight: isSelected ? 600 : 400,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        {/* Step 6: Result - Loading */}
-        {phase === "result" && results && (!typeProfiles || !prescriptions) && (
+        {/* Result: Loading */}
+        {phase === "result" && scoreResult && (!typeProfiles || !prescriptions || !biasMessages) && (
           <div style={{ ...CARD_STYLE, textAlign: "center", padding: "40px 20px" }}>
             <div style={{ fontSize: 14, color: TEXT_MUTED }}>結果を読み込み中...</div>
           </div>
         )}
 
-        {/* Step 6: Result */}
-        {phase === "result" && results && typeProfiles && prescriptions && (
+        {/* Result */}
+        {phase === "result" && scoreResult && typeProfiles && prescriptions && biasMessages && (
           <>
+            {/* タイプ結果 */}
             <div style={CARD_STYLE}>
               <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Your Life Oracle Profile</div>
-              <h2 style={{ fontSize: 26, textAlign: "center", marginBottom: 8 }}>
-                {getTypeName(results)}
+              <h2 style={{ fontSize: 36, textAlign: "center", marginBottom: 4, letterSpacing: 4, fontWeight: 700 }}>
+                {mbtiType}
               </h2>
+
+              {/* 軸スコア */}
               <div
                 style={{
-                  display: "inline-block",
-                  padding: "6px 16px",
-                  borderRadius: 20,
-                  fontSize: 12,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: 8,
                   marginBottom: 24,
-                  border: `1px solid ${results.isLight ? "rgba(168,216,168,0.5)" : "rgba(216,168,168,0.5)"}`,
-                  background: results.isLight ? "rgba(168,216,168,0.1)" : "rgba(216,168,168,0.1)",
-                  color: results.isLight ? "#a8d8a8" : "#d8a8a8",
+                  marginTop: 16,
                 }}
               >
-                {results.isLight ? "✦ 光のパターン" : "◈ 影のパターン"}
+                {[
+                  { axis: "EI", left: "E（外向）", right: "I（内向）", score: scoreResult.scores.EI, isLeft: scoreResult.E },
+                  { axis: "SN", left: "S（感覚）", right: "N（直観）", score: scoreResult.scores.SN, isLeft: scoreResult.S },
+                  { axis: "TF", left: "T（思考）", right: "F（感情）", score: scoreResult.scores.TF, isLeft: scoreResult.T },
+                  { axis: "JP", left: "J（判断）", right: "P（知覚）", score: scoreResult.scores.JP, isLeft: scoreResult.J },
+                ].map(({ axis, left, right, score, isLeft }) => (
+                  <div
+                    key={axis}
+                    style={{
+                      background: "rgba(196,148,10,0.06)",
+                      border: "1px solid rgba(196,148,10,0.15)",
+                      borderRadius: 10,
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <div style={{ fontSize: 11, color: ACCENT, marginBottom: 4 }}>
+                      {isLeft ? left : right}
+                    </div>
+                    <div style={{ fontSize: 11, color: TEXT_MUTED }}>
+                      {score}点 / 24点 &nbsp;·&nbsp; {getTendencyLabel(isLeft ? score : 24 - score)}
+                    </div>
+                    {/* スコアバー */}
+                    <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: 6 }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${(score / 24) * 100}%`,
+                          background: ACCENT,
+                          borderRadius: 2,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* 大絶賛・心の癖 */}
-              {typeProfile && (
+              {/* 強み・心の癖 */}
+              {typeProfile ? (
                 <>
                   <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>あなたの強み（大絶賛）</h3>
                   <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 20, whiteSpace: "pre-wrap" }}>{typeProfile.praiseText}</p>
                   <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>心の癖</h3>
-                  <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 20, whiteSpace: "pre-wrap" }}>{typeProfile.habitText}</p>
+                  <p style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{typeProfile.habitText}</p>
                 </>
-              )}
-
-              {/* バイアス 1〜2 */}
-              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>行動バイアス傾向</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 8 }}>
-                あなたは{results.biasInfo?.name}が強い傾向があります。（{results.biasInfo?.desc}）
-              </p>
-              {results.biasInfo2 && (
-                <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 20 }}>
-                  次に、{results.biasInfo2.name}も見られます。（{results.biasInfo2.desc}）
+              ) : (
+                <p style={{ color: TEXT_MUTED, fontSize: 13 }}>
+                  タイプ {mbtiType} のプロフィールデータを準備中です。
                 </p>
               )}
             </div>
 
             {/* 処方箋 */}
             <div style={CARD_STYLE}>
-              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>処方箋（{occupationLabel} × {getTypeName(results)} × {generationLabel}）</h3>
+              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>
+                処方箋（{occupationLabel} × {mbtiType} × {generationLabel}）
+              </h3>
               {prescriptionText ? (
                 <div style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-wrap" }}>{prescriptionText}</div>
               ) : (
-                <p style={{ color: TEXT_MUTED, fontSize: 14 }}>該当する処方箋のデータがありません。ExcelからJSONを生成して public/data/prescriptions.json に配置してください。</p>
+                <p style={{ color: TEXT_MUTED, fontSize: 14 }}>
+                  該当する処方箋のデータがありません。
+                </p>
               )}
             </div>
 
