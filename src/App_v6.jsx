@@ -719,6 +719,50 @@ export default function App() {
               style={{ width: "100%", padding: 14, background: "transparent", border: `1px solid rgba(196,148,10,0.2)`, borderRadius: 10, color: TEXT_MUTED, fontSize: 14, cursor: "pointer", marginBottom: 20 }}>
               もう一度診断する
             </button>
+
+            {/* もっと深く知りたい方へ（note導線） */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(196,148,10,0.15)",
+                borderRadius: 12,
+                padding: "20px 18px",
+                marginBottom: 20,
+              }}
+            >
+              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 12 }}>
+                もっと深く知りたい方へ
+              </div>
+              <a
+                href="https://note.com/lifeoraclejp"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "14px 16px",
+                  background: "rgba(196,148,10,0.07)",
+                  border: "1px solid rgba(196,148,10,0.2)",
+                  borderRadius: 10,
+                  textDecoration: "none",
+                  color: TEXT,
+                }}
+              >
+                <span style={{ fontSize: 18, lineHeight: 1 }}>📝</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+                    ライフオラクルの考え方をnoteで読む
+                  </div>
+                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>
+                    光と影の仕組み、バイアスとの関係、MBTIとの違いなど。
+                    <br />
+                    診断結果をもっと深く理解したい方へ。
+                  </div>
+                </div>
+                <span style={{ marginLeft: "auto", fontSize: 12, color: TEXT_MUTED }}>→</span>
+              </a>
+            </div>
           </>
         )}
       </div>
