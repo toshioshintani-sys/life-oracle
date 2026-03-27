@@ -676,11 +676,12 @@ export default function App() {
               </div>
             </div>
 
-            {/* ⑤ 結果カード画像シェア */}
+            {/* ⑤ 結果カード画像シェア（一時非表示）
             <div style={CARD_STYLE}>
               <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>結果カードを画像保存</h3>
               <ResultCard typeName={mbtiType} top2Biases={top2} />
             </div>
+            */}
 
             {/* ⑥ テキストシェア */}
             <div style={CARD_STYLE}>
@@ -761,6 +762,43 @@ export default function App() {
                   </div>
                 </div>
                 <span style={{ marginLeft: "auto", fontSize: 12, color: TEXT_MUTED }}>→</span>
+              </a>
+            </div>
+
+            {/* 次のステップ（キャリアコーチング導線） */}
+            <div
+              style={{
+                background: "rgba(196,148,10,0.06)",
+                border: "1px solid rgba(196,148,10,0.3)",
+                borderRadius: 12,
+                padding: "24px 18px",
+                marginBottom: 20,
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 14 }}>
+                次のステップ
+              </div>
+              <p style={{ fontSize: 14, lineHeight: 1.9, color: TEXT, marginBottom: 20 }}>
+                あなたのタイプを活かせる仕事を、<br />
+                プロと一緒に考えてみませんか？（無料）
+              </p>
+              <a
+                href="#"
+                style={{
+                  display: "block",
+                  padding: "14px 20px",
+                  background: "rgba(196,148,10,0.2)",
+                  border: "1px solid rgba(196,148,10,0.5)",
+                  borderRadius: 10,
+                  color: TEXT,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  letterSpacing: 0.5,
+                }}
+              >
+                無料キャリア相談を試してみる
               </a>
             </div>
           </>
