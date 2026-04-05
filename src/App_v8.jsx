@@ -68,22 +68,22 @@ const famousPeople = {
 };
 
 const cognitiveFunctionMap = {
-  ENTJ: { dominant: 'Te', shadow: 'Ti', lightName: '指揮者',       shadowName: '堂々巡り' },
-  INTJ: { dominant: 'Ni', shadow: 'Ne', lightName: '先読み人',     shadowName: '三日坊主' },
-  ENTP: { dominant: 'Ne', shadow: 'Ni', lightName: '発明家',       shadowName: '独走者' },
-  INTP: { dominant: 'Ti', shadow: 'Te', lightName: '職人',         shadowName: '鉄砲玉' },
-  ENFJ: { dominant: 'Fe', shadow: 'Fi', lightName: '聴き手',       shadowName: '頑固者' },
-  INFJ: { dominant: 'Ni', shadow: 'Ne', lightName: '先読み人',     shadowName: '三日坊主' },
-  ENFP: { dominant: 'Ne', shadow: 'Ni', lightName: '発明家',       shadowName: '独走者' },
-  INFP: { dominant: 'Fi', shadow: 'Fe', lightName: '求道者',       shadowName: '八方美人' },
-  ESTJ: { dominant: 'Te', shadow: 'Ti', lightName: '指揮者',       shadowName: '堂々巡り' },
-  ISTJ: { dominant: 'Si', shadow: 'Se', lightName: 'コツコツ人',   shadowName: '思いつき人' },
+  ENTJ: { dominant: 'Te', shadow: 'Ti', lightName: '指揮者', shadowName: '堂々巡り' },
+  INTJ: { dominant: 'Ni', shadow: 'Ne', lightName: '先読み人', shadowName: '三日坊主' },
+  ENTP: { dominant: 'Ne', shadow: 'Ni', lightName: '発明家', shadowName: '独走者' },
+  INTP: { dominant: 'Ti', shadow: 'Te', lightName: '職人', shadowName: '鉄砲玉' },
+  ENFJ: { dominant: 'Fe', shadow: 'Fi', lightName: '聴き手', shadowName: '頑固者' },
+  INFJ: { dominant: 'Ni', shadow: 'Ne', lightName: '先読み人', shadowName: '三日坊主' },
+  ENFP: { dominant: 'Ne', shadow: 'Ni', lightName: '発明家', shadowName: '独走者' },
+  INFP: { dominant: 'Fi', shadow: 'Fe', lightName: '求道者', shadowName: '八方美人' },
+  ESTJ: { dominant: 'Te', shadow: 'Ti', lightName: '指揮者', shadowName: '堂々巡り' },
+  ISTJ: { dominant: 'Si', shadow: 'Se', lightName: 'コツコツ人', shadowName: '思いつき人' },
   ESTP: { dominant: 'Se', shadow: 'Si', lightName: '今を楽しむ人', shadowName: '現状維持人' },
-  ISTP: { dominant: 'Ti', shadow: 'Te', lightName: '職人',         shadowName: '鉄砲玉' },
-  ESFJ: { dominant: 'Fe', shadow: 'Fi', lightName: '聴き手',       shadowName: '頑固者' },
-  ISFJ: { dominant: 'Si', shadow: 'Se', lightName: 'コツコツ人',   shadowName: '思いつき人' },
+  ISTP: { dominant: 'Ti', shadow: 'Te', lightName: '職人', shadowName: '鉄砲玉' },
+  ESFJ: { dominant: 'Fe', shadow: 'Fi', lightName: '聴き手', shadowName: '頑固者' },
+  ISFJ: { dominant: 'Si', shadow: 'Se', lightName: 'コツコツ人', shadowName: '思いつき人' },
   ESFP: { dominant: 'Se', shadow: 'Si', lightName: '今を楽しむ人', shadowName: '現状維持人' },
-  ISFP: { dominant: 'Fi', shadow: 'Fe', lightName: '求道者',       shadowName: '八方美人' },
+  ISFP: { dominant: 'Fi', shadow: 'Fe', lightName: '求道者', shadowName: '八方美人' },
 };
 
 const MBTI_TO_JUNG = {
@@ -184,6 +184,9 @@ export default function App() {
   const [promptCopied, setPromptCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
+  const [rssLinks, setRssLinks] = useState([]);
+  const [rssLoading, setRssLoading] = useState(false);
+
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
   const [biasMessages, setBiasMessages] = useState(null);
@@ -208,7 +211,7 @@ export default function App() {
   const progress = totalQ > 0 ? (answeredQ / totalQ) * 100 : 0;
 
   const scoreResult = phase === "result" ? (() => { try { return calcScore(jungAnswers); } catch { return null; } })() : null;
-  const biasResult  = phase === "result" ? (() => { try { return calcBiasScores(biasAnswers); } catch { return null; } })() : null;
+  const biasResult = phase === "result" ? (() => { try { return calcBiasScores(biasAnswers); } catch { return null; } })() : null;
   const mbtiType = scoreResult ? getTypeName(scoreResult) : "";
   const jungTypeId = mbtiType ? (MBTI_TO_JUNG[mbtiType] ?? mbtiType) : "";
   const occupationLabel = occupation ? occupations.find((o) => o.id === occupation)?.label : "";
@@ -254,6 +257,40 @@ export default function App() {
       .catch(() => { setChatError("初回メッセージの取得に失敗しました。"); })
       .finally(() => setChatLoading(false));
   }, [typeProfiles, prescriptions, biasMessages, chatInitialized]);
+
+  useEffect(() => {
+    if (phase !== "result" || !mbtiType) return;
+
+    const cf = cognitiveFunctionMap[mbtiType];
+    const b1 = top2[0] ? biasInfo[top2[0]]?.name : "";
+    const b2 = top2[1] ? biasInfo[top2[1]]?.name : "";
+    const b1s = top2[0] ? biasInfo[top2[0]]?.short : "";
+    const b2s = top2[1] ? biasInfo[top2[1]]?.short : "";
+
+    const keywords = [
+      mbtiType, typeLabels[mbtiType], cf?.lightName, cf?.shadowName, b1, b2, b1s, b2s
+    ].filter(Boolean);
+
+    setRssLoading(true);
+    fetch("/api/rss")
+      .then(res => res.text())
+      .then(xmlStr => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlStr, "application/xml");
+        const items = Array.from(doc.querySelectorAll("item"));
+        const matched = [];
+        items.forEach(item => {
+          const title = item.querySelector("title")?.textContent || "";
+          const link = item.querySelector("link")?.textContent || "";
+          if (keywords.some(kw => title.includes(kw))) {
+            matched.push({ title, link });
+          }
+        });
+        setRssLinks(matched);
+      })
+      .catch(err => console.error("RSS fetch error:", err))
+      .finally(() => setRssLoading(false));
+  }, [phase, mbtiType, top2]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -676,13 +713,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* ⑤ 結果カード画像シェア（一時非表示）
-            <div style={CARD_STYLE}>
-              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>結果カードを画像保存</h3>
-              <ResultCard typeName={mbtiType} top2Biases={top2} />
-            </div>
-            */}
-
             {/* ⑥ テキストシェア */}
             <div style={CARD_STYLE}>
               <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>結果をシェア</h3>
@@ -720,6 +750,42 @@ export default function App() {
               style={{ width: "100%", padding: 14, background: "transparent", border: `1px solid rgba(196,148,10,0.2)`, borderRadius: 10, color: TEXT_MUTED, fontSize: 14, cursor: "pointer", marginBottom: 20 }}>
               もう一度診断する
             </button>
+
+            {/* AIマッチングによるおすすめ記事 */}
+            {rssLinks.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 13, letterSpacing: 1, color: ACCENT, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>✨</span> あなたにおすすめの深掘り記事
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {rssLinks.map((item, idx) => (
+                    <a
+                      key={idx}
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "block",
+                        padding: "16px",
+                        background: "rgba(196,148,10,0.08)",
+                        border: "1px solid rgba(196,148,10,0.3)",
+                        borderRadius: 10,
+                        color: TEXT,
+                        textDecoration: "none",
+                        transition: "background 0.2s"
+                      }}
+                    >
+                      <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.5 }}>
+                        {item.title}
+                      </div>
+                      <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 8, textAlign: "right" }}>
+                        noteで読む →
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* もっと深く知りたい方へ（note導線） */}
             <div
@@ -766,42 +832,6 @@ export default function App() {
               </a>
             </div>
 
-            {/* 次のステップ（キャリアコーチング導線） */}
-            <div
-              style={{
-                background: "rgba(196,148,10,0.06)",
-                border: "1px solid rgba(196,148,10,0.3)",
-                borderRadius: 12,
-                padding: "24px 18px",
-                marginBottom: 20,
-                textAlign: "center",
-              }}
-            >
-              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 14 }}>
-                次のステップ
-              </div>
-              <p style={{ fontSize: 14, lineHeight: 1.9, color: TEXT, marginBottom: 20 }}>
-                あなたのタイプを活かせる仕事を、<br />
-                プロと一緒に考えてみませんか？（無料）
-              </p>
-              <a
-                href="#"
-                style={{
-                  display: "block",
-                  padding: "14px 20px",
-                  background: "rgba(196,148,10,0.2)",
-                  border: "1px solid rgba(196,148,10,0.5)",
-                  borderRadius: 10,
-                  color: TEXT,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  letterSpacing: 0.5,
-                }}
-              >
-                無料キャリア相談を試してみる
-              </a>
-            </div>
           </>
         )}
       </div>
