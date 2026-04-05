@@ -787,6 +787,73 @@ export default function App() {
               </div>
             )}
 
+            {/* ⑧ アフィリエイト（おすすめサービス）プレースホルダ */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 13, letterSpacing: 1, color: ACCENT, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 16 }}>💼</span> あなたの強みを活かせるサービス・参考書
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* A8.net等のプレースホルダ 1 */}
+                <a
+                  href="https://px.a8.net/svt/ejp?a8mat=dummy1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "16px",
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 10,
+                    textDecoration: "none",
+                    color: TEXT,
+                    transition: "background 0.2s"
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#a8d8a8", marginBottom: 4 }}>
+                      向いている環境を探すなら（適職マッチング）
+                    </div>
+                    <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.5 }}>
+                      【{typeLabels[mbtiType] ?? 'あなた'}】の特性を我慢せず活かせる！<br />
+                      価値観重視のキャリア支援サービス
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12, color: TEXT_MUTED, marginLeft: 10 }}>▶︎ 詳細へ</div>
+                </a>
+
+                {/* A8.net等のプレースホルダ 2 */}
+                <a
+                  href="https://px.a8.net/svt/ejp?a8mat=dummy2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "16px",
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 10,
+                    textDecoration: "none",
+                    color: TEXT,
+                    transition: "background 0.2s"
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#d8a8d8", marginBottom: 4 }}>
+                      自己理解を深めるおすすめ書籍
+                    </div>
+                    <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.5 }}>
+                      「{top2[0] ? biasInfo[top2[0]]?.name : '無意識の行動パターン'}」に気づき、<br />
+                      理想の選択ができるようになる心理学入門
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12, color: TEXT_MUTED, marginLeft: 10 }}>▶︎ 詳細へ</div>
+                </a>
+              </div>
+              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 8, textAlign: "right" }}>※PRリンクが含まれます</p>
+            </div>
+
             {/* もっと深く知りたい方へ（note導線） */}
             <div
               style={{
