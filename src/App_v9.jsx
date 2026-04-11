@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { questions } from "./data/questions.js";
 import { biasQuestions } from "./data/biasQuestions.js";
+import { biasBooksData, getAmazonAffiliateUrl } from "./data/types.js";
 import { calcScore, getTypeName, calcBiasScores, biasInfo, getTendencyLabel } from "./utils/scoring.js";
 import { OCCUPATIONS_18, GENERATIONS_7 } from "../life_oracle_questions_data.js";
 import MapPage from "./pages/MapPage.jsx";
@@ -792,7 +793,53 @@ export default function App() {
               </div>
             )}
 
-            {/* ⑧ アフィリエイト（おすすめサービス）プレースホルダ — リンク未設定のため非表示 */}
+            {/* ⑧ おすすめ書籍（Amazonアソシエイト） */}
+            {top2 && top2[0] && biasBooksData[top2[0]] && (() => {
+              const book = biasBooksData[top2[0]];
+              const url = getAmazonAffiliateUrl(book.asin);
+              return (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 12 }}>
+                    自己理解を深めるおすすめ書籍
+                  </div>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '16px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 10,
+                      textDecoration: 'none',
+                      color: TEXT,
+                      transition: 'background 0.2s',
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#d8a8d8', marginBottom: 4 }}>
+                        {book.title}
+                      </div>
+                      <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>
+                        {book.description}
+                      </div>
+                      <div style={{ fontSize: 10, color: TEXT_MUTED, marginTop: 4 }}>
+                        著：{book.author}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12, color: TEXT_MUTED, flexShrink: 0 }}>
+                      Amazon →
+                    </div>
+                  </a>
+                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 6, textAlign: 'right' }}>
+                    ※Amazonアソシエイトリンクが含まれます
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* もっと深く知りたい方へ（note導線） */}
             <div
