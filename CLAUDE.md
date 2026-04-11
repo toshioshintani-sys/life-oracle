@@ -98,8 +98,10 @@ netlify/functions/generate-oracle.js
 LF will be replaced by CRLF の警告は無視してOK。動作に影響なし。
 
 ### CSSについて
-- ベースカラー：background: #0f0f1a（ダーク）
-- テキスト：color: #e8e0d0
+- ベースカラー：background: #faf6f1（ウォームクリーム）
+- テキスト：color: #2d2318（深い焦げ茶）
+- アクセント：#9b6b3a（木・土色）
+- 光の状態：#3d7a5a / 影の状態：#a05050
 - フォント：Hiragino Sans, Hiragino Kaku Gothic ProN, Noto Sans JP, sans-serif
 
 ---

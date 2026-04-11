@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { questions } from "./data/questions.js";
 import { biasQuestions } from "./data/biasQuestions.js";
-import { biasBooksData, getAmazonAffiliateUrl } from "./data/types.js";
 import { calcScore, getTypeName, calcBiasScores, biasInfo, getTendencyLabel } from "./utils/scoring.js";
 import { OCCUPATIONS_18, GENERATIONS_7 } from "../life_oracle_questions_data.js";
 import MapPage from "./pages/MapPage.jsx";
@@ -9,15 +8,16 @@ import ResultCard from "./components/ResultCard.jsx";
 
 // ─── 定数 ────────────────────────────────────────────────
 const CARD_STYLE = {
-  background: "#1a1a2e",
-  border: "1px solid rgba(196, 148, 10, 0.25)",
+  background: "#ffffff",
+  border: "1px solid rgba(155, 107, 58, 0.18)",
   borderRadius: 16,
   padding: "24px 20px",
   marginBottom: 20,
+  boxShadow: "0 1px 6px rgba(155,107,58,0.07)",
 };
-const ACCENT = "#C4940A";
-const TEXT = "#e8e0d0";
-const TEXT_MUTED = "#8a7a6a";
+const ACCENT = "#9b6b3a";
+const TEXT = "#2d2318";
+const TEXT_MUTED = "#8a7060";
 
 const backBtnStyle = {
   background: "none",
@@ -446,7 +446,7 @@ export default function App() {
 
   // ─── render ───────────────────────────────────────────
   return (
-    <div style={{ minHeight: "100vh", background: "#0f0f1a", color: TEXT, fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, sans-serif", padding: "20px 16px", paddingBottom: 40 }}>
+    <div style={{ minHeight: "100vh", background: "#faf6f1", color: TEXT, fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, sans-serif", padding: "20px 16px", paddingBottom: 40 }}>
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
         <div style={{ textAlign: "center", paddingTop: 24, paddingBottom: 16 }}>
           <div style={{ fontSize: 12, letterSpacing: 4, color: ACCENT }}>LIFE ORACLE</div>
@@ -461,7 +461,7 @@ export default function App() {
               あなただけの処方箋とAI相談を提供します。<br /><br />
               所要時間：約10〜12分（ユング32問 + バイアス16問）
             </p>
-            <button onClick={() => setPhase("occupation")} style={{ width: "100%", padding: 16, background: "linear-gradient(135deg, #2d1b69, #1a0a2e)", border: `1px solid ${ACCENT}`, borderRadius: 12, color: TEXT, fontSize: 14, letterSpacing: 2, cursor: "pointer", marginBottom: 12 }}>
+            <button onClick={() => setPhase("occupation")} style={{ width: "100%", padding: 16, background: "linear-gradient(135deg, #f5efe8, #ede4d8)", border: `1px solid ${ACCENT}`, borderRadius: 12, color: "#7a4e20", fontSize: 14, letterSpacing: 2, cursor: "pointer", marginBottom: 12 }}>
               診断を始める
             </button>
             <button className="map-btn" onClick={() => { setMapFrom('top'); setPage('map'); }}>
@@ -479,7 +479,7 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {occupations.map((o) => (
                 <button key={o.id} onClick={() => { setOccupation(o.id); setPhase("generation"); }}
-                  style={{ padding: 14, background: occupation === o.id ? "rgba(196,148,10,0.15)" : "rgba(255,255,255,0.04)", border: `1px solid ${occupation === o.id ? ACCENT : "rgba(196,148,10,0.2)"}`, borderRadius: 10, color: TEXT, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
+                  style={{ padding: 14, background: occupation === o.id ? "rgba(155,107,58,0.12)" : "rgba(255,255,255,0.7)", border: `1px solid ${occupation === o.id ? ACCENT : "rgba(155,107,58,0.18)"}`, borderRadius: 10, color: TEXT, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
                   {o.label}
                 </button>
               ))}
@@ -496,7 +496,7 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {generations.map((g) => (
                 <button key={g.id} onClick={() => { setGeneration(g.id); setPhase("jung"); }}
-                  style={{ padding: 14, background: generation === g.id ? "rgba(196,148,10,0.15)" : "rgba(255,255,255,0.04)", border: `1px solid ${generation === g.id ? ACCENT : "rgba(196,148,10,0.2)"}`, borderRadius: 10, color: TEXT, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                  style={{ padding: 14, background: generation === g.id ? "rgba(155,107,58,0.12)" : "rgba(255,255,255,0.7)", border: `1px solid ${generation === g.id ? ACCENT : "rgba(155,107,58,0.18)"}`, borderRadius: 10, color: TEXT, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                   {g.label}
                 </button>
               ))}
@@ -508,7 +508,7 @@ export default function App() {
         {(phase === "jung" || phase === "bias") && currentQuestion && (
           <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 10 }}>
+            <div style={{ height: 3, background: "rgba(155,107,58,0.12)", borderRadius: 2, marginBottom: 10 }}>
               <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 2, transition: "width 0.3s" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
@@ -526,7 +526,7 @@ export default function App() {
                 const isSelected = selected === i || activeAnswers[currentQuestion.id] === i;
                 return (
                   <button key={i} onClick={() => handleAnswer(i)}
-                    style={{ padding: "12px 4px", background: isSelected ? "rgba(196,148,10,0.18)" : "rgba(255,255,255,0.04)", border: `1px solid ${isSelected ? ACCENT : "rgba(196,148,10,0.2)"}`, borderRadius: 10, color: isSelected ? ACCENT : TEXT, fontSize: 12, lineHeight: 1.4, cursor: "pointer", textAlign: "center", fontWeight: isSelected ? 600 : 400, transition: "all 0.15s" }}>
+                    style={{ padding: "12px 4px", background: isSelected ? "rgba(155,107,58,0.14)" : "rgba(255,255,255,0.7)", border: `1px solid ${isSelected ? ACCENT : "rgba(155,107,58,0.18)"}`, borderRadius: 10, color: isSelected ? ACCENT : TEXT, fontSize: 12, lineHeight: 1.4, cursor: "pointer", textAlign: "center", fontWeight: isSelected ? 600 : 400, transition: "all 0.15s" }}>
                     {label}
                   </button>
                 );
@@ -572,13 +572,13 @@ export default function App() {
               {cognitiveFunctionMap[mbtiType] && (() => {
                 const cf = cognitiveFunctionMap[mbtiType];
                 return (
-                  <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(196,148,10,0.15)", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
+                  <div style={{ background: "rgba(255,255,255,0.8)", border: "1px solid rgba(155,107,58,0.15)", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "4px 0" }}>
-                      <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#a8d8a8" }}>光の状態</span>
+                      <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#3d7a5a" }}>光の状態</span>
                       <span style={{ fontSize: 14, fontWeight: 500, flex: 1, color: TEXT }}>{cf.lightName}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "4px 0" }}>
-                      <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#d8a8a8" }}>影の状態</span>
+                      <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#a05050" }}>影の状態</span>
                       <span style={{ fontSize: 14, fontWeight: 500, flex: 1, color: TEXT }}>{cf.shadowName}</span>
                     </div>
                   </div>
@@ -591,10 +591,10 @@ export default function App() {
                   { axis: "TF", left: "T（思考）", right: "F（感情）", score: scoreResult.scores.TF, isLeft: scoreResult.T },
                   { axis: "JP", left: "J（判断）", right: "P（知覚）", score: scoreResult.scores.JP, isLeft: scoreResult.J },
                 ].map(({ axis, left, right, score, isLeft }) => (
-                  <div key={axis} style={{ background: "rgba(196,148,10,0.06)", border: "1px solid rgba(196,148,10,0.15)", borderRadius: 10, padding: "10px 12px" }}>
+                  <div key={axis} style={{ background: "rgba(155,107,58,0.06)", border: "1px solid rgba(155,107,58,0.15)", borderRadius: 10, padding: "10px 12px" }}>
                     <div style={{ fontSize: 11, color: ACCENT, marginBottom: 4 }}>{isLeft ? left : right}</div>
                     <div style={{ fontSize: 11, color: TEXT_MUTED }}>{score}点 / 24点 &nbsp;·&nbsp; {getTendencyLabel(isLeft ? score : 24 - score)}</div>
-                    <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: 6 }}>
+                    <div style={{ height: 3, background: "rgba(155,107,58,0.12)", borderRadius: 2, marginTop: 6 }}>
                       <div style={{ height: "100%", width: `${(score / 24) * 100}%`, background: ACCENT, borderRadius: 2 }} />
                     </div>
                   </div>
@@ -632,8 +632,8 @@ export default function App() {
                 const msg = index === 0 ? biasMsg1 : biasMsg2;
                 return (
                   <div key={biasId} style={{
-                    background: index === 0 ? "rgba(196,148,10,0.07)" : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${index === 0 ? "rgba(196,148,10,0.25)" : "rgba(196,148,10,0.12)"}`,
+                    background: index === 0 ? "rgba(155,107,58,0.08)" : "rgba(255,255,255,0.6)",
+                    border: `1px solid ${index === 0 ? "rgba(155,107,58,0.25)" : "rgba(155,107,58,0.12)"}`,
                     borderRadius: 12, padding: "16px 18px", marginBottom: index === 0 ? 12 : 0,
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -659,7 +659,7 @@ export default function App() {
               <div ref={chatContainerRef} style={{ maxHeight: 480, overflowY: "auto", marginBottom: 12, display: "flex", flexDirection: "column", gap: 12 }}>
                 {chatLoading && visibleMessages.length === 0 && (
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                    <div style={{ padding: "10px 16px", borderRadius: "16px 16px 16px 4px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14, color: TEXT_MUTED }}>
+                    <div style={{ padding: "10px 16px", borderRadius: "16px 16px 16px 4px", background: "rgba(255,255,255,0.8)", border: "1px solid rgba(155,107,58,0.12)", fontSize: 14, color: TEXT_MUTED }}>
                       あなたの診断結果を分析中...
                     </div>
                   </div>
@@ -669,8 +669,8 @@ export default function App() {
                     <div style={{
                       maxWidth: "85%", padding: "10px 14px",
                       borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                      background: msg.role === "user" ? "rgba(196,148,10,0.18)" : "rgba(255,255,255,0.06)",
-                      border: `1px solid ${msg.role === "user" ? "rgba(196,148,10,0.35)" : "rgba(255,255,255,0.1)"}`,
+                      background: msg.role === "user" ? "rgba(155,107,58,0.12)" : "rgba(255,255,255,0.8)",
+                      border: `1px solid ${msg.role === "user" ? "rgba(155,107,58,0.3)" : "rgba(155,107,58,0.12)"}`,
                       fontSize: 14, lineHeight: 1.7, color: TEXT, whiteSpace: "pre-wrap", wordBreak: "break-word",
                     }}>
                       {msg.content}
@@ -682,13 +682,13 @@ export default function App() {
                 ))}
                 {chatLoading && visibleMessages.length > 0 && (
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                    <div style={{ padding: "10px 16px", borderRadius: "16px 16px 16px 4px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14, color: TEXT_MUTED }}>
+                    <div style={{ padding: "10px 16px", borderRadius: "16px 16px 16px 4px", background: "rgba(255,255,255,0.8)", border: "1px solid rgba(155,107,58,0.12)", fontSize: 14, color: TEXT_MUTED }}>
                       考え中...
                     </div>
                   </div>
                 )}
                 {chatError && (
-                  <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(216,100,100,0.1)", border: "1px solid rgba(216,100,100,0.3)", fontSize: 13, color: "#d86464" }}>
+                  <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(180,80,80,0.08)", border: "1px solid rgba(180,80,80,0.25)", fontSize: 13, color: "#a04040" }}>
                     {chatError}
                   </div>
                 )}
@@ -700,15 +700,15 @@ export default function App() {
                   onKeyDown={handleChatKeyDown}
                   placeholder="質問や相談を入力… (Enterで送信)"
                   rows={2}
-                  style={{ flex: 1, padding: "10px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(196,148,10,0.25)", borderRadius: 10, color: TEXT, fontSize: 14, resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5 }}
+                  style={{ flex: 1, padding: "10px 12px", background: "rgba(255,255,255,0.8)", border: "1px solid rgba(155,107,58,0.25)", borderRadius: 10, color: TEXT, fontSize: 14, resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5 }}
                 />
                 <button
                   onClick={handleChatSend}
                   disabled={!chatInput.trim() || chatLoading}
                   style={{
                     padding: "0 16px",
-                    background: (!chatInput.trim() || chatLoading) ? "rgba(196,148,10,0.08)" : "rgba(196,148,10,0.2)",
-                    border: `1px solid ${(!chatInput.trim() || chatLoading) ? "rgba(196,148,10,0.15)" : ACCENT}`,
+                    background: (!chatInput.trim() || chatLoading) ? "rgba(155,107,58,0.06)" : "rgba(155,107,58,0.15)",
+                    border: `1px solid ${(!chatInput.trim() || chatLoading) ? "rgba(155,107,58,0.15)" : ACCENT}`,
                     borderRadius: 10, color: (!chatInput.trim() || chatLoading) ? TEXT_MUTED : TEXT,
                     fontSize: 14, cursor: (!chatInput.trim() || chatLoading) ? "not-allowed" : "pointer",
                     minWidth: 60, alignSelf: "stretch",
@@ -723,13 +723,13 @@ export default function App() {
             <div style={CARD_STYLE}>
               <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>結果をシェア</h3>
               <button onClick={handleShareCopy}
-                style={{ width: "100%", padding: 14, marginBottom: 10, background: shareCopied ? "rgba(168,216,168,0.2)" : "rgba(196,148,10,0.15)", border: `1px solid ${shareCopied ? "#a8d8a8" : ACCENT}`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer" }}>
+                style={{ width: "100%", padding: 14, marginBottom: 10, background: shareCopied ? "rgba(61,122,90,0.1)" : "rgba(155,107,58,0.1)", border: `1px solid ${shareCopied ? "#3d7a5a" : ACCENT}`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer" }}>
                 {shareCopied ? "✓ コピーしました" : "結果をコピーする"}
               </button>
               <a
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`【ライフオラクル】${cognitiveFunctionMap[mbtiType]?.lightName ?? mbtiType} #ライフオラクル`)}&url=${encodeURIComponent('https://incredible-llama-51caa2.netlify.app/')}`}
                 target="_blank" rel="noopener noreferrer"
-                style={{ display: "block", width: "100%", padding: 14, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: TEXT, fontSize: 14, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}>
+                style={{ display: "block", width: "100%", padding: 14, background: "#2d2318", border: "1px solid rgba(45,35,24,0.3)", borderRadius: 10, color: "#faf6f1", fontSize: 14, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}>
                 Xでシェア（#ライフオラクル）
               </a>
             </div>
@@ -738,7 +738,7 @@ export default function App() {
             <div style={CARD_STYLE}>
               <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 12 }}>ChatGPT・Claude用 個人専用プロンプト</h3>
               <button onClick={handleCopyPrompt}
-                style={{ width: "100%", padding: 14, background: promptCopied ? "rgba(168,216,168,0.2)" : "rgba(196,148,10,0.15)", border: `1px solid ${promptCopied ? "#a8d8a8" : ACCENT}`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer" }}>
+                style={{ width: "100%", padding: 14, background: promptCopied ? "rgba(61,122,90,0.1)" : "rgba(155,107,58,0.1)", border: `1px solid ${promptCopied ? "#3d7a5a" : ACCENT}`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer" }}>
                 {promptCopied ? "✓ コピーしました" : "プロンプトを生成してコピー"}
               </button>
               <p style={{ fontSize: 12, color: TEXT_MUTED, marginTop: 10, textAlign: "center" }}>
@@ -748,12 +748,12 @@ export default function App() {
 
             <button
               onClick={() => { setMapFrom('result'); setPage('map'); }}
-              style={{ width: "100%", padding: 14, background: "rgba(196,148,10,0.08)", border: `1px solid rgba(196,148,10,0.3)`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer", marginBottom: 12 }}>
+              style={{ width: "100%", padding: 14, background: "rgba(155,107,58,0.08)", border: `1px solid rgba(155,107,58,0.25)`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer", marginBottom: 12 }}>
               16タイプ 全体マップを見る
             </button>
 
             <button onClick={handleReset}
-              style={{ width: "100%", padding: 14, background: "transparent", border: `1px solid rgba(196,148,10,0.2)`, borderRadius: 10, color: TEXT_MUTED, fontSize: 14, cursor: "pointer", marginBottom: 20 }}>
+              style={{ width: "100%", padding: 14, background: "transparent", border: `1px solid rgba(155,107,58,0.2)`, borderRadius: 10, color: TEXT_MUTED, fontSize: 14, cursor: "pointer", marginBottom: 20 }}>
               もう一度診断する
             </button>
 
@@ -773,8 +773,8 @@ export default function App() {
                       style={{
                         display: "block",
                         padding: "16px",
-                        background: "rgba(196,148,10,0.08)",
-                        border: "1px solid rgba(196,148,10,0.3)",
+                        background: "rgba(155,107,58,0.07)",
+                        border: "1px solid rgba(155,107,58,0.22)",
                         borderRadius: 10,
                         color: TEXT,
                         textDecoration: "none",
@@ -793,62 +793,48 @@ export default function App() {
               </div>
             )}
 
-            {/* ⑧ おすすめ書籍（Amazonアソシエイト） */}
-            {top2 && top2[0] && biasBooksData[top2[0]] && (() => {
-              const book = biasBooksData[top2[0]];
-              const url = getAmazonAffiliateUrl(book.asin);
-              return (
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 8 }}>
+            {/* ⑧ おすすめ書籍 */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 8 }}>
+                自己理解を深めるおすすめ書籍
+              </div>
+              <p style={{ fontSize: 13, color: TEXT_MUTED, lineHeight: 1.7, marginBottom: 12 }}>
+                あなたの思考のクセ1位は<span style={{ color: TEXT }}>{biasInfo[top2[0]]?.name}</span>でした。もう少し深く知りたい方に、この一冊をおすすめします。
+              </p>
+              <a
+                href="https://www.amazon.co.jp/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  background: 'rgba(155,107,58,0.06)',
+                  border: '1px solid rgba(155,107,58,0.18)',
+                  borderRadius: 10,
+                  textDecoration: 'none',
+                  color: TEXT,
+                  transition: 'background 0.2s',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#7a4e20', marginBottom: 4 }}>
                     自己理解を深めるおすすめ書籍
                   </div>
-                  <p style={{ fontSize: 13, color: TEXT_MUTED, lineHeight: 1.7, marginBottom: 12 }}>
-                    あなたの思考のクセ1位は<span style={{ color: TEXT }}>{biasInfo[top2[0]]?.name}</span>でした。もう少し深く知りたい方に、この一冊をおすすめします。
-                  </p>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '16px',
-                      background: 'rgba(196,148,10,0.06)',
-                      border: '1px solid rgba(196,148,10,0.2)',
-                      borderRadius: 10,
-                      textDecoration: 'none',
-                      color: TEXT,
-                      transition: 'background 0.2s',
-                      gap: 12,
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#d8a8d8', marginBottom: 4 }}>
-                        {book.title}
-                      </div>
-                      <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>
-                        {book.description}
-                      </div>
-                      <div style={{ fontSize: 10, color: TEXT_MUTED, marginTop: 4 }}>
-                        著：{book.author}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 12, color: TEXT_MUTED, flexShrink: 0 }}>
-                      Amazon →
-                    </div>
-                  </a>
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 6, textAlign: 'right' }}>
-                    ※Amazonアソシエイトリンクが含まれます
-                  </p>
+                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.5 }}>
+                    「{top2[0] ? biasInfo[top2[0]]?.name : '無意識の行動パターン'}」に気づき、理想の選択ができるようになる心理学入門
+                  </div>
                 </div>
-              );
-            })()}
+                <div style={{ fontSize: 12, color: TEXT_MUTED, marginLeft: 10 }}>▶︎ 詳細へ</div>
+              </a>
+            </div>
 
             {/* もっと深く知りたい方へ（note導線） */}
             <div
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(196,148,10,0.15)",
+                background: "rgba(155,107,58,0.04)",
+                border: "1px solid rgba(155,107,58,0.15)",
                 borderRadius: 12,
                 padding: "20px 18px",
                 marginBottom: 20,
@@ -866,8 +852,8 @@ export default function App() {
                   alignItems: "center",
                   gap: 12,
                   padding: "14px 16px",
-                  background: "rgba(196,148,10,0.07)",
-                  border: "1px solid rgba(196,148,10,0.2)",
+                  background: "rgba(155,107,58,0.07)",
+                  border: "1px solid rgba(155,107,58,0.22)",
                   borderRadius: 10,
                   textDecoration: "none",
                   color: TEXT,
@@ -895,3 +881,4 @@ export default function App() {
     </div>
   );
 }
+    
