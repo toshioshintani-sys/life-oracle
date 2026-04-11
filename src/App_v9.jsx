@@ -799,9 +799,12 @@ export default function App() {
               const url = getAmazonAffiliateUrl(book.asin);
               return (
                 <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 8 }}>
                     自己理解を深めるおすすめ書籍
                   </div>
+                  <p style={{ fontSize: 13, color: TEXT_MUTED, lineHeight: 1.7, marginBottom: 12 }}>
+                    あなたの思考のクセ1位は<span style={{ color: TEXT }}>{biasInfo[top2[0]]?.name}</span>でした。もう少し深く知りたい方に、この一冊をおすすめします。
+                  </p>
                   <a
                     href={url}
                     target="_blank"
@@ -810,8 +813,8 @@ export default function App() {
                       display: 'flex',
                       alignItems: 'center',
                       padding: '16px',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
+                      background: 'rgba(196,148,10,0.06)',
+                      border: '1px solid rgba(196,148,10,0.2)',
                       borderRadius: 10,
                       textDecoration: 'none',
                       color: TEXT,
