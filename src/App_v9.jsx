@@ -122,14 +122,22 @@ export const typeLabels = {
 };
 
 const famousPeople = {
-  ENFP: { name: 'アン・フランク' }, INFP: { name: '宮崎駿' },
-  ENFJ: { name: 'バラク・オバマ' }, INFJ: { name: 'マーティン・ルーサー・キング' },
-  ENTP: { name: 'スティーブ・ジョブズ' }, INTP: { name: 'アルベルト・アインシュタイン' },
-  ENTJ: { name: 'ナポレオン・ボナパルト' }, INTJ: { name: 'イーロン・マスク' },
-  ESFP: { name: 'マリリン・モンロー' }, ISFP: { name: 'マイケル・ジャクソン' },
-  ESFJ: { name: 'テレサ修道女' }, ISFJ: { name: 'ベアトリクス女王' },
-  ESTP: { name: 'アーネスト・ヘミングウェイ' }, ISTP: { name: 'クリント・イーストウッド' },
-  ESTJ: { name: 'ジョージ・ワシントン' }, ISTJ: { name: 'ウォーレン・バフェット' },
+  ENFP: { people: ['坂本龍馬', 'ウォルト・ディズニー'] },
+  INFP: { people: ['宮崎駿', 'マイケル・ジャクソン'] },
+  ENFJ: { people: ['松下幸之助', 'バラク・オバマ'] },
+  INFJ: { people: ['村上春樹', 'マーティン・ルーサー・キング'] },
+  ENTP: { people: ['手塚治虫', 'スティーブ・ジョブズ'] },
+  INTP: { people: ['夏目漱石', 'アルベルト・アインシュタイン'] },
+  ENTJ: { people: ['織田信長', 'ナポレオン・ボナパルト'] },
+  INTJ: { people: ['羽生善治', 'イーロン・マスク'] },
+  ESFP: { people: ['明石家さんま', 'マリリン・モンロー'] },
+  ISFP: { people: ['坂本龍一', 'ボブ・ディラン'] },
+  ESFJ: { people: ['吉永小百合', 'マザー・テレサ'] },
+  ISFJ: { people: ['黒柳徹子', 'オードリー・ヘプバーン'] },
+  ESTP: { people: ['本田圭佑', 'アーネスト・ヘミングウェイ'] },
+  ISTP: { people: ['羽生結弦', 'クリント・イーストウッド'] },
+  ESTJ: { people: ['渋沢栄一', 'ジョージ・ワシントン'] },
+  ISTJ: { people: ['稲盛和夫', 'ウォーレン・バフェット'] },
 };
 
 const cognitiveFunctionMap = {
@@ -633,7 +641,11 @@ export default function App() {
                   <>
                     <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 36, textAlign: "center", marginBottom: 4, fontWeight: 700, color: ACCENT }}>{cf.lightName}</h2>
                     <div style={{ textAlign: "center", fontSize: 12, color: TEXT_MUTED, marginBottom: 12 }}>あなたの光の状態 / {mbtiType}</div>
-                    {famousPeople[mbtiType] && <div style={{ textAlign: "center", fontSize: 12, color: ACCENT, marginBottom: 16 }}>{famousPeople[mbtiType].name}と同じタイプ</div>}
+                    {famousPeople[mbtiType] && (
+                      <div style={{ textAlign: "center", fontSize: 12, color: ACCENT, marginBottom: 16 }}>
+                        {famousPeople[mbtiType].people.join(' · ')} と同じタイプ
+                      </div>
+                    )}
                     <div style={{ background: "rgba(255,255,255,0.8)", border: "1px solid rgba(184,131,63,0.15)", borderRadius: 10, padding: "12px 16px", marginBottom: 8 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "4px 0" }}>
                         <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#3d7a5a" }}>光の状態</span>
