@@ -7,7 +7,9 @@ Claude Codeが起動するたびに自動で読み込まれるプロジェクト
 ## プロジェクト基本情報
 
 - **アプリ名**：ライフオラクル
-- **本番URL**：https://incredible-llama-51caa2.netlify.app/
+- **本番URL**：https://life-oracle.jp/
+- **旧URL（301リダイレクト中）**：https://life-oracle.jp/
+- **保護ドメイン（301リダイレクト）**：https://life-oracle.com/
 - **GitHubリポジトリ**：https://github.com/toshioshintani-sys/life-oracle
 - **技術構成**：React + Vite
 - **プロジェクトパス**：C:\Users\user\Desktop\claude_work\ライフオラクル
@@ -48,13 +50,18 @@ MBTIを入口にしつつ、ユング認知機能の光と影・行動経済学�
 ## ファイル操作のルール
 
 ### 重要：実際にビルドされるファイル
-**main.jsx は App_v8.jsx を読み込んでいる。**
-結果ページの変更は必ず `src/App_v8.jsx` を編集すること。
-`src/App.jsx` を編集してもビルドに反映されない。
+**main.jsx は App_v9.jsx を読み込んでいる。**
+結果ページの変更は必ず `src/App_v9.jsx` を編集すること。
+`src/App.jsx` / `src/App_v2〜v8.jsx` は過去バージョンの残骸でビルドに使われない。
 
-### 大きな変更をするとき
-App_v8.jsxを直接上書きしない。
-App_v9.jsx として別ファイルで作り、動作確認後にmain.jsxのimportを更新する。
+### バージョン管理はGit任せ
+`App_v10.jsx` のような新ファイル作成は不要。
+`App_v9.jsx` を直接編集し、コミットで履歴を残す。
+- 大きな変更：feature branch を切って作業 → PR/マージ
+- 安全策：変更前に `git commit` でセーブポイントを作る
+- ロールバック：`git revert` か `git checkout <commit> -- src/App_v9.jsx`
+
+古い `App_v2〜v8.jsx` は将来的にクリーンアップ候補。
 
 ### デプロイの手順
 git add .
@@ -100,9 +107,12 @@ LF will be replaced by CRLF の警告は無視してOK。動作に影響なし�
 ### CSSについて
 - ベースカラー：background: #faf6f1（ウォームクリーム）
 - テキスト：color: #2d2318（深い焦げ茶）
-- アクセント：#9b6b3a（木・土色）
+- アクセント：#b8833f（アンバー・金土色。羅針盤と同系統）
+- アクセント濃：#8c5f28
 - 光の状態：#3d7a5a / 影の状態：#a05050
-- フォント：Hiragino Sans, Hiragino Kaku Gothic ProN, Noto Sans JP, sans-serif
+- フォント本文：Hiragino Sans, Hiragino Kaku Gothic ProN, Noto Sans JP, sans-serif
+- フォント見出し：Noto Serif JP, Hiragino Mincho ProN, Yu Mincho, serif
+- ブランドシグネチャ：**羅針盤モチーフ**（favicon / ヘッダー / イントロ画面で使用）
 
 ---
 

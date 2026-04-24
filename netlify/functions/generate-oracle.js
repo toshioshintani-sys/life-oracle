@@ -4,7 +4,11 @@ exports.handler = async (event) => {
   }
 
   const allowedOrigins = [
-    'https://incredible-llama-51caa2.netlify.app',
+    'https://life-oracle.jp',
+    'https://www.life-oracle.jp',
+    'https://life-oracle.com',
+    'https://www.life-oracle.com',
+    'https://life-oracle.jp',
     'http://localhost:5173',
   ];
   const origin = event.headers.origin || '';
