@@ -626,8 +626,8 @@ export default function App() {
 
         {/* ═══════════════════════════════════════════════
             結果画面
-            順序：タイプ発表 → 悩み相談（主役） → 処方箋
-                  → 思考のクセ → 強み/癖 → 今日のアクション
+            順序：タイプ発表 → 処方箋 → 思考のクセ
+                  → 強み/癖 → 今日のアクション → AI相談（CTA）
                   → シェア → 記事 → 書籍 → note導線
         ═══════════════════════════════════════════════ */}
         {phase === "result" && scoreResult && biasResult && typeProfiles && prescriptions && biasMessages && (
@@ -685,7 +685,60 @@ export default function App() {
               </details>
             </div>
 
-            {/* ② 今の悩みを相談する（主役） */}
+            {/* ② 処方箋 */}
+            <div style={{ ...CARD_STYLE, borderColor: "rgba(184,131,63,0.3)" }}>
+              <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 4 }}>あなただけの処方箋</div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: TEXT, marginBottom: 4, fontWeight: 600 }}>
+                {occupationLabel} × {mbtiType} × {generationLabel}
+              </h3>
+              <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 14, lineHeight: 1.6 }}>
+                職種・タイプ・年代の組み合わせ2,016通りから、あなた専用の処方箋を導き出しました。
+              </div>
+              {prescriptionText
+                ? <div style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-wrap" }}>{prescriptionText}</div>
+                : <p style={{ color: TEXT_MUTED, fontSize: 14 }}>該当する処方箋のデータがありません。</p>
+              }
+            </div>
+
+            {/* ④ 思考のクセ */}
+            <div style={CARD_STYLE}>
+              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 16 }}>あなたの思考のクセ</h3>
+              {top2.map((biasId, index) => {
+                const info = biasInfo[biasId];
+                const msg = index === 0 ? biasMsg1 : biasMsg2;
+                return (
+                  <div key={biasId} style={{ background: index === 0 ? "rgba(184,131,63,0.08)" : "rgba(255,255,255,0.6)", border: `1px solid ${index === 0 ? "rgba(184,131,63,0.25)" : "rgba(184,131,63,0.12)"}`, borderRadius: 12, padding: "16px 18px", marginBottom: index === 0 ? 12 : 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, color: index === 0 ? ACCENT : TEXT_MUTED, letterSpacing: 1 }}>{index + 1}位のクセ</span>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{info?.name}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: msg ? 12 : 0 }}>{info?.short}</div>
+                    <p style={{ fontSize: 14, lineHeight: 1.9, margin: 0 }}>{msg ?? info?.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ⑤ 強み・心の癖 */}
+            {typeProfile && (
+              <div style={CARD_STYLE}>
+                <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>あなたの強み</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 20, whiteSpace: "pre-wrap" }}>{typeProfile.praiseText}</p>
+                <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>心の癖</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.8, margin: 0, whiteSpace: "pre-wrap" }}>{typeProfile.habitText}</p>
+              </div>
+            )}
+
+            {/* ⑥ 今日のアクション */}
+            {cognitiveFunctionMap[mbtiType]?.todayAction && (
+              <div style={{ background: "rgba(61,122,90,0.05)", border: "1px solid rgba(61,122,90,0.25)", borderRadius: 14, padding: "20px 20px", marginBottom: 20 }}>
+                <div style={{ fontSize: 10, letterSpacing: 2, color: "#3d7a5a", marginBottom: 10 }}>今日のアクション</div>
+                <p style={{ fontSize: 15, lineHeight: 1.8, color: TEXT, margin: 0, fontWeight: 500 }}>{cognitiveFunctionMap[mbtiType].todayAction}</p>
+                <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 10 }}>小さな一歩が、行動変容のはじまりです。</div>
+              </div>
+            )}
+
+            {/* ⑥ AI相談（処方箋を読んだあとのCTA） */}
             <div style={{ ...CARD_STYLE, borderColor: "rgba(184,131,63,0.4)", boxShadow: "0 2px 12px rgba(184,131,63,0.10)" }}>
               <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 6 }}>あなた専用の相談窓口</div>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: TEXT, marginBottom: 4 }}>
@@ -790,59 +843,6 @@ export default function App() {
                 </>
               )}
             </div>
-
-            {/* ③ 処方箋 */}
-            <div style={{ ...CARD_STYLE, borderColor: "rgba(184,131,63,0.3)" }}>
-              <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 4 }}>あなただけの処方箋</div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: TEXT, marginBottom: 4, fontWeight: 600 }}>
-                {occupationLabel} × {mbtiType} × {generationLabel}
-              </h3>
-              <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 14, lineHeight: 1.6 }}>
-                職種・タイプ・年代の組み合わせ2,016通りから、あなた専用の処方箋を導き出しました。
-              </div>
-              {prescriptionText
-                ? <div style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-wrap" }}>{prescriptionText}</div>
-                : <p style={{ color: TEXT_MUTED, fontSize: 14 }}>該当する処方箋のデータがありません。</p>
-              }
-            </div>
-
-            {/* ④ 思考のクセ */}
-            <div style={CARD_STYLE}>
-              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 16 }}>あなたの思考のクセ</h3>
-              {top2.map((biasId, index) => {
-                const info = biasInfo[biasId];
-                const msg = index === 0 ? biasMsg1 : biasMsg2;
-                return (
-                  <div key={biasId} style={{ background: index === 0 ? "rgba(184,131,63,0.08)" : "rgba(255,255,255,0.6)", border: `1px solid ${index === 0 ? "rgba(184,131,63,0.25)" : "rgba(184,131,63,0.12)"}`, borderRadius: 12, padding: "16px 18px", marginBottom: index === 0 ? 12 : 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, color: index === 0 ? ACCENT : TEXT_MUTED, letterSpacing: 1 }}>{index + 1}位のクセ</span>
-                      <span style={{ fontSize: 14, fontWeight: 600 }}>{info?.name}</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: msg ? 12 : 0 }}>{info?.short}</div>
-                    <p style={{ fontSize: 14, lineHeight: 1.9, margin: 0 }}>{msg ?? info?.description}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* ⑤ 強み・心の癖 */}
-            {typeProfile && (
-              <div style={CARD_STYLE}>
-                <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>あなたの強み</h3>
-                <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 20, whiteSpace: "pre-wrap" }}>{typeProfile.praiseText}</p>
-                <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>心の癖</h3>
-                <p style={{ fontSize: 14, lineHeight: 1.8, margin: 0, whiteSpace: "pre-wrap" }}>{typeProfile.habitText}</p>
-              </div>
-            )}
-
-            {/* ⑥ 今日のアクション */}
-            {cognitiveFunctionMap[mbtiType]?.todayAction && (
-              <div style={{ background: "rgba(61,122,90,0.05)", border: "1px solid rgba(61,122,90,0.25)", borderRadius: 14, padding: "20px 20px", marginBottom: 20 }}>
-                <div style={{ fontSize: 10, letterSpacing: 2, color: "#3d7a5a", marginBottom: 10 }}>今日のアクション</div>
-                <p style={{ fontSize: 15, lineHeight: 1.8, color: TEXT, margin: 0, fontWeight: 500 }}>{cognitiveFunctionMap[mbtiType].todayAction}</p>
-                <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 10 }}>小さな一歩が、行動変容のはじまりです。</div>
-              </div>
-            )}
 
             {/* ⑦ Xシェア */}
             <div style={CARD_STYLE}>
