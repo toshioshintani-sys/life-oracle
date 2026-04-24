@@ -219,6 +219,7 @@ export default function App() {
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
   const [biasMessages, setBiasMessages] = useState(null);
+  const [rssLinks, setRssLinks] = useState([]);
 
   // チャット
   const [chatMessages, setChatMessages] = useState([]);
@@ -263,6 +264,27 @@ export default function App() {
     fetch("/data/bias_messages.json").then((r) => r.json()).then(setBiasMessages).catch(() => setBiasMessages({}));
   }, [phase]);
 
+
+  useEffect(() => {
+    if (phase !== 'result' || !mbtiType) return;
+    const cf = cognitiveFunctionMap[mbtiType];
+    const keywords = [cf?.lightName, occupationLabel].filter(Boolean);
+    fetch('/api/rss')
+      .then(res => res.text())
+      .then(xmlStr => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlStr, 'application/xml');
+        const items = Array.from(doc.querySelectorAll('item'));
+        const matched = [];
+        items.forEach(item => {
+          const title = item.querySelector('title')?.textContent || '';
+          const link = item.querySelector('link')?.textContent || '';
+          if (keywords.some(kw => title.includes(kw))) matched.push({ title, link });
+        });
+        setRssLinks(matched.slice(0, 3));
+      })
+      .catch(() => {});
+  }, [phase, mbtiType, occupationLabel]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -800,6 +822,24 @@ export default function App() {
               )}
             </div>
 
+
+            {/* note深掘り記事 */}
+            {rssLinks.length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 10, letterSpacing: 0.5 }}>
+                  {cognitiveFunctionMap[mbtiType]?.lightName ?? mbtiType} ・ {occupationLabel} に関連する深掘り記事
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {rssLinks.map((item, idx) => (
+                    <a key={idx} href={item.link} target='_blank' rel='noopener noreferrer'
+                      style={{ display: 'block', padding: '14px 16px', background: 'rgba(184,131,63,0.06)', border: '1px solid rgba(184,131,63,0.18)', borderRadius: 10, color: TEXT, textDecoration: 'none' }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>{item.title}</div>
+                      <div style={{ fontSize: 11, color: ACCENT, marginTop: 6, textAlign: 'right' }}>noteで読む →</div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <button onClick={() => { setMapFrom('result'); setPage('map'); }}
               style={{ width: "100%", padding: 14, background: "rgba(184,131,63,0.08)", border: `1px solid rgba(184,131,63,0.25)`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer", marginBottom: 12 }}>
