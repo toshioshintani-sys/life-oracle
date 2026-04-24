@@ -4,7 +4,6 @@ import { biasQuestions } from "./data/biasQuestions.js";
 import { calcScore, getTypeName, calcBiasScores, biasInfo, getTendencyLabel } from "./utils/scoring.js";
 import { OCCUPATIONS_18, GENERATIONS_7 } from "../life_oracle_questions_data.js";
 import MapPage from "./pages/MapPage.jsx";
-import { biasBooksData, getAmazonAffiliateUrl } from "./data/types.js";
 
 // ─── 定数 ────────────────────────────────────────────────
 const CARD_STYLE = {
@@ -216,9 +215,7 @@ export default function App() {
   const [biasAnswers, setBiasAnswers] = useState({});
   const [selected, setSelected] = useState(null);
   const [animating, setAnimating] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
 
-  const [rssLinks, setRssLinks] = useState([]);
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
   const [biasMessages, setBiasMessages] = useState(null);
@@ -266,27 +263,6 @@ export default function App() {
     fetch("/data/bias_messages.json").then((r) => r.json()).then(setBiasMessages).catch(() => setBiasMessages({}));
   }, [phase]);
 
-  useEffect(() => {
-    if (phase !== "result" || !mbtiType) return;
-    const cf = cognitiveFunctionMap[mbtiType];
-    const keywords = [mbtiType, typeLabels[mbtiType], cf?.lightName, cf?.shadowName,
-      top2[0] ? biasInfo[top2[0]]?.name : "", top2[1] ? biasInfo[top2[1]]?.name : ""].filter(Boolean);
-    fetch("/api/rss")
-      .then(res => res.text())
-      .then(xmlStr => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xmlStr, "application/xml");
-        const items = Array.from(doc.querySelectorAll("item"));
-        const matched = [];
-        items.forEach(item => {
-          const title = item.querySelector("title")?.textContent || "";
-          const link = item.querySelector("link")?.textContent || "";
-          if (keywords.some(kw => title.includes(kw))) matched.push({ title, link });
-        });
-        setRssLinks(matched);
-      })
-      .catch(() => {});
-  }, [phase, mbtiType, top2]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -424,26 +400,6 @@ export default function App() {
     setSelectedConcern(null);
   }
 
-  function handleShareCopy() {
-    const cf = cognitiveFunctionMap[mbtiType];
-    const text = [
-      `私の「光の状態」は『${cf?.lightName ?? mbtiType}』`,
-      `消耗しているなら、影の『${cf?.shadowName ?? ''}』が出ているサイン。`,
-      ``, `思考のクセ1位：${biasInfo[top2[0]]?.name ?? ''}`,
-      ``, `自分の動き方を知ると、職場での消耗が変わる。`,
-      `#ライフオラクル で無料診断`, `https://life-oracle.jp/`,
-    ].join('\n');
-    const onSuccess = () => { setShareCopied(true); setTimeout(() => setShareCopied(false), 2000); };
-    if (navigator.clipboard) navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
-    else fallbackCopy(text, onSuccess);
-  }
-
-  function fallbackCopy(text, onSuccess) {
-    const el = document.createElement("textarea");
-    el.value = text; el.style.cssText = "position:fixed;top:-9999px;left:-9999px";
-    document.body.appendChild(el); el.select();
-    try { if (document.execCommand("copy")) onSuccess(); } finally { document.body.removeChild(el); }
-  }
 
   const visibleMessages = chatMessages.filter((m) => !m.hidden);
   const isConsultationReady = typeProfiles && biasMessages;
@@ -844,80 +800,6 @@ export default function App() {
               )}
             </div>
 
-            {/* ⑦ Xシェア */}
-            <div style={CARD_STYLE}>
-              <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>診断結果をシェア</h3>
-              <p style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 14, lineHeight: 1.6 }}>あなたと同じ悩みを抱えた人に届くかもしれません。</p>
-              <button onClick={handleShareCopy}
-                style={{ width: "100%", padding: 14, marginBottom: 10, background: shareCopied ? "rgba(61,122,90,0.1)" : "rgba(184,131,63,0.1)", border: `1px solid ${shareCopied ? "#3d7a5a" : ACCENT}`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer" }}>
-                {shareCopied ? "✓ コピーしました" : "投稿テキストをコピーする"}
-              </button>
-              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`私の「光の状態」は『${cognitiveFunctionMap[mbtiType]?.lightName ?? mbtiType}』\n消耗しているなら影の『${cognitiveFunctionMap[mbtiType]?.shadowName ?? ''}』が出ているサイン。\n\n思考のクセ1位：${biasInfo[top2[0]]?.name ?? ''}\n\n自分の動き方を知ると、職場での消耗が変わる。\n#ライフオラクル で無料診断`)}&url=${encodeURIComponent('https://life-oracle.jp/')}`}
-                target="_blank" rel="noopener noreferrer"
-                style={{ display: "block", width: "100%", padding: 14, background: "#2d2318", border: "1px solid rgba(45,35,24,0.3)", borderRadius: 10, color: "#faf6f1", fontSize: 14, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}>
-                Xでシェア（#ライフオラクル）
-              </a>
-            </div>
-
-            {/* ⑧ note関連記事 */}
-            {rssLinks.length > 0 && (
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 13, letterSpacing: 1, color: ACCENT, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-                  <span>✨</span> あなたのタイプに関連する深掘り記事
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {rssLinks.map((item, idx) => (
-                    <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer"
-                      style={{ display: "block", padding: "16px", background: "rgba(184,131,63,0.07)", border: "1px solid rgba(184,131,63,0.22)", borderRadius: 10, color: TEXT, textDecoration: "none" }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.5 }}>{item.title}</div>
-                      <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 8, textAlign: "right" }}>noteで読む →</div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ⑨ おすすめ書籍 */}
-            {top2[0] && biasBooksData[top2[0]] && (
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 8 }}>自己理解を深めるおすすめ書籍</div>
-                <p style={{ fontSize: 13, color: TEXT_MUTED, lineHeight: 1.7, marginBottom: 12 }}>
-                  あなたの思考のクセ1位は<span style={{ color: TEXT }}>{biasInfo[top2[0]]?.name}</span>でした。{biasBooksData[top2[0]].description}。
-                </p>
-                <a href={getAmazonAffiliateUrl(biasBooksData[top2[0]].asin)} target="_blank" rel="noopener noreferrer sponsored"
-                  style={{ display: 'flex', alignItems: 'center', padding: '16px', background: 'rgba(184,131,63,0.06)', border: '1px solid rgba(184,131,63,0.18)', borderRadius: 10, textDecoration: 'none', color: TEXT, gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#8c5f28', marginBottom: 4 }}>{biasBooksData[top2[0]].title}</div>
-                    <div style={{ fontSize: 11, color: TEXT_MUTED }}>{biasBooksData[top2[0]].author}</div>
-                  </div>
-                  <div style={{ fontSize: 12, color: TEXT_MUTED }}>Amazonで見る ▶︎</div>
-                </a>
-                <div style={{ fontSize: 10, color: TEXT_MUTED, marginTop: 6, textAlign: 'right' }}>※ Amazonアソシエイトリンクが含まれます</div>
-              </div>
-            )}
-
-            {/* ⑩ note・メンバーシップ導線 */}
-            <div style={{ background: "rgba(184,131,63,0.04)", border: "1px solid rgba(184,131,63,0.18)", borderRadius: 14, padding: "20px 18px", marginBottom: 20 }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 14 }}>もっと深く知りたい方へ</div>
-              <a href="https://note.com/lifeoraclejp" target="_blank" rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "rgba(184,131,63,0.07)", border: "1px solid rgba(184,131,63,0.22)", borderRadius: 10, textDecoration: "none", color: TEXT, marginBottom: 10 }}>
-                <span style={{ fontSize: 18 }}>📝</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>ライフオラクルの考え方をnoteで読む</div>
-                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>光と影の仕組み・バイアスとの関係・MBTIとの違いなど</div>
-                </div>
-                <span style={{ marginLeft: "auto", fontSize: 12, color: TEXT_MUTED }}>→</span>
-              </a>
-              <a href="https://note.com/lifeoraclejp/membership" target="_blank" rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "rgba(184,131,63,0.12)", border: `1px solid ${ACCENT}`, borderRadius: 10, textDecoration: "none", color: TEXT }}>
-                <span style={{ fontSize: 18 }}>🧭</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, color: ACCENT }}>メンバーシップでより深い処方箋を</div>
-                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>あなたのタイプ専用の深掘りコンテンツが届きます</div>
-                </div>
-                <span style={{ marginLeft: "auto", fontSize: 12, color: ACCENT }}>→</span>
-              </a>
-            </div>
 
             <button onClick={() => { setMapFrom('result'); setPage('map'); }}
               style={{ width: "100%", padding: 14, background: "rgba(184,131,63,0.08)", border: `1px solid rgba(184,131,63,0.25)`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer", marginBottom: 12 }}>
