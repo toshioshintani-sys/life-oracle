@@ -28,6 +28,63 @@ const backBtnStyle = {
   padding: "0 0 12px 0",
 };
 
+// ─── 軸境界値（モジュールレベルで計算）──────────────────────
+const AXIS_END = (() => {
+  let ei = 0, sn = 0, tf = 0, jp = 0;
+  questions.forEach(q => {
+    if (q.axis === 'EI') ei++;
+    else if (q.axis === 'SN') sn++;
+    else if (q.axis === 'TF') tf++;
+    else if (q.axis === 'JP') jp++;
+  });
+  return { EI: ei, SN: ei + sn, TF: ei + sn + tf, JP: ei + sn + tf + jp };
+})();
+
+// 軸マイルストーン情報
+const AXIS_INFO = {
+  EI: {
+    axisNum: 1, axis: 'EI',
+    leftPole: 'E', rightPole: 'I',
+    leftLabel: '外向（E）', rightLabel: '内向（I）',
+    leftDesc: '会話や外部との交流からエネルギーを得やすいタイプです。発言することで思考がまとまる傾向があります。',
+    rightDesc: '一人の時間や内省からエネルギーを回復しやすいタイプです。頭の中で整理してから話す傾向があります。',
+    remaining: 24,
+    nextLabel: '続ける → あと24問',
+  },
+  SN: {
+    axisNum: 2, axis: 'SN',
+    leftPole: 'S', rightPole: 'N',
+    leftLabel: '感覚（S）', rightLabel: '直観（N）',
+    leftDesc: '目の前の現実・事実・経験を重視する傾向があります。具体的なデータや実績を大切にします。',
+    rightDesc: 'パターンや可能性・未来のビジョンに惹かれる傾向があります。「なぜ？」「どうすれば？」を考えがちです。',
+    remaining: 16,
+    nextLabel: '続ける → あと16問',
+  },
+  TF: {
+    axisNum: 3, axis: 'TF',
+    leftPole: 'T', rightPole: 'F',
+    leftLabel: '思考（T）', rightLabel: '感情（F）',
+    leftDesc: '論理・分析・客観性で判断する傾向があります。感情より筋道を大切にします。',
+    rightDesc: '人への影響・価値観・共感で判断する傾向があります。関係性の調和を大切にします。',
+    remaining: 8,
+    nextLabel: '続ける → あと8問',
+  },
+  JP: {
+    axisNum: 4, axis: 'JP',
+    leftPole: 'J', rightPole: 'P',
+    leftLabel: '判断（J）', rightLabel: '知覚（P）',
+    leftDesc: '計画・構造・決断を好む傾向があります。物事に見通しがある状態が安心です。',
+    rightDesc: '柔軟・オープン・状況適応を好む傾向があります。選択肢を開いておくことが安心です。',
+    remaining: 0,
+    nextLabel: '最後の16問へ → 思考のクセを調べる',
+  },
+};
+
+const MILESTONE_PHASES = ['ei_milestone', 'sn_milestone', 'tf_milestone', 'jp_milestone'];
+const PHASE_TO_AXIS = {
+  ei_milestone: 'EI', sn_milestone: 'SN', tf_milestone: 'TF', jp_milestone: 'JP',
+};
+
 // 羅針盤アイコン（ブランドのシグネチャ）
 function CompassIcon({ size = 24, color = "currentColor", strokeWidth = 1.5, decorative = false }) {
   return (
@@ -131,16 +188,17 @@ const MBTI_TO_JUNG = {
   ISFP: 'Fi-光', INFP: 'Fi-影',
 };
 
-// ─── EI仮判定（マイルストーン用）──────────────────────────
-function getProvisionalEI(jungAnswers) {
+// ─── 軸仮判定ヘルパー ─────────────────────────────────────
+// 戻り値: true = 左極（E/S/T/J）、false = 右極（I/N/F/P）
+function getProvisionalAxis(jungAnswers, axis) {
   let score = 0;
-  const eiQs = questions.filter(q => q.axis === 'EI');
-  for (const q of eiQs) {
+  const axisQs = questions.filter(q => q.axis === axis);
+  for (const q of axisQs) {
     const v = jungAnswers[q.id];
     if (v === undefined) continue;
     score += q.reversed ? v : (3 - v);
   }
-  return score >= 13 ? 'E' : 'I';
+  return score >= 13;
 }
 
 // ─── プロンプト生成 ───────────────────────────────────────
@@ -195,13 +253,11 @@ export default function App() {
   const [shareCopied, setShareCopied] = useState(false);
 
   const [rssLinks, setRssLinks] = useState([]);
-  const [rssLoading, setRssLoading] = useState(false);
 
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
   const [biasMessages, setBiasMessages] = useState(null);
 
-  // AI チャット状態
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -243,45 +299,31 @@ export default function App() {
     fetch("/data/bias_messages.json").then((r) => r.json()).then(setBiasMessages).catch(() => setBiasMessages({}));
   }, [phase]);
 
-  // 全データ揃ったら初回AIメッセージを自動生成
   useEffect(() => {
     if (!typeProfiles || !prescriptions || !biasMessages || chatInitialized || !scoreResult || !biasResult) return;
     setChatInitialized(true);
     setChatLoading(true);
-
     const systemPrompt = buildSystemPrompt(mbtiType, scoreResult.scores, top2, typeProfile, occupationLabel, generationLabel);
     const triggerContent = `私のプロフィール（${mbtiType}・${occupationLabel}・${generationLabel}）を踏まえて、私の特徴・強み・心の癖を300文字程度で紹介してください。最後に「何か聞きたいことはありますか？」で締めてください。`;
     const hiddenTrigger = { role: "user", content: triggerContent, hidden: true };
-
     fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ systemPrompt, messages: [{ role: "user", content: triggerContent }] }),
     })
       .then((r) => r.json())
-      .then((data) => {
-        if (data.content) {
-          setChatMessages([hiddenTrigger, { role: "assistant", content: data.content }]);
-        }
-      })
-      .catch(() => { setChatError("初回メッセージの取得に失敗しました。"); })
+      .then((data) => { if (data.content) setChatMessages([hiddenTrigger, { role: "assistant", content: data.content }]); })
+      .catch(() => setChatError("初回メッセージの取得に失敗しました。"))
       .finally(() => setChatLoading(false));
   }, [typeProfiles, prescriptions, biasMessages, chatInitialized]);
 
   useEffect(() => {
     if (phase !== "result" || !mbtiType) return;
-
     const cf = cognitiveFunctionMap[mbtiType];
-    const b1 = top2[0] ? biasInfo[top2[0]]?.name : "";
-    const b2 = top2[1] ? biasInfo[top2[1]]?.name : "";
-    const b1s = top2[0] ? biasInfo[top2[0]]?.short : "";
-    const b2s = top2[1] ? biasInfo[top2[1]]?.short : "";
-
     const keywords = [
-      mbtiType, typeLabels[mbtiType], cf?.lightName, cf?.shadowName, b1, b2, b1s, b2s
+      mbtiType, typeLabels[mbtiType], cf?.lightName, cf?.shadowName,
+      top2[0] ? biasInfo[top2[0]]?.name : "", top2[1] ? biasInfo[top2[1]]?.name : "",
     ].filter(Boolean);
-
-    setRssLoading(true);
     fetch("/api/rss")
       .then(res => res.text())
       .then(xmlStr => {
@@ -292,14 +334,11 @@ export default function App() {
         items.forEach(item => {
           const title = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "";
-          if (keywords.some(kw => title.includes(kw))) {
-            matched.push({ title, link });
-          }
+          if (keywords.some(kw => title.includes(kw))) matched.push({ title, link });
         });
         setRssLinks(matched);
       })
-      .catch(err => console.error("RSS fetch error:", err))
-      .finally(() => setRssLoading(false));
+      .catch(err => console.error("RSS fetch error:", err));
   }, [phase, mbtiType, top2]);
 
   useEffect(() => {
@@ -308,9 +347,7 @@ export default function App() {
     }
   }, [chatMessages, chatLoading]);
 
-  // EI軸の問題数
-  const EI_COUNT = questions.filter(q => q.axis === 'EI').length;
-
+  // ─── handleAnswer ────────────────────────────────────────
   function handleAnswer(value) {
     if (animating) return;
     setSelected(value);
@@ -321,15 +358,21 @@ export default function App() {
       if (isJungPhase) {
         const newAnswers = { ...jungAnswers, [currentQuestion.id]: value };
         setJungAnswers(newAnswers);
-        // EI軸の最後の問題に答えたらマイルストーンへ
-        if (currentQ + 1 === EI_COUNT) {
-          setCurrentQ(EI_COUNT);
+        const next = currentQ + 1;
+        if (next === AXIS_END.EI) {
+          setCurrentQ(next);
           setPhase("ei_milestone");
-        } else if (currentQ + 1 < questions.length) {
-          setCurrentQ((prev) => prev + 1);
+        } else if (next === AXIS_END.SN) {
+          setCurrentQ(next);
+          setPhase("sn_milestone");
+        } else if (next === AXIS_END.TF) {
+          setCurrentQ(next);
+          setPhase("tf_milestone");
+        } else if (next === AXIS_END.JP) {
+          // JP軸完了 → jp_milestone（全4軸の仮タイプを表示）
+          setPhase("jp_milestone");
         } else {
-          setCurrentQ(0);
-          setPhase("bias");
+          setCurrentQ(next);
         }
       } else if (isBiasPhase) {
         const newAnswers = { ...biasAnswers, [currentQuestion.id]: value };
@@ -340,16 +383,20 @@ export default function App() {
     }, 300);
   }
 
+  // ─── handleBack ─────────────────────────────────────────
   function handleBack() {
     if (phase === "occupation") { setPhase("intro"); }
     else if (phase === "generation") { setPhase("occupation"); }
-    else if (phase === "ei_milestone") {
-      // マイルストーンから最後のEI問題に戻る
-      const lastEIQ = questions[EI_COUNT - 1];
+    else if (MILESTONE_PHASES.includes(phase)) {
+      // マイルストーンから前の軸の最後の問題に戻る
+      const axis = PHASE_TO_AXIS[phase];
+      const endIdx = AXIS_END[axis]; // このマイルストーンの終了Q番号
+      const lastQIdx = endIdx - 1;   // 最後の問題のインデックス
+      const lastQ = questions[lastQIdx];
       const newAnswers = { ...jungAnswers };
-      delete newAnswers[lastEIQ.id];
+      delete newAnswers[lastQ.id];
       setJungAnswers(newAnswers);
-      setCurrentQ(EI_COUNT - 1);
+      setCurrentQ(lastQIdx);
       setPhase("jung");
     }
     else if (phase === "jung") {
@@ -370,49 +417,32 @@ export default function App() {
         setCurrentQ((prev) => prev - 1);
         setSelected(null);
       } else {
-        const lastJungQ = questions[questions.length - 1];
-        const newJungAnswers = { ...jungAnswers };
-        delete newJungAnswers[lastJungQ.id];
-        setJungAnswers(newJungAnswers);
-        setCurrentQ(questions.length - 1);
-        setPhase("jung");
+        // バイアス先頭 → JP完了マイルストーンへ戻る
+        setPhase("jp_milestone");
       }
     }
   }
 
   function handleReset() {
-    setPage('top');
-    setPhase("intro");
-    setOccupation(null);
-    setGeneration(null);
-    setCurrentQ(0);
-    setJungAnswers({});
-    setBiasAnswers({});
-    setSelected(null);
-    setAnimating(false);
-    setShareCopied(false);
-    setTypeProfiles(null);
-    setPrescriptions(null);
-    setBiasMessages(null);
-    setChatMessages([]);
-    setChatInput("");
-    setChatLoading(false);
-    setChatError(null);
-    setChatInitialized(false);
+    setPage('top'); setPhase("intro"); setOccupation(null); setGeneration(null);
+    setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
+    setAnimating(false); setShareCopied(false);
+    setTypeProfiles(null); setPrescriptions(null); setBiasMessages(null);
+    setChatMessages([]); setChatInput(""); setChatLoading(false); setChatError(null); setChatInitialized(false);
   }
 
   function handleShareCopy() {
     const cf = cognitiveFunctionMap[mbtiType];
     const text = [
       `私の「光の状態」は『${cf?.lightName ?? mbtiType}』`,
-      `でも消耗しているなら、影の『${cf?.shadowName ?? ''}』が出ているサイン。`,
+      `消耗しているなら、影の『${cf?.shadowName ?? ''}』が出ているサイン。`,
       ``,
       `思考のクセ1位：${biasInfo[top2[0]]?.name ?? ''}`,
       ``,
       `自分の動き方を知ると、職場での消耗が変わる。`,
       `#ライフオラクル で無料診断`,
       `https://life-oracle.jp/`,
-    ].filter(s => s !== undefined).join('\n');
+    ].join('\n');
     const onSuccess = () => { setShareCopied(true); setTimeout(() => setShareCopied(false), 2000); };
     if (navigator.clipboard) navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
     else fallbackCopy(text, onSuccess);
@@ -449,9 +479,7 @@ export default function App() {
       else { setChatMessages([...newMessages, { role: "assistant", content: data.content }]); }
     } catch {
       setChatError("通信エラーが発生しました。しばらくしてから再試行してください。");
-    } finally {
-      setChatLoading(false);
-    }
+    } finally { setChatLoading(false); }
   }
 
   function handleChatKeyDown(e) {
@@ -460,15 +488,15 @@ export default function App() {
 
   const visibleMessages = chatMessages.filter((m) => !m.hidden);
 
-  // ─── マップページ ──────────────────────────────────────
-  if (page === 'map') {
-    return <MapPage onBack={() => setPage(mapFrom)} />;
-  }
+  // マップページ
+  if (page === 'map') return <MapPage onBack={() => setPage(mapFrom)} />;
 
   // ─── render ───────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh", background: "#faf6f1", color: TEXT, fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, sans-serif", padding: "20px 16px", paddingBottom: 40 }}>
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
+
+        {/* ヘッダー */}
         <div style={{ textAlign: "center", paddingTop: 24, paddingBottom: 16 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, color: ACCENT }}>
             <CompassIcon size={22} strokeWidth={1.6} />
@@ -540,7 +568,7 @@ export default function App() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
               <div style={{ fontSize: 11, color: TEXT_MUTED }}>Q{currentQ + 1} / {totalQ}</div>
-              {isBiasPhase && <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>あなたのクセを調べます</div>}
+              {isBiasPhase && <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>思考のクセを調べます</div>}
             </div>
             <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 6 }}>
               {isJungPhase ? "Step 3 / 3 — 性格診断" : "Step 3 / 3 — バイアス測定"}
@@ -562,36 +590,127 @@ export default function App() {
           </div>
         )}
 
-        {/* EIマイルストーン */}
-        {phase === "ei_milestone" && (() => {
-          const eiTendency = getProvisionalEI(jungAnswers);
-          const isE = eiTendency === 'E';
+        {/* ═══════════════════════════════════════
+            軸マイルストーン（EI / SN / TF / JP）
+        ═══════════════════════════════════════ */}
+        {MILESTONE_PHASES.includes(phase) && (() => {
+          const axis = PHASE_TO_AXIS[phase];
+          const info = AXIS_INFO[axis];
+          const isLeft = getProvisionalAxis(jungAnswers, axis);
+          const isJP = phase === 'jp_milestone';
+
+          // JP完了時：全4軸の仮タイプを算出
+          const provisionalE = getProvisionalAxis(jungAnswers, 'EI');
+          const provisionalS = getProvisionalAxis(jungAnswers, 'SN');
+          const provisionalT = getProvisionalAxis(jungAnswers, 'TF');
+          const provisionalJ = isJP ? getProvisionalAxis(jungAnswers, 'JP') : null;
+          const provisionalType = isJP
+            ? (provisionalE ? 'E' : 'I') + (provisionalS ? 'S' : 'N') + (provisionalT ? 'T' : 'F') + (provisionalJ ? 'J' : 'P')
+            : null;
+          const provisionalCF = provisionalType ? cognitiveFunctionMap[provisionalType] : null;
+
           return (
             <div style={{ ...CARD_STYLE, animation: "lo-fade-in 320ms var(--ease-out)" }}>
               <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-              <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 16 }}>
-                  最初の8問が完了しました
+
+              {/* 4軸プログレスバー */}
+              <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
+                {['EI', 'SN', 'TF', 'JP'].map((ax, i) => (
+                  <div key={ax} style={{ flex: 1 }}>
+                    <div style={{
+                      height: 5, borderRadius: 3,
+                      background: i < info.axisNum ? ACCENT : 'rgba(184,131,63,0.15)',
+                      transition: 'background 0.3s',
+                    }} />
+                    <div style={{ fontSize: 9, color: i < info.axisNum ? ACCENT : TEXT_MUTED, marginTop: 3, textAlign: 'center' }}>
+                      {ax}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 11, color: TEXT_MUTED, textAlign: 'center', marginBottom: 20 }}>
+                {info.axisNum} / 4 軸完了
+              </div>
+
+              {/* 今回の軸結果 */}
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'rgba(184,131,63,0.10)', border: `2px solid ${ACCENT}`, marginBottom: 12 }}>
+                  <span style={{ fontSize: 24, fontWeight: 700, color: ACCENT }}>
+                    {isLeft ? info.leftPole : info.rightPole}
+                  </span>
                 </div>
-                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 72, height: 72, borderRadius: "50%", background: "rgba(184,131,63,0.10)", border: `2px solid ${ACCENT}`, marginBottom: 16 }}>
-                  <span style={{ fontSize: 28, fontWeight: 700, color: ACCENT }}>{eiTendency}</span>
+                <div style={{ fontSize: 18, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
+                  {isLeft ? info.leftLabel : info.rightLabel}
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: TEXT, marginBottom: 8 }}>
-                  {isE ? '外向（E）寄り' : '内向（I）寄り'}です
-                </h2>
-                <p style={{ fontSize: 13, lineHeight: 1.8, color: TEXT_MUTED, marginBottom: 4 }}>
-                  {isE
-                    ? '会話や外部との交流からエネルギーを得やすいタイプです。'
-                    : '一人の時間や内省からエネルギーを回復しやすいタイプです。'}
-                </p>
-                <p style={{ fontSize: 12, color: TEXT_MUTED }}>
-                  残り24問で、あなたの全体像が見えてきます。
+                <p style={{ fontSize: 13, lineHeight: 1.8, color: TEXT_MUTED, margin: '0 0 4px' }}>
+                  {isLeft ? info.leftDesc : info.rightDesc}
                 </p>
               </div>
+
+              {/* EI〜TF：これまでの軸サマリー */}
+              {!isJP && info.axisNum > 1 && (
+                <div style={{ background: 'rgba(184,131,63,0.05)', border: '1px solid rgba(184,131,63,0.15)', borderRadius: 10, padding: '12px 16px', marginBottom: 20 }}>
+                  <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 8 }}>これまでの結果</div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {info.axisNum >= 1 && (
+                      <span style={{ fontSize: 13, fontWeight: 600, color: ACCENT, background: 'rgba(184,131,63,0.12)', padding: '4px 10px', borderRadius: 20 }}>
+                        {provisionalE ? 'E（外向）' : 'I（内向）'}
+                      </span>
+                    )}
+                    {info.axisNum >= 2 && (
+                      <span style={{ fontSize: 13, fontWeight: 600, color: ACCENT, background: 'rgba(184,131,63,0.12)', padding: '4px 10px', borderRadius: 20 }}>
+                        {provisionalS ? 'S（感覚）' : 'N（直観）'}
+                      </span>
+                    )}
+                    {info.axisNum >= 3 && (
+                      <span style={{ fontSize: 13, fontWeight: 600, color: ACCENT, background: 'rgba(184,131,63,0.12)', padding: '4px 10px', borderRadius: 20 }}>
+                        {provisionalT ? 'T（思考）' : 'F（感情）'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* JP完了時：全4軸サマリー + 仮タイプ表示 */}
+              {isJP && provisionalType && (
+                <div style={{ background: 'rgba(184,131,63,0.07)', border: `1px solid ${ACCENT}`, borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+                  <div style={{ fontSize: 11, color: TEXT_MUTED, marginBottom: 10 }}>4軸の仮タイプ（確定前）</div>
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+                    {[
+                      provisionalE ? 'E（外向）' : 'I（内向）',
+                      provisionalS ? 'S（感覚）' : 'N（直観）',
+                      provisionalT ? 'T（思考）' : 'F（感情）',
+                      provisionalJ ? 'J（判断）' : 'P（知覚）',
+                    ].map((label, i) => (
+                      <span key={i} style={{ fontSize: 12, fontWeight: 600, color: ACCENT, background: 'rgba(184,131,63,0.15)', padding: '4px 10px', borderRadius: 20 }}>
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                  {provisionalCF && (
+                    <>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginBottom: 4 }}>
+                        {provisionalCF.lightName}
+                      </div>
+                      <div style={{ fontSize: 12, color: TEXT_MUTED }}>
+                        光の状態：{provisionalCF.lightName} ／ 影の状態：{provisionalCF.shadowName}
+                      </div>
+                    </>
+                  )}
+                  <div style={{ fontSize: 12, color: TEXT_MUTED, marginTop: 10, lineHeight: 1.6, borderTop: '1px solid rgba(184,131,63,0.15)', paddingTop: 10 }}>
+                    次の16問で「なぜそう動いてしまうのか」の思考のクセが明らかになります。
+                  </div>
+                </div>
+              )}
+
+              {/* 続けるボタン */}
               <button
-                onClick={() => { setPhase("jung"); }}
+                onClick={() => {
+                  if (isJP) { setCurrentQ(0); setPhase("bias"); }
+                  else { setPhase("jung"); }
+                }}
                 style={{ width: "100%", padding: "16px", background: ACCENT, border: `1px solid ${ACCENT}`, borderRadius: 10, color: "#ffffff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
-                続けて診断する →
+                {info.nextLabel}
               </button>
             </div>
           );
@@ -605,10 +724,7 @@ export default function App() {
         )}
 
         {/* ═══════════════════════════════════════════════
-            結果画面（大改修版）
-            順序：タイプ発表 → 処方箋 → AIチャット →
-                  思考のクセ → 強み/心の癖 → 今日のアクション →
-                  Xシェア → note記事 → 書籍 → note導線
+            結果画面
         ═══════════════════════════════════════════════ */}
         {phase === "result" && scoreResult && biasResult && typeProfiles && prescriptions && biasMessages && (
           <>
@@ -641,11 +757,10 @@ export default function App() {
               })()}
               {!cognitiveFunctionMap[mbtiType] && (
                 <>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, textAlign: "center", marginBottom: 6, fontWeight: 700, letterSpacing: "0.04em", color: ACCENT }}>{mbtiType}</h2>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, textAlign: "center", marginBottom: 6, fontWeight: 700, color: ACCENT }}>{mbtiType}</h2>
                   <div style={{ textAlign: "center", fontSize: 15, color: TEXT_MUTED, marginBottom: 6 }}>{typeLabels[mbtiType]}</div>
                 </>
               )}
-              {/* 軸スコア（折りたたみ） */}
               <details style={{ marginTop: 8 }}>
                 <summary style={{ fontSize: 12, color: TEXT_MUTED, cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{ fontSize: 10, color: ACCENT }}>▶</span> 軸スコアを見る
@@ -669,7 +784,7 @@ export default function App() {
               </details>
             </div>
 
-            {/* ② 処方箋（ヒーローコンテンツ） */}
+            {/* ② 処方箋 */}
             <div style={{ ...CARD_STYLE, borderColor: "rgba(184,131,63,0.35)" }}>
               <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 4 }}>あなただけの処方箋</div>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: TEXT, marginBottom: 4, fontWeight: 600 }}>
@@ -685,38 +800,24 @@ export default function App() {
               )}
             </div>
 
-            {/* ③ AIに今すぐ相談する（一次CTA） */}
+            {/* ③ AIに今すぐ相談する */}
             <div style={{ ...CARD_STYLE, borderColor: "rgba(184,131,63,0.3)" }}>
               <h3 style={{ fontSize: 15, color: ACCENT, marginBottom: 4, fontWeight: 700 }}>AIに今すぐ相談する</h3>
               <p style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 14 }}>
                 診断結果をベースに、あなたの職場の悩みに答えます。
               </p>
-              {/* 質問テンプレート */}
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
                 {[
                   "転職・異動後に「思っていたのと違う」と感じる理由を教えてください",
                   "職場で噛み合わない人との関係を改善するにはどうすればいいですか？",
                   "やる気が続かない根本的な原因と、私に合った対処法を教えてください",
                 ].map((template, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setChatInput(template)}
-                    style={{
-                      padding: "10px 14px",
-                      background: "rgba(184,131,63,0.06)",
-                      border: "1px solid rgba(184,131,63,0.2)",
-                      borderRadius: 10,
-                      color: TEXT_MUTED,
-                      fontSize: 12,
-                      cursor: "pointer",
-                      textAlign: "left",
-                      lineHeight: 1.6,
-                    }}>
+                  <button key={i} onClick={() => setChatInput(template)}
+                    style={{ padding: "10px 14px", background: "rgba(184,131,63,0.06)", border: "1px solid rgba(184,131,63,0.2)", borderRadius: 10, color: TEXT_MUTED, fontSize: 12, cursor: "pointer", textAlign: "left", lineHeight: 1.6 }}>
                     💬 {template}
                   </button>
                 ))}
               </div>
-              {/* チャット本体 */}
               <div ref={chatContainerRef} style={{ maxHeight: 400, overflowY: "auto", marginBottom: 12, display: "flex", flexDirection: "column", gap: 12 }}>
                 {chatLoading && visibleMessages.length === 0 && (
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
@@ -755,30 +856,12 @@ export default function App() {
                 )}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <textarea
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={handleChatKeyDown}
-                  placeholder="質問や相談を入力… (Enterで送信)"
-                  rows={2}
+                <textarea value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleChatKeyDown}
+                  placeholder="質問や相談を入力… (Enterで送信)" rows={2}
                   style={{ flex: 1, padding: "10px 12px", background: "rgba(255,255,255,0.8)", border: "1px solid rgba(184,131,63,0.25)", borderRadius: 10, color: TEXT, fontSize: 14, resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5 }}
                 />
-                <button
-                  onClick={handleChatSend}
-                  disabled={!chatInput.trim() || chatLoading}
-                  style={{
-                    padding: "0 16px",
-                    background: (!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.06)" : ACCENT,
-                    border: `1px solid ${(!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.15)" : ACCENT}`,
-                    borderRadius: 10,
-                    color: (!chatInput.trim() || chatLoading) ? TEXT_MUTED : "#ffffff",
-                    fontSize: 14,
-                    cursor: (!chatInput.trim() || chatLoading) ? "not-allowed" : "pointer",
-                    minWidth: 60,
-                    alignSelf: "stretch",
-                    fontWeight: 600,
-                  }}
-                >
+                <button onClick={handleChatSend} disabled={!chatInput.trim() || chatLoading}
+                  style={{ padding: "0 16px", background: (!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.06)" : ACCENT, border: `1px solid ${(!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.15)" : ACCENT}`, borderRadius: 10, color: (!chatInput.trim() || chatLoading) ? TEXT_MUTED : "#ffffff", fontSize: 14, cursor: (!chatInput.trim() || chatLoading) ? "not-allowed" : "pointer", minWidth: 60, alignSelf: "stretch", fontWeight: 600 }}>
                   送信
                 </button>
               </div>
@@ -822,46 +905,32 @@ export default function App() {
 
             {/* ⑥ 今日のアクション */}
             {cognitiveFunctionMap[mbtiType]?.todayAction && (
-              <div style={{
-                background: "rgba(61,122,90,0.05)",
-                border: "1px solid rgba(61,122,90,0.25)",
-                borderRadius: 14,
-                padding: "20px 20px",
-                marginBottom: 20,
-              }}>
-                <div style={{ fontSize: 10, letterSpacing: 2, color: "#3d7a5a", marginBottom: 10 }}>
-                  今日のアクション
-                </div>
+              <div style={{ background: "rgba(61,122,90,0.05)", border: "1px solid rgba(61,122,90,0.25)", borderRadius: 14, padding: "20px 20px", marginBottom: 20 }}>
+                <div style={{ fontSize: 10, letterSpacing: 2, color: "#3d7a5a", marginBottom: 10 }}>今日のアクション</div>
                 <p style={{ fontSize: 15, lineHeight: 1.8, color: TEXT, margin: 0, fontWeight: 500 }}>
                   {cognitiveFunctionMap[mbtiType].todayAction}
                 </p>
-                <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 10 }}>
-                  小さな一歩が、行動変容のはじまりです。
-                </div>
+                <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 10 }}>小さな一歩が、行動変容のはじまりです。</div>
               </div>
             )}
 
-            {/* ⑦ Xシェア（バイラル型） */}
+            {/* ⑦ Xシェア */}
             <div style={CARD_STYLE}>
               <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 8 }}>診断結果をシェア</h3>
-              <p style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 14, lineHeight: 1.6 }}>
-                あなたと同じ悩みを抱えた人に届くかもしれません。
-              </p>
+              <p style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 14, lineHeight: 1.6 }}>あなたと同じ悩みを抱えた人に届くかもしれません。</p>
               <button onClick={handleShareCopy}
                 style={{ width: "100%", padding: 14, marginBottom: 10, background: shareCopied ? "rgba(61,122,90,0.1)" : "rgba(184,131,63,0.1)", border: `1px solid ${shareCopied ? "#3d7a5a" : ACCENT}`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer" }}>
                 {shareCopied ? "✓ コピーしました" : "投稿テキストをコピーする"}
               </button>
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                  `私の「光の状態」は『${cognitiveFunctionMap[mbtiType]?.lightName ?? mbtiType}』\n消耗しているなら影の『${cognitiveFunctionMap[mbtiType]?.shadowName ?? ''}』が出ているサイン。\n\n思考のクセ1位：${biasInfo[top2[0]]?.name ?? ''}\n\n自分の動き方を知ると、職場での消耗が変わる。\n#ライフオラクル で無料診断`
-                )}&url=${encodeURIComponent('https://life-oracle.jp/')}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`私の「光の状態」は『${cognitiveFunctionMap[mbtiType]?.lightName ?? mbtiType}』\n消耗しているなら影の『${cognitiveFunctionMap[mbtiType]?.shadowName ?? ''}』が出ているサイン。\n\n思考のクセ1位：${biasInfo[top2[0]]?.name ?? ''}\n\n自分の動き方を知ると、職場での消耗が変わる。\n#ライフオラクル で無料診断`)}&url=${encodeURIComponent('https://life-oracle.jp/')}`}
                 target="_blank" rel="noopener noreferrer"
                 style={{ display: "block", width: "100%", padding: 14, background: "#2d2318", border: "1px solid rgba(45,35,24,0.3)", borderRadius: 10, color: "#faf6f1", fontSize: 14, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}>
                 Xでシェア（#ライフオラクル）
               </a>
             </div>
 
-            {/* ⑧ あなたにおすすめの深掘り記事（RSS） */}
+            {/* ⑧ note関連記事 */}
             {rssLinks.length > 0 && (
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 13, letterSpacing: 1, color: ACCENT, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
@@ -869,28 +938,10 @@ export default function App() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {rssLinks.map((item, idx) => (
-                    <a
-                      key={idx}
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "block",
-                        padding: "16px",
-                        background: "rgba(184,131,63,0.07)",
-                        border: "1px solid rgba(184,131,63,0.22)",
-                        borderRadius: 10,
-                        color: TEXT,
-                        textDecoration: "none",
-                        transition: "background 0.2s",
-                      }}
-                    >
-                      <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.5 }}>
-                        {item.title}
-                      </div>
-                      <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 8, textAlign: "right" }}>
-                        noteで読む →
-                      </div>
+                    <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "block", padding: "16px", background: "rgba(184,131,63,0.07)", border: "1px solid rgba(184,131,63,0.22)", borderRadius: 10, color: TEXT, textDecoration: "none" }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.5 }}>{item.title}</div>
+                      <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 8, textAlign: "right" }}>noteで読む →</div>
                     </a>
                   ))}
                 </div>
@@ -900,103 +951,47 @@ export default function App() {
             {/* ⑨ おすすめ書籍 */}
             {top2[0] && biasBooksData[top2[0]] && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 8 }}>
-                  自己理解を深めるおすすめ書籍
-                </div>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 8 }}>自己理解を深めるおすすめ書籍</div>
                 <p style={{ fontSize: 13, color: TEXT_MUTED, lineHeight: 1.7, marginBottom: 12 }}>
                   あなたの思考のクセ1位は<span style={{ color: TEXT }}>{biasInfo[top2[0]]?.name}</span>でした。{biasBooksData[top2[0]].description}。
                 </p>
-                <a
-                  href={getAmazonAffiliateUrl(biasBooksData[top2[0]].asin)}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '16px',
-                    background: 'rgba(184,131,63,0.06)',
-                    border: '1px solid rgba(184,131,63,0.18)',
-                    borderRadius: 10,
-                    textDecoration: 'none',
-                    color: TEXT,
-                    transition: 'background 0.2s',
-                    gap: 12,
-                  }}
-                >
+                <a href={getAmazonAffiliateUrl(biasBooksData[top2[0]].asin)} target="_blank" rel="noopener noreferrer sponsored"
+                  style={{ display: 'flex', alignItems: 'center', padding: '16px', background: 'rgba(184,131,63,0.06)', border: '1px solid rgba(184,131,63,0.18)', borderRadius: 10, textDecoration: 'none', color: TEXT, gap: 12 }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#8c5f28', marginBottom: 4 }}>
-                      {biasBooksData[top2[0]].title}
-                    </div>
-                    <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.5 }}>
-                      {biasBooksData[top2[0]].author}
-                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#8c5f28', marginBottom: 4 }}>{biasBooksData[top2[0]].title}</div>
+                    <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.5 }}>{biasBooksData[top2[0]].author}</div>
                   </div>
                   <div style={{ fontSize: 12, color: TEXT_MUTED, marginLeft: 10 }}>Amazonで見る ▶︎</div>
                 </a>
-                <div style={{ fontSize: 10, color: TEXT_MUTED, marginTop: 6, textAlign: 'right' }}>
-                  ※ 当リンクにはAmazonアソシエイトIDが含まれます
-                </div>
+                <div style={{ fontSize: 10, color: TEXT_MUTED, marginTop: 6, textAlign: 'right' }}>※ 当リンクにはAmazonアソシエイトIDが含まれます</div>
               </div>
             )}
 
             {/* ⑩ note・メンバーシップ導線 */}
-            <div style={{
-              background: "rgba(184,131,63,0.04)",
-              border: "1px solid rgba(184,131,63,0.18)",
-              borderRadius: 14,
-              padding: "20px 18px",
-              marginBottom: 20,
-            }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 14 }}>
-                もっと深く知りたい方へ
-              </div>
-              <a
-                href="https://note.com/lifeoraclejp"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "14px 16px",
-                  background: "rgba(184,131,63,0.07)", border: "1px solid rgba(184,131,63,0.22)",
-                  borderRadius: 10, textDecoration: "none", color: TEXT, marginBottom: 10,
-                }}
-              >
+            <div style={{ background: "rgba(184,131,63,0.04)", border: "1px solid rgba(184,131,63,0.18)", borderRadius: 14, padding: "20px 18px", marginBottom: 20 }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: TEXT_MUTED, marginBottom: 14 }}>もっと深く知りたい方へ</div>
+              <a href="https://note.com/lifeoraclejp" target="_blank" rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "rgba(184,131,63,0.07)", border: "1px solid rgba(184,131,63,0.22)", borderRadius: 10, textDecoration: "none", color: TEXT, marginBottom: 10 }}>
                 <span style={{ fontSize: 18, lineHeight: 1 }}>📝</span>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
-                    ライフオラクルの考え方をnoteで読む
-                  </div>
-                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>
-                    光と影の仕組み・バイアスとの関係・MBTIとの違いなど
-                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>ライフオラクルの考え方をnoteで読む</div>
+                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>光と影の仕組み・バイアスとの関係・MBTIとの違いなど</div>
                 </div>
                 <span style={{ marginLeft: "auto", fontSize: 12, color: TEXT_MUTED }}>→</span>
               </a>
-              <a
-                href="https://note.com/lifeoraclejp/membership"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "14px 16px",
-                  background: "rgba(184,131,63,0.12)", border: `1px solid ${ACCENT}`,
-                  borderRadius: 10, textDecoration: "none", color: TEXT,
-                }}
-              >
+              <a href="https://note.com/lifeoraclejp/membership" target="_blank" rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "rgba(184,131,63,0.12)", border: `1px solid ${ACCENT}`, borderRadius: 10, textDecoration: "none", color: TEXT }}>
                 <span style={{ fontSize: 18, lineHeight: 1 }}>🧭</span>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, color: ACCENT }}>
-                    メンバーシップでより深い処方箋を
-                  </div>
-                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>
-                    あなたのタイプ専用の深掘りコンテンツが届きます
-                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, color: ACCENT }}>メンバーシップでより深い処方箋を</div>
+                  <div style={{ fontSize: 11, color: TEXT_MUTED, lineHeight: 1.6 }}>あなたのタイプ専用の深掘りコンテンツが届きます</div>
                 </div>
                 <span style={{ marginLeft: "auto", fontSize: 12, color: ACCENT }}>→</span>
               </a>
             </div>
 
             {/* ボトムナビ */}
-            <button
-              onClick={() => { setMapFrom('result'); setPage('map'); }}
+            <button onClick={() => { setMapFrom('result'); setPage('map'); }}
               style={{ width: "100%", padding: 14, background: "rgba(184,131,63,0.08)", border: `1px solid rgba(184,131,63,0.25)`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer", marginBottom: 12 }}>
               16タイプ 全体マップを見る
             </button>
