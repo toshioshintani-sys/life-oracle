@@ -265,10 +265,32 @@ export default function App() {
   }, [phase]);
 
 
+  const OCCUPATION_RSS_KEYWORDS = {
+    '会社員':    ['会社員', 'ITエンジニア', '事務職', '営業', 'ビジネス'],
+    '教育職':    ['教育職', '教員', '保育士', '先生'],
+    '公務員':    ['公務員'],
+    '医療職':    ['医療職', '看護師', '医師', '医療'],
+    '士業':      ['士業', '弁護士', '税理士'],
+    'クリエイター': ['クリエイター', 'デザイナー', 'ライター'],
+    '接客':      ['接客', 'サービス業'],
+    '調理':      ['調理', '料理人', '飲食'],
+    '理美容師':  ['理美容師', '美容師'],
+    '介護':      ['介護', '福祉'],
+    'フリーランス': ['フリーランス', '副業', '独立'],
+    '自営業':    ['自営業', '経営者'],
+    '一次産業':  ['一次産業', '農業', '農家'],
+    '建設業':    ['建設業', '建設', '土木'],
+    '主婦/主夫': ['主婦', '主夫'],
+    '非正規雇用': ['非正規', 'パート', 'アルバイト'],
+    '学生':      ['学生', '就活', '新入社員'],
+    '無職':      ['無職', '転職活動'],
+  };
+
   useEffect(() => {
     if (phase !== 'result' || !mbtiType) return;
     const cf = cognitiveFunctionMap[mbtiType];
-    const keywords = [cf?.lightName, occupationLabel].filter(Boolean);
+    const occKeywords = OCCUPATION_RSS_KEYWORDS[occupation] ?? [occupationLabel];
+    const keywords = [cf?.lightName, ...occKeywords].filter(Boolean);
     fetch('/api/rss')
       .then(res => res.text())
       .then(xmlStr => {
