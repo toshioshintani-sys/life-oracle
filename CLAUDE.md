@@ -50,18 +50,15 @@ MBTIを入口にしつつ、ユング認知機能の光と影・行動経済学�
 ## ファイル操作のルール
 
 ### 重要：実際にビルドされるファイル
-**main.jsx は App_v9.jsx を読み込んでいる。**
-結果ページの変更は必ず `src/App_v9.jsx` を編集すること。
-`src/App.jsx` / `src/App_v2〜v8.jsx` は過去バージョンの残骸でビルドに使われない。
+**main.jsx は App.jsx を読み込んでいる。**
+フロントの変更は `src/App.jsx` を編集すること。
 
 ### バージョン管理はGit任せ
-`App_v10.jsx` のような新ファイル作成は不要。
-`App_v9.jsx` を直接編集し、コミットで履歴を残す。
+`App_v10.jsx` のような連番ファイルは作らない。
+`App.jsx` を直接編集し、コミットで履歴を残す。
 - 大きな変更：feature branch を切って作業 → PR/マージ
 - 安全策：変更前に `git commit` でセーブポイントを作る
-- ロールバック：`git revert` か `git checkout <commit> -- src/App_v9.jsx`
-
-古い `App_v2〜v8.jsx` は将来的にクリーンアップ候補。
+- ロールバック：`git revert` か `git checkout <commit> -- src/App.jsx`
 
 ### デプロイの手順
 git add .
@@ -148,7 +145,6 @@ Ni：先読み人 / 独走者
 ## よくある確認への回答
 
 - LF will be replaced by CRLF → 無視してOK
-- Do you want to overwrite App.jsx? → Noを選びApp_v2.jsxで保存
 - git compound command の確認 → Yes
 - --dangerously-skip-permissions → 確認スキップしてよい
 - Python関連の確認 → Yes, and don't ask again for: python:*
