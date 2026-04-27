@@ -867,19 +867,13 @@ export default function App() {
                   {isChatLimitReached ? (
                     <div style={{ marginTop: 8, padding: "16px 18px", borderRadius: 12, background: "rgba(184,131,63,0.06)", border: "1px solid rgba(184,131,63,0.2)", textAlign: "center" }}>
                       <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.8, marginBottom: 14 }}>
-                        もっと深く相談したい方は、<br />
-                        noteメンバーシップで継続的なサポートを受けられます。
+                        今日の相談はここまでです。<br />
+                        別の悩みがあれば、もう一度始めてみてください。
                       </div>
-                      <a href="https://note.com/lifeoraclejp/membership" target="_blank" rel="noopener noreferrer"
-                        style={{ display: "inline-block", padding: "10px 22px", background: ACCENT, borderRadius: 10, color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none", marginBottom: 12 }}>
-                        メンバーシップを見る →
-                      </a>
-                      <div>
-                        <button onClick={() => { setSelectedConcern(null); setChatMessages([]); setChatError(null); }}
-                          style={{ background: "none", border: "none", color: TEXT_MUTED, fontSize: 12, cursor: "pointer", textDecoration: "underline" }}>
-                          別の悩みで新しく相談する
-                        </button>
-                      </div>
+                      <button onClick={() => { setSelectedConcern(null); setChatMessages([]); setChatError(null); }}
+                        style={{ padding: "10px 22px", background: ACCENT, border: "none", borderRadius: 10, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                        別の悩みで新しく相談する
+                      </button>
                     </div>
                   ) : (
                     <div style={{ display: "flex", gap: 8 }}>
