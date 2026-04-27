@@ -357,7 +357,7 @@ export default function App() {
   // ─── チャット送信 ────────────────────────────────────
   async function handleChatSend() {
     const text = chatInput.trim();
-    if (!text || chatLoading) return;
+    if (!text || chatLoading || isChatLimitReached) return;
     const userMsg = { role: "user", content: text };
     const apiMessages = [...chatMessages.map(({ role, content }) => ({ role, content })), userMsg];
     const newMessages = [...chatMessages, userMsg];
@@ -468,6 +468,8 @@ export default function App() {
 
   const visibleMessages = chatMessages.filter((m) => !m.hidden);
   const isConsultationReady = typeProfiles && biasMessages;
+  const assistantTurnCount = chatMessages.filter((m) => m.role === "assistant").length;
+  const isChatLimitReached = assistantTurnCount >= 3;
 
   if (page === 'map') return <MapPage onBack={() => setPage(mapFrom)} />;
 
@@ -861,17 +863,36 @@ export default function App() {
                       </div>
                     )}
                   </div>
-                  {/* 追加質問フィールド */}
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <textarea value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleChatKeyDown}
-                      placeholder="さらに詳しく聞く… (Enterで送信)" rows={2}
-                      style={{ flex: 1, padding: "10px 12px", background: "rgba(255,255,255,0.8)", border: "1px solid rgba(184,131,63,0.25)", borderRadius: 10, color: TEXT, fontSize: 14, resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5 }}
-                    />
-                    <button onClick={handleChatSend} disabled={!chatInput.trim() || chatLoading}
-                      style={{ padding: "0 16px", background: (!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.06)" : ACCENT, border: `1px solid ${(!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.15)" : ACCENT}`, borderRadius: 10, color: (!chatInput.trim() || chatLoading) ? TEXT_MUTED : "#ffffff", fontSize: 14, cursor: (!chatInput.trim() || chatLoading) ? "not-allowed" : "pointer", minWidth: 60, alignSelf: "stretch", fontWeight: 600 }}>
-                      送信
-                    </button>
-                  </div>
+                  {/* 追加質問フィールド / ターン上限到達 */}
+                  {isChatLimitReached ? (
+                    <div style={{ marginTop: 8, padding: "16px 18px", borderRadius: 12, background: "rgba(184,131,63,0.06)", border: "1px solid rgba(184,131,63,0.2)", textAlign: "center" }}>
+                      <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.8, marginBottom: 14 }}>
+                        もっと深く相談したい方は、<br />
+                        noteメンバーシップで継続的なサポートを受けられます。
+                      </div>
+                      <a href="https://note.com/lifeoraclejp/membership" target="_blank" rel="noopener noreferrer"
+                        style={{ display: "inline-block", padding: "10px 22px", background: ACCENT, borderRadius: 10, color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none", marginBottom: 12 }}>
+                        メンバーシップを見る →
+                      </a>
+                      <div>
+                        <button onClick={() => { setSelectedConcern(null); setChatMessages([]); setChatError(null); }}
+                          style={{ background: "none", border: "none", color: TEXT_MUTED, fontSize: 12, cursor: "pointer", textDecoration: "underline" }}>
+                          別の悩みで新しく相談する
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <textarea value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleChatKeyDown}
+                        placeholder="さらに詳しく聞く… (Enterで送信)" rows={2}
+                        style={{ flex: 1, padding: "10px 12px", background: "rgba(255,255,255,0.8)", border: "1px solid rgba(184,131,63,0.25)", borderRadius: 10, color: TEXT, fontSize: 14, resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5 }}
+                      />
+                      <button onClick={handleChatSend} disabled={!chatInput.trim() || chatLoading}
+                        style={{ padding: "0 16px", background: (!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.06)" : ACCENT, border: `1px solid ${(!chatInput.trim() || chatLoading) ? "rgba(184,131,63,0.15)" : ACCENT}`, borderRadius: 10, color: (!chatInput.trim() || chatLoading) ? TEXT_MUTED : "#ffffff", fontSize: 14, cursor: (!chatInput.trim() || chatLoading) ? "not-allowed" : "pointer", minWidth: 60, alignSelf: "stretch", fontWeight: 600 }}>
+                        送信
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>
