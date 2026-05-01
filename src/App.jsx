@@ -87,6 +87,12 @@ const CONCERN_PICKS = [
   { id: 'recognition',icon: '🏆', label: '頑張っているのに評価・結果が出ない' },
 ];
 
+function trackEvent(action, params = {}) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', action, { event_category: 'diagnostic_flow', ...params });
+  }
+}
+
 // 羅針盤アイコン
 function CompassIcon({ size = 24, color = "currentColor", strokeWidth = 1.5, decorative = false }) {
   return (
@@ -230,6 +236,7 @@ export default function App() {
   const [selectedConcern, setSelectedConcern] = useState(null);
   const chatContainerRef = useRef(null);
   const retryFnRef = useRef(null);
+  const resultTrackedRef = useRef(false);
 
   const occupations = OCCUPATIONS_18;
   const generations = GENERATIONS_7;
@@ -314,6 +321,16 @@ export default function App() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages, chatLoading]);
+
+  useEffect(() => { trackEvent('app_loaded'); }, []);
+  useEffect(() => { if (phase === 'intro') trackEvent('step_top'); }, [phase]);
+  useEffect(() => { if (phase === 'jung' && currentQ === 0) trackEvent('step_q1_start'); }, [phase]);
+  useEffect(() => {
+    if (phase === 'result' && typeProfiles && prescriptions && biasMessages && !resultTrackedRef.current) {
+      trackEvent('step_result_shown');
+      resultTrackedRef.current = true;
+    }
+  }, [phase, typeProfiles, prescriptions, biasMessages]);
 
   // ─── 悩みクイックピック → 即AIへ送信 ─────────────────
   async function handleConcernSelect(pick) {
@@ -407,22 +424,28 @@ export default function App() {
         const newAnswers = { ...jungAnswers, [currentQuestion.id]: value };
         setJungAnswers(newAnswers);
         const next = currentQ + 1;
-        if (next === AXIS_END.EI)      { setCurrentQ(next); setPhase("ei_milestone"); }
-        else if (next === AXIS_END.SN) { setCurrentQ(next); setPhase("sn_milestone"); }
-        else if (next === AXIS_END.TF) { setCurrentQ(next); setPhase("tf_milestone"); }
-        else if (next === AXIS_END.JP) { setPhase("jp_milestone"); }
+        if (next === AXIS_END.EI)      { setCurrentQ(next); setPhase("ei_milestone"); trackEvent('step_q8_pass'); }
+        else if (next === AXIS_END.SN) { setCurrentQ(next); setPhase("sn_milestone"); trackEvent('step_q16_pass'); }
+        else if (next === AXIS_END.TF) { setCurrentQ(next); setPhase("tf_milestone"); trackEvent('step_q24_pass'); }
+        else if (next === AXIS_END.JP) { setPhase("jp_milestone"); trackEvent('step_jung_complete'); }
         else                           { setCurrentQ(next); }
       } else if (isBiasPhase) {
         const newAnswers = { ...biasAnswers, [currentQuestion.id]: value };
         setBiasAnswers(newAnswers);
-        if (currentQ + 1 < biasQuestions.length) setCurrentQ((prev) => prev + 1);
-        else setPhase("result");
+        if (currentQ + 1 < biasQuestions.length) {
+          if (currentQ + 1 === 8) trackEvent('step_bias_q8_pass');
+          setCurrentQ((prev) => prev + 1);
+        } else {
+          trackEvent('step_bias_complete');
+          setPhase("result");
+        }
       }
     }, 300);
   }
 
   // ─── handleBack ─────────────────────────────────────
   function handleBack() {
+    trackEvent('step_back_pressed', { step_name: phase });
     if (phase === "occupation") { setPhase("intro"); }
     else if (phase === "generation") { setPhase("occupation"); }
     else if (MILESTONE_PHASES.includes(phase)) {
@@ -457,6 +480,7 @@ export default function App() {
   }
 
   function handleReset() {
+    resultTrackedRef.current = false;
     setPage('top'); setPhase("intro"); setOccupation(null); setGeneration(null);
     setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
     setAnimating(false); setShareCopied(false);
@@ -497,7 +521,7 @@ export default function App() {
               行動を変えるはじめの一歩。<br /><br />
               所要時間：約10〜12分（ユング32問 + バイアス16問）
             </p>
-            <button onClick={() => setPhase("occupation")} style={{ fontFamily: 'var(--font-body)', width: "100%", padding: "16px", background: ACCENT, border: `1px solid ${ACCENT}`, borderRadius: 10, color: "#ffffff", fontSize: 15, fontWeight: 600, letterSpacing: "0.04em", cursor: "pointer", marginBottom: 12 }}>
+            <button onClick={() => { trackEvent('step_start'); setPhase("occupation"); }} style={{ fontFamily: 'var(--font-body)', width: "100%", padding: "16px", background: ACCENT, border: `1px solid ${ACCENT}`, borderRadius: 10, color: "#ffffff", fontSize: 15, fontWeight: 600, letterSpacing: "0.04em", cursor: "pointer", marginBottom: 12 }}>
               診断を始める
             </button>
             <button className="map-btn" onClick={() => { setMapFrom('top'); setPage('map'); }}>16タイプ 全体マップを見る</button>
@@ -512,7 +536,7 @@ export default function App() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 19, marginBottom: 12, textAlign: "center", fontWeight: 500 }}>あなたの職種に近いのは？</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {occupations.map((o) => (
-                <button key={o.id} onClick={() => { setOccupation(o.id); setPhase("generation"); }}
+                <button key={o.id} onClick={() => { setOccupation(o.id); trackEvent('step_job_selected'); setPhase("generation"); }}
                   style={{ padding: 14, background: occupation === o.id ? "rgba(184,131,63,0.12)" : "rgba(255,255,255,0.7)", border: `1px solid ${occupation === o.id ? ACCENT : "rgba(184,131,63,0.18)"}`, borderRadius: 10, color: TEXT, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
                   {o.label}
                 </button>
@@ -529,7 +553,7 @@ export default function App() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 19, marginBottom: 20, textAlign: "center", fontWeight: 500 }}>あなたの年代は？</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {generations.map((g) => (
-                <button key={g.id} onClick={() => { setGeneration(g.id); setPhase("jung"); }}
+                <button key={g.id} onClick={() => { setGeneration(g.id); trackEvent('step_age_selected'); setPhase("jung"); }}
                   style={{ padding: 14, background: generation === g.id ? "rgba(184,131,63,0.12)" : "rgba(255,255,255,0.7)", border: `1px solid ${generation === g.id ? ACCENT : "rgba(184,131,63,0.18)"}`, borderRadius: 10, color: TEXT, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                   {g.label}
                 </button>
@@ -632,7 +656,7 @@ export default function App() {
                   </div>
                 </div>
               )}
-              <button onClick={() => { if (isJP) { setCurrentQ(0); setPhase("bias"); } else { setPhase("jung"); } }}
+              <button onClick={() => { if (isJP) { setCurrentQ(0); trackEvent('step_bias_start'); setPhase("bias"); } else { setPhase("jung"); } }}
                 style={{ width: "100%", padding: "16px", background: ACCENT, border: `1px solid ${ACCENT}`, borderRadius: 10, color: "#ffffff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
                 {info.nextLabel}
               </button>
