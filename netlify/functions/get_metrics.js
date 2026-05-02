@@ -51,14 +51,43 @@ function safeFloat(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+// 共通レスポンスヘッダー
+const NO_INDEX_HEADERS = {
+  "Content-Type": "application/json",
+  "Cache-Control": "no-store, no-cache, must-revalidate, private",
+  "X-Robots-Tag": "noindex, nofollow",
+};
+
 export const handler = async (event) => {
   try {
+    // ───── トークン認証 ─────
+    // COCKPIT_TOKEN は Netlify 環境変数で設定（GitHub にコミットしない）
+    const expectedToken = process.env.COCKPIT_TOKEN;
+    if (!expectedToken) {
+      return {
+        statusCode: 503,
+        headers: NO_INDEX_HEADERS,
+        body: JSON.stringify({ error: "COCKPIT_TOKEN が設定されていません（Netlify 環境変数を確認）" }),
+      };
+    }
+    const providedToken =
+      event.headers?.["x-cockpit-token"] ||
+      event.headers?.["X-Cockpit-Token"] ||
+      event.queryStringParameters?.token;
+    if (providedToken !== expectedToken) {
+      return {
+        statusCode: 401,
+        headers: NO_INDEX_HEADERS,
+        body: JSON.stringify({ error: "Unauthorized: 有効なトークンが必要です" }),
+      };
+    }
+
     const days = parseInt(event.queryStringParameters?.days ?? "7", 10);
 
     if (!fs.existsSync(CSV_PATH)) {
       return {
         statusCode: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: NO_INDEX_HEADERS,
         body: JSON.stringify({ error: "CSV not found", path: CSV_PATH }),
       };
     }
@@ -120,10 +149,7 @@ export const handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
-      },
+      headers: NO_INDEX_HEADERS,
       body: JSON.stringify({
         latest_date: latest?.date ?? null,
         latest_row: latest,
@@ -137,7 +163,7 @@ export const handler = async (event) => {
   } catch (err) {
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: NO_INDEX_HEADERS,
       body: JSON.stringify({ error: err.message, stack: err.stack }),
     };
   }

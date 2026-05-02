@@ -1,54 +1,54 @@
 import React, { useEffect, useState } from "react";
 import KpiCard from "./components/KpiCard.jsx";
 
-const ALLOWED_EMAIL = "toshio.shintani@gmail.com";
+const TOKEN_STORAGE_KEY = "lifeoracle_cockpit_token";
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [identityReady, setIdentityReady] = useState(false);
+  const [token, setToken] = useState(null);
+  const [tokenInput, setTokenInput] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [authError, setAuthError] = useState(null);
 
-  // Netlify Identity 初期化
+  // 初回マウント時：URLパラメータ or localStorage からトークン取得
   useEffect(() => {
-    if (!window.netlifyIdentity) return;
-    window.netlifyIdentity.on("init", (u) => {
-      setUser(u);
-      setIdentityReady(true);
-    });
-    window.netlifyIdentity.on("login", (u) => {
-      setUser(u);
-      window.netlifyIdentity.close();
-    });
-    window.netlifyIdentity.on("logout", () => setUser(null));
-    window.netlifyIdentity.init();
+    const url = new URL(window.location.href);
+    const urlToken = url.searchParams.get("token");
+    const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const t = urlToken || storedToken;
+    if (t) {
+      // URLからトークンが来た場合はlocalStorageに保存してURLから消す（履歴に残さない）
+      if (urlToken) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, urlToken);
+        url.searchParams.delete("token");
+        window.history.replaceState({}, "", url.toString());
+      }
+      setToken(t);
+    }
   }, []);
 
-  // メトリクス取得
+  // トークン取得後にデータ取得
   useEffect(() => {
-    if (!user) return;
-    const email = user.email;
-    // ローカル開発時は Netlify Identity がないため、host が localhost なら認証スキップ可
-    if (email !== ALLOWED_EMAIL) {
-      setError(`このアカウント (${email}) はアクセス権限がありません`);
-      return;
-    }
+    if (!token) return;
     fetchMetrics();
-  }, [user]);
-
-  // 開発モード（localhost）では認証スキップして即フェッチ
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-      fetchMetrics();
-    }
-  }, []);
+  }, [token]);
 
   async function fetchMetrics() {
     setLoading(true);
     setError(null);
+    setAuthError(null);
     try {
-      const res = await fetch("/.netlify/functions/get_metrics?days=7");
+      const res = await fetch("/.netlify/functions/get_metrics?days=7", {
+        headers: { "X-Cockpit-Token": token },
+      });
+      if (res.status === 401) {
+        // トークン不正 → クリアして再入力を求める
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        setToken(null);
+        setAuthError("トークンが無効です。正しいトークンを入力してください。");
+        return;
+      }
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
@@ -66,6 +66,20 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleTokenSubmit(e) {
+    e.preventDefault();
+    if (!tokenInput.trim()) return;
+    localStorage.setItem(TOKEN_STORAGE_KEY, tokenInput.trim());
+    setToken(tokenInput.trim());
+    setTokenInput("");
+  }
+
+  function handleLogout() {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    setToken(null);
+    setData(null);
   }
 
   const MOCK_DATA = {
@@ -99,29 +113,63 @@ export default function App() {
     freshness: { last_csv_update: new Date().toISOString(), age_hours: 0.5, stale: false },
   };
 
-
-  // 未ログイン状態
+  // 開発モード（localhost）でトークン未設定 → モックUIを直接表示
   const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
-  if (!user && !isLocal && identityReady) {
+  useEffect(() => {
+    if (isLocal && !token && !data) {
+      setData(MOCK_DATA);
+      setError("(開発モード) localhost のためトークン認証スキップ。モックデータ表示中");
+    }
+  }, []);
+
+  // トークン未設定 → ログイン画面
+  if (!token && !isLocal) {
     return (
-      <div style={{ maxWidth: 480, margin: "120px auto", textAlign: "center" }}>
+      <div style={{ maxWidth: 480, margin: "120px auto", textAlign: "center", padding: 20 }}>
         <h1 style={{ fontFamily: "'Noto Serif JP', serif", color: "#2d2318" }}>ライフオラクル Cockpit</h1>
-        <p style={{ color: "#666" }}>俊雄さん専用ダッシュボード</p>
-        <button
-          onClick={() => window.netlifyIdentity.open("login")}
-          style={{
-            marginTop: 24,
-            padding: "12px 32px",
-            background: "#b8833f",
-            color: "white",
-            border: "none",
-            borderRadius: 8,
-            fontSize: 14,
-            cursor: "pointer",
-          }}
-        >
-          Googleでログイン
-        </button>
+        <p style={{ color: "#666", fontSize: 14 }}>俊雄さん専用ダッシュボード</p>
+        {authError && (
+          <div style={{ background: "#f8e6e6", border: "1px solid #a05050", padding: 12, borderRadius: 8, color: "#a05050", margin: "16px 0", fontSize: 13 }}>
+            ❌ {authError}
+          </div>
+        )}
+        <form onSubmit={handleTokenSubmit} style={{ marginTop: 24 }}>
+          <input
+            type="password"
+            value={tokenInput}
+            onChange={(e) => setTokenInput(e.target.value)}
+            placeholder="アクセストークンを入力"
+            autoFocus
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              fontSize: 14,
+              border: "1px solid #b8833f",
+              borderRadius: 6,
+              fontFamily: "monospace",
+              boxSizing: "border-box",
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              marginTop: 12,
+              padding: "12px 32px",
+              background: "#b8833f",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 14,
+              cursor: "pointer",
+              width: "100%",
+            }}
+          >
+            ログイン
+          </button>
+        </form>
+        <p style={{ color: "#999", fontSize: 11, marginTop: 24 }}>
+          初回は <code>?token=&lt;トークン&gt;</code> をURLに付けてアクセスすると自動入力されます。
+        </p>
       </div>
     );
   }
@@ -142,26 +190,44 @@ export default function App() {
             )}
           </p>
         </div>
-        <button
-          onClick={fetchMetrics}
-          disabled={loading}
-          style={{
-            padding: "8px 16px",
-            background: "white",
-            border: "1px solid #b8833f",
-            color: "#b8833f",
-            borderRadius: 6,
-            cursor: loading ? "wait" : "pointer",
-            fontSize: 13,
-          }}
-        >
-          {loading ? "更新中..." : "🔄 更新"}
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={fetchMetrics}
+            disabled={loading}
+            style={{
+              padding: "8px 16px",
+              background: "white",
+              border: "1px solid #b8833f",
+              color: "#b8833f",
+              borderRadius: 6,
+              cursor: loading ? "wait" : "pointer",
+              fontSize: 13,
+            }}
+          >
+            {loading ? "更新中..." : "🔄 更新"}
+          </button>
+          {!isLocal && (
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "8px 16px",
+                background: "white",
+                border: "1px solid #999",
+                color: "#666",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontSize: 13,
+              }}
+            >
+              ログアウト
+            </button>
+          )}
+        </div>
       </header>
 
       {error && (
-        <div style={{ background: "#f8e6e6", border: "1px solid #a05050", padding: 16, borderRadius: 8, color: "#a05050", marginBottom: 24 }}>
-          ❌ {error}
+        <div style={{ background: "#fbf3df", border: "1px solid #b8833f", padding: 16, borderRadius: 8, color: "#8c5f28", marginBottom: 24, fontSize: 13 }}>
+          ⚠️ {error}
         </div>
       )}
 
@@ -207,7 +273,7 @@ export default function App() {
                 format="int"
                 sparkline={data.sparklines.active_users}
                 footnote={
-                  data.kpi.active_users.diff !== null
+                  data.kpi.active_users.diff !== null && data.kpi.active_users.diff !== undefined
                     ? `前日比 ${data.kpi.active_users.diff >= 0 ? "+" : ""}${data.kpi.active_users.diff.toFixed(0)}人`
                     : "前日比データなし"
                 }
@@ -237,18 +303,6 @@ export default function App() {
               <div>noteフォロワー: {data.latest_row?.note_followers || "—"}人 / 週次PV: {data.latest_row?.note_pv_24h || "—"}</div>
             </div>
           </section>
-
-          {user && (
-            <footer style={{ marginTop: 40, paddingTop: 16, borderTop: "1px solid #e0d8c8", color: "#888", fontSize: 12 }}>
-              ログイン中: {user.email}
-              <button
-                onClick={() => window.netlifyIdentity.logout()}
-                style={{ marginLeft: 12, background: "none", border: "none", color: "#b8833f", cursor: "pointer", textDecoration: "underline" }}
-              >
-                ログアウト
-              </button>
-            </footer>
-          )}
         </>
       )}
     </div>
