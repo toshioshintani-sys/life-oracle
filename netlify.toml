@@ -3,7 +3,21 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Cockpit (W1) は /cockpit/ 配下で公開（Netlify Identity でアクセス制限）
+# Netlify Identity を有効にする手順（俊雄さん側）:
+#   Netlify dashboard → Site settings → Identity → Enable Identity
+#   Registration: Invite only
+#   External providers: Google を有効化
+#   その後 Identity → Invite users で toshio.shintani@gmail.com を招待
+
+[[redirects]]
+  from = "/cockpit"
+  to = "/cockpit/index.html"
+  status = 200
+
+# 既存の診断アプリ (SPA fallback)。/cockpit/* と /.netlify/* は除外
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Path = ["!/cockpit/*", "!/.netlify/*"]}
