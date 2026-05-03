@@ -96,6 +96,23 @@ const OCCUPATION_ICONS = {
   '学生': '🎓', '無職': '🔍',
 };
 
+// ─── 月替わりの問い（隠しステージ・羅針盤裏面）───────────
+const MONTHLY_QUESTIONS = [
+  '', // index 0 unused
+  '1月の問い：今年の自分が「過去を振り返らずに進める」場面はどこか。',
+  '2月の問い：自分にいちばん優しくしたい瞬間は、どんな時か。',
+  '3月の問い：終わらせたいのに終わらせられないことは何か。',
+  '4月の問い：「もうやらなくていい」と決めたいことは何か。',
+  '5月の問い：自分にとっての「ちょうどいい人との距離」はどこか。',
+  '6月の問い：雨の日に整えたい、自分の小さな儀式はあるか。',
+  '7月の問い：今年いちばん「自分らしい」と感じた瞬間はいつか。',
+  '8月の問い：本当はもっと休みたい場所はどこか。',
+  '9月の問い：今年の残り、何を捨てて何を残すか。',
+  '10月の問い：誰かに伝えそびれた感謝はあるか。',
+  '11月の問い：来年に持ち越したくない癖はあるか。',
+  '12月の問い：今年の自分に「ありがとう」と言いたい瞬間はどこか。',
+];
+
 // ─── A/B variant（URL ?v=a / ?v=b、初回はランダム） ───────
 function getVariant() {
   if (typeof window === 'undefined') return 'a';
@@ -266,6 +283,14 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [animating, setAnimating] = useState(false);
   const [biasShowAlt, setBiasShowAlt] = useState(false);
+  const [jungShowAlt, setJungShowAlt] = useState(false);
+  const [turboMode, setTurboMode] = useState(false);
+  const [compassFlipped, setCompassFlipped] = useState(false);
+  const [sliderValue, setSliderValue] = useState(2);
+  const [sliderTouched, setSliderTouched] = useState(false);
+  const sliderTimerRef = useRef(null);
+  const titleTapsRef = useRef([]);
+  const compassPressTimerRef = useRef(null);
 
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
@@ -400,6 +425,57 @@ export default function App() {
   }, [phase]);
   useEffect(() => { if (phase === 'jung' && currentQ === 0) trackEvent('step_q1_start'); }, [phase]);
   useEffect(() => { if (phase === 'simple_jung' && currentQ === 0) trackEvent('simple_jung_q1_start'); }, [phase]);
+
+  // ─── スライダー値リセット（質問が変わるたび） ─────────────
+  useEffect(() => {
+    setSliderValue(2);
+    setSliderTouched(false);
+    if (sliderTimerRef.current) { clearTimeout(sliderTimerRef.current); sliderTimerRef.current = null; }
+  }, [currentQ, phase]);
+
+  // ─── コナミコマンド検知（PCキーボード） ───────────────────
+  useEffect(() => {
+    const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let buf = [];
+    const handler = (e) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      buf.push(k);
+      if (buf.length > KONAMI.length) buf = buf.slice(-KONAMI.length);
+      if (buf.length === KONAMI.length && buf.every((x, i) => x === KONAMI[i])) {
+        if (!turboMode) {
+          setTurboMode(true);
+          trackEvent('turbo_unlocked', { method: 'konami' });
+        }
+        buf = [];
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [turboMode]);
+
+  // タイトル5タップ → ターボモード（モバイル）
+  function handleTitleTap() {
+    const now = Date.now();
+    titleTapsRef.current = titleTapsRef.current.filter((t) => now - t < 2000).concat(now);
+    if (titleTapsRef.current.length >= 5 && !turboMode) {
+      setTurboMode(true);
+      trackEvent('turbo_unlocked', { method: 'logo_tap' });
+      titleTapsRef.current = [];
+    }
+  }
+
+  // 羅針盤長押し → 裏面（隠しステージ）
+  function handleCompassPressStart() {
+    if (phase !== 'result') return;
+    if (compassPressTimerRef.current) clearTimeout(compassPressTimerRef.current);
+    compassPressTimerRef.current = setTimeout(() => {
+      setCompassFlipped(true);
+      trackEvent('compass_flip');
+    }, 3000);
+  }
+  function handleCompassPressEnd() {
+    if (compassPressTimerRef.current) { clearTimeout(compassPressTimerRef.current); compassPressTimerRef.current = null; }
+  }
   useEffect(() => {
     if (phase === 'result' && typeProfiles && prescriptions && biasMessages && !resultTrackedRef.current) {
       trackEvent('step_result_shown');
@@ -498,6 +574,7 @@ export default function App() {
       if (isJungPhase) {
         const newAnswers = { ...jungAnswers, [currentQuestion.id]: value };
         setJungAnswers(newAnswers);
+        setJungShowAlt(false);
         const next = currentQ + 1;
         if (next === 4)  trackEvent('step_q4_pass');
         if (next === 12) trackEvent('step_q12_pass');
@@ -522,6 +599,41 @@ export default function App() {
         }
       }
     }, 300);
+  }
+
+  // ─── スライダー操作（ユング・通常モード）────────────────
+  function handleSliderChange(v) {
+    setSliderValue(v);
+    setSliderTouched(true);
+    if (sliderTimerRef.current) clearTimeout(sliderTimerRef.current);
+    // 600ms 操作が止まったら自動で回答を確定して次へ
+    sliderTimerRef.current = setTimeout(() => {
+      trackEvent('slider_committed', { q_id: currentQuestion?.id, value: v });
+      handleAnswer(v);
+    }, 600);
+  }
+
+  // ─── handleJungSkip（ユング質問・代替問への切替／無回答スキップ）─
+  function handleJungSkip() {
+    if (animating) return;
+    if (!jungShowAlt) {
+      trackEvent('jung_skip_to_alt', { q_id: currentQuestion.id });
+      setJungShowAlt(true);
+      return;
+    }
+    // 2回目: 無回答スキップ
+    trackEvent('jung_skip_unanswered', { q_id: currentQuestion.id });
+    setJungShowAlt(false);
+    const next = currentQ + 1;
+    if (next === 4)  trackEvent('step_q4_pass');
+    if (next === 12) trackEvent('step_q12_pass');
+    if (next === 20) trackEvent('step_q20_pass');
+    if (next === 28) trackEvent('step_q28_pass');
+    if (next === AXIS_END.EI)      { setCurrentQ(next); setPhase("ei_milestone"); trackEvent('step_q8_pass'); }
+    else if (next === AXIS_END.SN) { setCurrentQ(next); setPhase("sn_milestone"); trackEvent('step_q16_pass'); }
+    else if (next === AXIS_END.TF) { setCurrentQ(next); setPhase("tf_milestone"); trackEvent('step_q24_pass'); }
+    else if (next === AXIS_END.JP) { setPhase("jp_milestone"); trackEvent('step_jung_complete'); }
+    else                           { setCurrentQ(next); }
   }
 
   // ─── handleBiasSkip（バイアス質問・代替問への切替／無回答スキップ）─
@@ -618,6 +730,7 @@ export default function App() {
       setPhase("jung");
     }
     else if (phase === "jung") {
+      setJungShowAlt(false);
       if (currentQ > 0) {
         const newAnswers = { ...jungAnswers };
         delete newAnswers[questions[currentQ - 1].id];
@@ -646,7 +759,8 @@ export default function App() {
     setOccupation(null); setGeneration(null);
     setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
     setSimpleJungAnswers({}); setSimpleBiasAnswers({});
-    setAnimating(false); setBiasShowAlt(false);
+    setAnimating(false); setBiasShowAlt(false); setJungShowAlt(false);
+    setCompassFlipped(false);
     setTypeProfiles(null); setPrescriptions(null); setBiasMessages(null);
     setChatMessages([]); setChatInput(""); setChatLoading(false); setChatError(null);
     setSelectedConcern(null);
@@ -675,12 +789,76 @@ export default function App() {
 
         {/* ヘッダー */}
         <div style={{ textAlign: "center", paddingTop: 24, paddingBottom: 16 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, color: ACCENT }}>
+          <div
+            onClick={handleTitleTap}
+            onMouseDown={handleCompassPressStart}
+            onMouseUp={handleCompassPressEnd}
+            onMouseLeave={handleCompassPressEnd}
+            onTouchStart={handleCompassPressStart}
+            onTouchEnd={handleCompassPressEnd}
+            onTouchCancel={handleCompassPressEnd}
+            style={{ display: "inline-flex", alignItems: "center", gap: 10, color: ACCENT, cursor: phase === 'result' ? "pointer" : "default", userSelect: "none" }}
+          >
             <CompassIcon size={22} strokeWidth={1.6} />
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: TEXT, letterSpacing: "0.02em", margin: 0 }}>ライフオラクル</h1>
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, letterSpacing: 1, color: TEXT_MUTED, marginTop: 6 }}>ユング心理学 × 行動経済学</div>
         </div>
+
+        {/* ⚡TURBOバッジ（コナミコマンド or ロゴ5タップで発動） */}
+        {turboMode && (
+          <div style={{
+            position: 'fixed', top: 12, right: 12, zIndex: 100,
+            background: ACCENT, color: '#ffffff',
+            padding: '4px 10px', borderRadius: 12,
+            fontSize: 11, fontWeight: 700, letterSpacing: 1.5,
+            animation: 'lo-fade-in 220ms var(--ease-out)',
+            boxShadow: '0 2px 8px rgba(184,131,63,0.30)',
+            pointerEvents: 'none',
+          }}>
+            ⚡ TURBO
+          </div>
+        )}
+
+        {/* 羅針盤裏面オーバーレイ（隠しステージ：今月の問い） */}
+        {compassFlipped && (
+          <div
+            onClick={() => setCompassFlipped(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(45, 35, 24, 0.78)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '24px',
+              animation: 'lo-fade-in 320ms var(--ease-out)',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{
+              maxWidth: 480, width: '100%',
+              background: 'linear-gradient(135deg, #fdfbf7 0%, #f5efe8 100%)',
+              borderRadius: 18, padding: '36px 28px',
+              boxShadow: '0 20px 60px rgba(45,35,24,0.40)',
+              textAlign: 'center',
+              border: `1.5px solid ${ACCENT}`,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18, color: ACCENT, animation: 'lo-fade-in 600ms var(--ease-out)' }}>
+                <CompassIcon size={56} strokeWidth={1.4} decorative />
+              </div>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: ACCENT, marginBottom: 14, fontWeight: 600 }}>
+                ─── 羅針盤の裏面 ───
+              </div>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 500,
+                lineHeight: 2, color: TEXT, margin: 0,
+              }}>
+                {MONTHLY_QUESTIONS[new Date().getMonth() + 1] ?? '—'}
+              </p>
+              <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 22, letterSpacing: 0.5 }}>
+                tap to close
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Intro */}
         {phase === "intro" && (
@@ -969,58 +1147,122 @@ export default function App() {
           </div>
         )}
 
-        {/* ユング診断（4段階Likert・既存仕様） */}
-        {phase === "jung" && currentQuestion && (
-          <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
-            <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ height: 7, background: "rgba(184,131,63,0.12)", borderRadius: 4, marginBottom: 10 }}>
-              <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 4, transition: "width 0.3s" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Q{currentQ + 1} / {totalQ}</div>
-              <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>
-                性格診断・残り {totalQ - currentQ - 1} 問
+        {/* ユング診断（スライダー or ターボモード4ボタン・代替問スキップつき） */}
+        {phase === "jung" && currentQuestion && (() => {
+          const displayed = jungShowAlt && currentQuestion.alt ? currentQuestion.alt : currentQuestion;
+          const stem = displayed.stem;
+          const tag = displayed.tag;
+          const recordedValue = jungAnswers[currentQuestion.id];
+          const TURBO_MARKS = ['●', '◐', '◑', '○'];
+          return (
+            <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
+              <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
+              <div style={{ height: 7, background: "rgba(184,131,63,0.12)", borderRadius: 4, marginBottom: 10 }}>
+                <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 4, transition: "width 0.3s" }} />
               </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Q{currentQ + 1} / {totalQ}</div>
+                <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>
+                  性格診断・残り {totalQ - currentQ - 1} 問
+                </div>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, marginBottom: 8 }}>
+                {AXIS_ICONS[currentQuestion.axis] ?? ''} {tag}
+                {jungShowAlt && (
+                  <span style={{ marginLeft: 8, color: TEXT_MUTED, fontWeight: 400, fontSize: 10 }}>
+                    （別の聞き方）
+                  </span>
+                )}
+              </div>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 500,
+                lineHeight: 1.9, marginBottom: 18, color: TEXT,
+              }}>
+                {stem}
+              </p>
+
+              {turboMode ? (
+                /* ターボモード：4マークボタン */
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                  {TURBO_MARKS.map((mark, i) => {
+                    const isSelected = selected === i || recordedValue === i;
+                    return (
+                      <button key={i} onClick={() => handleAnswer(i)}
+                        className="lo-answer-btn"
+                        style={{
+                          padding: "14px 4px",
+                          background: isSelected ? "rgba(184,131,63,0.16)" : "rgba(255,255,255,0.8)",
+                          border: `1px solid ${isSelected ? ACCENT : "rgba(184,131,63,0.20)"}`,
+                          borderRadius: 10,
+                          color: isSelected ? ACCENT : TEXT,
+                          fontSize: 22, lineHeight: 1,
+                          cursor: "pointer", textAlign: "center",
+                          fontWeight: isSelected ? 700 : 500,
+                          transition: "all 0.15s",
+                        }}>
+                        {mark}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* 通常モード：スライダー（つまむ操作） */
+                <div>
+                  <div style={{ position: 'relative', padding: '6px 14px 0', marginBottom: 4 }}>
+                    {/* 4スナップ点 */}
+                    <div style={{ position: 'absolute', top: 26, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', pointerEvents: 'none', zIndex: 0 }}>
+                      {[0,1,2,3].map(i => (
+                        <div key={i} style={{
+                          width: 8, height: 8, borderRadius: '50%',
+                          background: sliderTouched && sliderValue === i ? ACCENT : 'rgba(184,131,63,0.30)',
+                          transition: 'background 0.2s',
+                        }} />
+                      ))}
+                    </div>
+                    <input
+                      type="range"
+                      min="0" max="3" step="1"
+                      value={recordedValue !== undefined ? recordedValue : sliderValue}
+                      onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                      className={`lo-jung-slider ${sliderTouched || recordedValue !== undefined ? 'committed' : ''}`}
+                      aria-label={stem}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: TEXT_MUTED, marginTop: 2, padding: '0 4px' }}>
+                    <span>強くそう</span>
+                    <span style={{ color: 'transparent' }}>·</span>
+                    <span style={{ color: 'transparent' }}>·</span>
+                    <span>強くちがう</span>
+                  </div>
+                  {!sliderTouched && recordedValue === undefined && (
+                    <div style={{ fontSize: 11, color: TEXT_MUTED, textAlign: 'center', marginTop: 8 }}>
+                      ↑ つまんで自分の位置までドラッグ
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 飛ばすボタン */}
+              <button
+                onClick={handleJungSkip}
+                disabled={animating}
+                style={{
+                  width: "100%",
+                  padding: "8px 8px",
+                  marginTop: 14,
+                  background: "transparent",
+                  border: `1px dashed rgba(184,131,63,0.30)`,
+                  borderRadius: 10,
+                  color: TEXT_MUTED,
+                  fontSize: 11,
+                  cursor: animating ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                }}>
+                {jungShowAlt ? '答えづらいのでこの問は飛ばす →' : '別の聞き方で答える ↻'}
+              </button>
             </div>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, marginBottom: 8 }}>
-              {AXIS_ICONS[currentQuestion.axis] ?? ''} {currentQuestion.tag}
-            </div>
-            <p style={{
-              fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 500,
-              lineHeight: 1.9, marginBottom: 18, color: TEXT,
-            }}>
-              {currentQuestion.stem}
-            </p>
-            <div className="lo-spectrum-bar">
-              <span>← 同意する</span>
-              <span>同意しない →</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-              {ANSWER_LABELS.map((label, i) => {
-                const isSelected = selected === i || jungAnswers[currentQuestion.id] === i;
-                const isExtreme = i === 0 || i === 3;
-                return (
-                  <button key={i} onClick={() => handleAnswer(i)}
-                    className="lo-answer-btn"
-                    style={{
-                      padding: "12px 4px",
-                      background: isSelected ? "rgba(184,131,63,0.16)" : "rgba(255,255,255,0.8)",
-                      border: `1px solid ${isSelected ? ACCENT : "rgba(184,131,63,0.20)"}`,
-                      borderRadius: 10,
-                      color: isSelected ? ACCENT : TEXT,
-                      fontSize: isExtreme ? 13 : 12,
-                      lineHeight: 1.4,
-                      cursor: "pointer", textAlign: "center",
-                      fontWeight: isSelected ? 700 : (isExtreme ? 500 : 400),
-                      transition: "all 0.15s",
-                    }}>
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* バイアス測定（○×2択・代替問スキップ機能つき） */}
         {phase === "bias" && currentQuestion && (() => {
