@@ -1,29 +1,31 @@
 // netlify/functions/get_metrics.js
 // 日次メトリクスCSVを読んでJSON返却するエンドポイント。
-// Cockpit (W1) のデータソース。
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+// Cockpit (W1) のデータソース。Netlify Functions v2 (Web API) 形式。
+import fs from "node:fs";
+import path from "node:path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// CSV: netlify.toml の included_files で同梱される
+// Functionのcwdからの相対参照（Netlifyランタイムでは process.cwd() がプロジェクトルート）
+function resolveCsvPath() {
+  const candidates = [
+    path.join(process.cwd(), "cockpit-data", "daily_metrics.csv"),
+    path.join(process.cwd(), "..", "..", "cockpit-data", "daily_metrics.csv"),
+    "/var/task/cockpit-data/daily_metrics.csv",
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  return candidates[0]; // 最有力候補（エラー時はこのパスが返る）
+}
 
-// CSVは life-oracle リポジトリの cockpit-data/ にコミットされる
-// Netlify上ではfunctionsディレクトリの外側を辿って取得
-const CSV_PATH = path.resolve(__dirname, "../../cockpit-data/daily_metrics.csv");
+const NO_INDEX_HEADERS = {
+  "Content-Type": "application/json",
+  "Cache-Control": "no-store, no-cache, must-revalidate, private",
+  "X-Robots-Tag": "noindex, nofollow",
+};
 
-function parseCsv(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const header = lines[0].split(",");
-  return lines.slice(1).map((line) => {
-    // 簡易CSVパーサ（フィールド内にカンマがある場合は要注意。今回は安全な形式想定）
-    const cells = parseCsvLine(line);
-    const row = {};
-    header.forEach((h, i) => {
-      row[h] = cells[i] ?? "";
-    });
-    return row;
-  });
+function jsonResponse(status, body) {
+  return new Response(JSON.stringify(body), { status, headers: NO_INDEX_HEADERS });
 }
 
 function parseCsvLine(line) {
@@ -45,62 +47,60 @@ function parseCsvLine(line) {
   return out;
 }
 
+function parseCsv(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines[0].split(",");
+  return lines.slice(1).map((line) => {
+    const cells = parseCsvLine(line);
+    const row = {};
+    header.forEach((h, i) => {
+      row[h] = cells[i] ?? "";
+    });
+    return row;
+  });
+}
+
 function safeFloat(v) {
   if (v === undefined || v === null || v === "" || v === "N/A") return null;
   const n = parseFloat(v);
   return Number.isFinite(n) ? n : null;
 }
 
-// 共通レスポンスヘッダー
-const NO_INDEX_HEADERS = {
-  "Content-Type": "application/json",
-  "Cache-Control": "no-store, no-cache, must-revalidate, private",
-  "X-Robots-Tag": "noindex, nofollow",
-};
-
-export const handler = async (event) => {
+export default async (req) => {
   try {
     // ───── トークン認証 ─────
-    // COCKPIT_TOKEN は Netlify 環境変数で設定（GitHub にコミットしない）
     const expectedToken = process.env.COCKPIT_TOKEN;
     if (!expectedToken) {
-      return {
-        statusCode: 503,
-        headers: NO_INDEX_HEADERS,
-        body: JSON.stringify({ error: "COCKPIT_TOKEN が設定されていません（Netlify 環境変数を確認）" }),
-      };
+      return jsonResponse(503, {
+        error: "COCKPIT_TOKEN が設定されていません（Netlify 環境変数を確認してください）",
+      });
     }
+    const url = new URL(req.url);
     const providedToken =
-      event.headers?.["x-cockpit-token"] ||
-      event.headers?.["X-Cockpit-Token"] ||
-      event.queryStringParameters?.token;
+      req.headers.get("x-cockpit-token") || url.searchParams.get("token");
     if (providedToken !== expectedToken) {
-      return {
-        statusCode: 401,
-        headers: NO_INDEX_HEADERS,
-        body: JSON.stringify({ error: "Unauthorized: 有効なトークンが必要です" }),
-      };
+      return jsonResponse(401, { error: "Unauthorized: 有効なトークンが必要です" });
     }
 
-    const days = parseInt(event.queryStringParameters?.days ?? "7", 10);
+    const days = parseInt(url.searchParams.get("days") ?? "7", 10);
 
-    if (!fs.existsSync(CSV_PATH)) {
-      return {
-        statusCode: 500,
-        headers: NO_INDEX_HEADERS,
-        body: JSON.stringify({ error: "CSV not found", path: CSV_PATH }),
-      };
+    const csvPath = resolveCsvPath();
+    if (!fs.existsSync(csvPath)) {
+      return jsonResponse(500, {
+        error: "CSV not found",
+        tried: csvPath,
+        cwd: process.cwd(),
+      });
     }
 
-    const csv = fs.readFileSync(CSV_PATH, "utf-8");
-    const stats = fs.statSync(CSV_PATH);
+    const csv = fs.readFileSync(csvPath, "utf-8");
+    const stats = fs.statSync(csvPath);
     const rows = parseCsv(csv);
 
     const recent = rows.slice(-Math.max(days, 1));
     const latest = rows[rows.length - 1] ?? null;
     const prev = rows[rows.length - 2] ?? null;
 
-    // KPI算出
     const likeRate = safeFloat(latest?.note_like_rate);
     const completionRate = safeFloat(latest?.ga4_completion_rate);
     const xClicks = safeFloat(latest?.x_link_clicks_24h);
@@ -130,7 +130,6 @@ export const handler = async (event) => {
       },
     };
 
-    // sparkline用の時系列
     const sparklines = {
       like_rate: recent.map((r) => safeFloat(r.note_like_rate)),
       completion_rate: recent.map((r) => safeFloat(r.ga4_completion_rate)),
@@ -139,32 +138,23 @@ export const handler = async (event) => {
       dates: recent.map((r) => r.date),
     };
 
-    // CSV鮮度（24時間以上更新されていなければ警告）
     const ageHours = (Date.now() - stats.mtimeMs) / 1000 / 3600;
     const freshness = {
       last_csv_update: stats.mtime.toISOString(),
       age_hours: Math.round(ageHours * 10) / 10,
-      stale: ageHours > 30, // バッチが朝6:30→翌日6:30で約24時間。30時間超えたら警告
+      stale: ageHours > 30,
     };
 
-    return {
-      statusCode: 200,
-      headers: NO_INDEX_HEADERS,
-      body: JSON.stringify({
-        latest_date: latest?.date ?? null,
-        latest_row: latest,
-        prev_row: prev,
-        kpi,
-        sparklines,
-        freshness,
-        rows_count: rows.length,
-      }),
-    };
+    return jsonResponse(200, {
+      latest_date: latest?.date ?? null,
+      latest_row: latest,
+      prev_row: prev,
+      kpi,
+      sparklines,
+      freshness,
+      rows_count: rows.length,
+    });
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers: NO_INDEX_HEADERS,
-      body: JSON.stringify({ error: err.message, stack: err.stack }),
-    };
+    return jsonResponse(500, { error: err.message, stack: err.stack });
   }
 };

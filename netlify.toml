@@ -3,6 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# get_metrics function に CSV を同梱（バンドル時にコピーされる）
+[functions."get_metrics"]
+  included_files = ["cockpit-data/daily_metrics.csv"]
+
 # Cockpit (W1) は /cockpit/ 配下で公開（Netlify Identity でアクセス制限）
 # Netlify Identity を有効にする手順（俊雄さん側）:
 #   Netlify dashboard → Site settings → Identity → Enable Identity
