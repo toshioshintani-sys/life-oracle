@@ -71,8 +71,10 @@ button {
   transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), background 160ms var(--ease-out), color 160ms var(--ease-out);
 }
 
-button:not(:disabled):hover {
-  transform: translateY(-1px);
+@media (hover: hover) {
+  button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
 }
 
 button:not(:disabled):active {
@@ -92,10 +94,12 @@ button:not(:disabled):active {
 
 /* ─── 診断UI拡張（離脱率改善） ─────────────────────────── */
 
-/* 回答ボタンのホバー強化（精密診断・4択） */
-.lo-answer-btn:hover:not(:disabled) {
-  background: rgba(184, 131, 63, 0.12) !important;
-  border-color: rgba(184, 131, 63, 0.50) !important;
+/* 回答ボタンのホバー強化（精密診断・4択／タッチ機器では適用しない） */
+@media (hover: hover) {
+  .lo-answer-btn:hover:not(:disabled) {
+    background: rgba(184, 131, 63, 0.12) !important;
+    border-color: rgba(184, 131, 63, 0.50) !important;
+  }
 }
 
 /* 簡易診断ボタン（2択・大きめ） */
@@ -113,11 +117,13 @@ button:not(:disabled):active {
   font-family: inherit;
   transition: all 200ms var(--ease-out);
 }
-.lo-simple-answer-btn:hover:not(:disabled) {
-  background: rgba(184, 131, 63, 0.10);
-  border-color: var(--accent-wood);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(184, 131, 63, 0.15);
+@media (hover: hover) {
+  .lo-simple-answer-btn:hover:not(:disabled) {
+    background: rgba(184, 131, 63, 0.10);
+    border-color: var(--accent-wood);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 131, 63, 0.15);
+  }
 }
 .lo-simple-answer-btn.active {
   background: rgba(184, 131, 63, 0.16);
@@ -170,10 +176,12 @@ button:not(:disabled):active {
   font-family: inherit;
   box-shadow: 0 4px 12px rgba(184, 131, 63, 0.20);
 }
-.lo-primary-cta:hover:not(:disabled) {
-  background: var(--accent-wood-deep);
-  border-color: var(--accent-wood-deep);
-  box-shadow: 0 6px 16px rgba(184, 131, 63, 0.30);
+@media (hover: hover) {
+  .lo-primary-cta:hover:not(:disabled) {
+    background: var(--accent-wood-deep);
+    border-color: var(--accent-wood-deep);
+    box-shadow: 0 6px 16px rgba(184, 131, 63, 0.30);
+  }
 }
 
 /* セカンダリCTA（intro用・透明背景） */
@@ -189,8 +197,10 @@ button:not(:disabled):active {
   cursor: pointer;
   font-family: inherit;
 }
-.lo-secondary-cta:hover:not(:disabled) {
-  background: var(--accent-wood-soft);
+@media (hover: hover) {
+  .lo-secondary-cta:hover:not(:disabled) {
+    background: var(--accent-wood-soft);
+  }
 }
 
 /* ベネフィット行（チェックマーク付き） */
@@ -235,7 +245,7 @@ button:not(:disabled):active {
   padding: 0;
   font-size: 0.9rem;
 }
-.back-btn:hover { color: var(--accent-wood); }
+@media (hover: hover) { .back-btn:hover { color: var(--accent-wood); } }
 .map-axis-label { text-align: center; font-size: 0.75rem; color: var(--text-subtle); margin: 0.5rem 0; }
 .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .map-quadrant {
@@ -265,7 +275,7 @@ button:not(:disabled):active {
 .chip-ne { background: rgba(80, 140, 160, 0.18); color: #306070; }
 .chip-si { background: rgba(80, 120, 80, 0.18); color: #3d6040; }
 .chip-se { background: rgba(160, 100, 80, 0.18); color: #7a4030; }
-.type-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+@media (hover: hover) { .type-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); } }
 .type-chip.active {
   transform: scale(1.08);
   box-shadow: 0 0 0 2px var(--accent-wood), var(--shadow-sm);
@@ -301,7 +311,7 @@ button:not(:disabled):active {
   cursor: pointer;
   font-size: 0.9rem;
 }
-.close-btn:hover { color: var(--accent-wood); }
+@media (hover: hover) { .close-btn:hover { color: var(--accent-wood); } }
 .detail-row { display: flex; gap: 0.75rem; margin-bottom: 0.5rem; align-items: flex-start; }
 .detail-key { font-size: 0.7rem; color: var(--text-subtle); min-width: 60px; padding-top: 2px; }
 .detail-light { color: var(--light-green); font-weight: bold; font-size: 0.95rem; }
@@ -321,7 +331,7 @@ button:not(:disabled):active {
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
-.map-btn:hover { background: var(--accent-wood-soft); }
+@media (hover: hover) { .map-btn:hover { background: var(--accent-wood-soft); } }
 
 /* ─── ResultCard (画像保存用) ──────────────────────────── */
 .result-card-image {
@@ -382,4 +392,4 @@ button:not(:disabled):active {
   cursor: pointer;
   font-size: 0.9rem;
 }
-.save-image-btn:hover { background: var(--accent-wood-soft); }
+@media (hover: hover) { .save-image-btn:hover { background: var(--accent-wood-soft); } }
