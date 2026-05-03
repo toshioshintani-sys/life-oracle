@@ -265,6 +265,7 @@ export default function App() {
   const [simpleBiasAnswers, setSimpleBiasAnswers] = useState({});
   const [selected, setSelected] = useState(null);
   const [animating, setAnimating] = useState(false);
+  const [biasShowAlt, setBiasShowAlt] = useState(false);
 
   const [typeProfiles, setTypeProfiles] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
@@ -510,6 +511,7 @@ export default function App() {
       } else if (isBiasPhase) {
         const newAnswers = { ...biasAnswers, [currentQuestion.id]: value };
         setBiasAnswers(newAnswers);
+        setBiasShowAlt(false);
         if (currentQ + 1 < biasQuestions.length) {
           if (currentQ + 1 === 4) trackEvent('step_bias_q4_pass');
           if (currentQ + 1 === 8) trackEvent('step_bias_q8_pass');
@@ -520,6 +522,28 @@ export default function App() {
         }
       }
     }, 300);
+  }
+
+  // ─── handleBiasSkip（バイアス質問・代替問への切替／無回答スキップ）─
+  function handleBiasSkip() {
+    if (animating) return;
+    if (!biasShowAlt) {
+      // 1回目のスキップ → 代替問に切替
+      trackEvent('bias_skip_to_alt', { q_id: currentQuestion.id });
+      setBiasShowAlt(true);
+      return;
+    }
+    // 2回目のスキップ → 無回答のまま次の問へ
+    trackEvent('bias_skip_unanswered', { q_id: currentQuestion.id });
+    setBiasShowAlt(false);
+    if (currentQ + 1 < biasQuestions.length) {
+      if (currentQ + 1 === 4) trackEvent('step_bias_q4_pass');
+      if (currentQ + 1 === 8) trackEvent('step_bias_q8_pass');
+      setCurrentQ((prev) => prev + 1);
+    } else {
+      trackEvent('step_bias_complete');
+      setPhase("result");
+    }
   }
 
   // ─── handleSimpleAnswer（簡易診断・二択 0/1） ────────
@@ -603,6 +627,7 @@ export default function App() {
       } else { setPhase("generation"); }
     }
     else if (phase === "bias") {
+      setBiasShowAlt(false);
       if (currentQ > 0) {
         const newAnswers = { ...biasAnswers };
         delete newAnswers[biasQuestions[currentQ - 1].id];
@@ -621,7 +646,7 @@ export default function App() {
     setOccupation(null); setGeneration(null);
     setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
     setSimpleJungAnswers({}); setSimpleBiasAnswers({});
-    setAnimating(false);
+    setAnimating(false); setBiasShowAlt(false);
     setTypeProfiles(null); setPrescriptions(null); setBiasMessages(null);
     setChatMessages([]); setChatInput(""); setChatLoading(false); setChatError(null);
     setSelectedConcern(null);
@@ -632,6 +657,7 @@ export default function App() {
     trackEvent('simple_to_precision_clicked');
     setMode('precision');
     setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
+    setBiasShowAlt(false);
     setPhase("occupation");
   }
 
@@ -943,8 +969,8 @@ export default function App() {
           </div>
         )}
 
-        {/* ユング診断 / バイアス測定 */}
-        {(phase === "jung" || phase === "bias") && currentQuestion && (
+        {/* ユング診断（4段階Likert・既存仕様） */}
+        {phase === "jung" && currentQuestion && (
           <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
             <div style={{ height: 7, background: "rgba(184,131,63,0.12)", borderRadius: 4, marginBottom: 10 }}>
@@ -953,13 +979,11 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Q{currentQ + 1} / {totalQ}</div>
               <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>
-                {isBiasPhase ? "思考のクセ" : "性格診断"}・残り {totalQ - currentQ - 1} 問
+                性格診断・残り {totalQ - currentQ - 1} 問
               </div>
             </div>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, marginBottom: 8 }}>
-              {isJungPhase
-                ? `${AXIS_ICONS[currentQuestion.axis] ?? ''} ${currentQuestion.tag}`
-                : `${BIAS_ICON} 思考のクセを測定中`}
+              {AXIS_ICONS[currentQuestion.axis] ?? ''} {currentQuestion.tag}
             </div>
             <p style={{
               fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 500,
@@ -973,8 +997,7 @@ export default function App() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
               {ANSWER_LABELS.map((label, i) => {
-                const activeAnswers = isBiasPhase ? biasAnswers : jungAnswers;
-                const isSelected = selected === i || activeAnswers[currentQuestion.id] === i;
+                const isSelected = selected === i || jungAnswers[currentQuestion.id] === i;
                 const isExtreme = i === 0 || i === 3;
                 return (
                   <button key={i} onClick={() => handleAnswer(i)}
@@ -998,6 +1021,92 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* バイアス測定（○×2択・代替問スキップ機能つき） */}
+        {phase === "bias" && currentQuestion && (() => {
+          const displayed = biasShowAlt && currentQuestion.alt ? currentQuestion.alt : currentQuestion;
+          const stem = displayed.stem;
+          const scene = displayed.scene;
+          const recordedValue = biasAnswers[currentQuestion.id];
+          return (
+            <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
+              <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
+              <div style={{ height: 7, background: "rgba(184,131,63,0.12)", borderRadius: 4, marginBottom: 10 }}>
+                <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 4, transition: "width 0.3s" }} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Q{currentQ + 1} / {totalQ}</div>
+                <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>
+                  思考のクセ・残り {totalQ - currentQ - 1} 問
+                </div>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, marginBottom: 8 }}>
+                {BIAS_ICON} {scene}
+                {biasShowAlt && (
+                  <span style={{ marginLeft: 8, color: TEXT_MUTED, fontWeight: 400, fontSize: 10 }}>
+                    （別の聞き方）
+                  </span>
+                )}
+              </div>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 500,
+                lineHeight: 1.9, marginBottom: 18, color: TEXT,
+              }}>
+                {stem}
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                {/* ○ そう（value=0、3点扱い） */}
+                <button
+                  onClick={() => handleAnswer(0)}
+                  className="lo-answer-btn"
+                  style={{
+                    padding: "16px 8px",
+                    background: (selected === 0 || recordedValue === 0) ? "rgba(184,131,63,0.18)" : "rgba(255,255,255,0.85)",
+                    border: `1.5px solid ${(selected === 0 || recordedValue === 0) ? ACCENT : "rgba(184,131,63,0.22)"}`,
+                    borderRadius: 12,
+                    color: (selected === 0 || recordedValue === 0) ? ACCENT : TEXT,
+                    fontSize: 15, fontWeight: 600,
+                    cursor: "pointer", textAlign: "center",
+                    transition: "all 0.15s",
+                  }}>
+                  <span style={{ fontSize: 20, marginRight: 6 }}>○</span>そう
+                </button>
+                {/* × ちがう（value=3、0点扱い） */}
+                <button
+                  onClick={() => handleAnswer(3)}
+                  className="lo-answer-btn"
+                  style={{
+                    padding: "16px 8px",
+                    background: (selected === 3 || recordedValue === 3) ? "rgba(184,131,63,0.18)" : "rgba(255,255,255,0.85)",
+                    border: `1.5px solid ${(selected === 3 || recordedValue === 3) ? ACCENT : "rgba(184,131,63,0.22)"}`,
+                    borderRadius: 12,
+                    color: (selected === 3 || recordedValue === 3) ? ACCENT : TEXT,
+                    fontSize: 15, fontWeight: 600,
+                    cursor: "pointer", textAlign: "center",
+                    transition: "all 0.15s",
+                  }}>
+                  <span style={{ fontSize: 20, marginRight: 6 }}>×</span>ちがう
+                </button>
+              </div>
+              <button
+                onClick={handleBiasSkip}
+                disabled={animating}
+                style={{
+                  width: "100%",
+                  padding: "10px 8px",
+                  background: "transparent",
+                  border: `1px dashed rgba(184,131,63,0.35)`,
+                  borderRadius: 10,
+                  color: TEXT_MUTED,
+                  fontSize: 12,
+                  cursor: animating ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                }}>
+                {biasShowAlt ? '答えづらいのでこの問は飛ばす →' : '別の聞き方で答える ↻'}
+              </button>
+            </div>
+          );
+        })()}
 
         {/* 軸マイルストーン */}
         {MILESTONE_PHASES.includes(phase) && (() => {
