@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { questions } from "./data/questions.js";
 import { biasQuestions } from "./data/biasQuestions.js";
+import {
+  simpleJungQuestions,
+  simpleBiasQuestions,
+  calcSimpleJungScore,
+  calcSimpleBiasResult,
+} from "./data/simpleQuestions.js";
 import { calcScore, getTypeName, calcBiasScores, biasInfo, getTendencyLabel } from "./utils/scoring.js";
 import { OCCUPATIONS_18, GENERATIONS_7 } from "../life_oracle_questions_data.js";
 import MapPage from "./pages/MapPage.jsx";
@@ -46,7 +52,7 @@ const AXIS_INFO = {
     leftLabel: '外向（E）', rightLabel: '内向（I）',
     leftDesc: '会話や外部との交流からエネルギーを得やすいタイプです。発言することで思考がまとまる傾向があります。',
     rightDesc: '一人の時間や内省からエネルギーを回復しやすいタイプです。頭の中で整理してから話す傾向があります。',
-    remaining: 24, nextLabel: '続ける → あと24問',
+    remaining: 24, nextLabel: '次へ進む（残り24問・約3分）',
   },
   SN: {
     axisNum: 2, axis: 'SN',
@@ -54,7 +60,7 @@ const AXIS_INFO = {
     leftLabel: '感覚（S）', rightLabel: '直観（N）',
     leftDesc: '目の前の現実・事実・経験を重視する傾向があります。具体的なデータや実績を大切にします。',
     rightDesc: 'パターンや可能性・未来のビジョンに惹かれる傾向があります。「なぜ？」「どうすれば？」を考えがちです。',
-    remaining: 16, nextLabel: '続ける → あと16問',
+    remaining: 16, nextLabel: '次へ進む（残り16問・約2分）',
   },
   TF: {
     axisNum: 3, axis: 'TF',
@@ -62,7 +68,7 @@ const AXIS_INFO = {
     leftLabel: '思考（T）', rightLabel: '感情（F）',
     leftDesc: '論理・分析・客観性で判断する傾向があります。感情より筋道を大切にします。',
     rightDesc: '人への影響・価値観・共感で判断する傾向があります。関係性の調和を大切にします。',
-    remaining: 8, nextLabel: '続ける → あと8問',
+    remaining: 8, nextLabel: '次へ進む（残り8問・約1分）',
   },
   JP: {
     axisNum: 4, axis: 'JP',
@@ -77,6 +83,41 @@ const AXIS_INFO = {
 const MILESTONE_PHASES = ['ei_milestone', 'sn_milestone', 'tf_milestone', 'jp_milestone'];
 const PHASE_TO_AXIS = { ei_milestone: 'EI', sn_milestone: 'SN', tf_milestone: 'TF', jp_milestone: 'JP' };
 
+// ─── 軸アイコン（質問ページのナッジ）─────────────────────
+const AXIS_ICONS = { EI: '💬', SN: '🔭', TF: '⚖️', JP: '🗓️' };
+const BIAS_ICON = '🧠';
+
+// ─── 職種アイコン（ファイルは触らずApp内でマッピング）──────
+const OCCUPATION_ICONS = {
+  '会社員': '🏢', '教育職': '📚', '公務員': '🏛️', '医療職': '🏥',
+  '士業': '⚖️', 'クリエイター': '🎨', '接客': '😊', '調理': '🍳',
+  '理美容師': '✂️', '介護': '🤝', 'フリーランス': '💻', '自営業': '🏪',
+  '一次産業': '🌾', '建設業': '🔨', '主婦/主夫': '🏠', '非正規雇用': '🗂️',
+  '学生': '🎓', '無職': '🔍',
+};
+
+// ─── A/B variant（URL ?v=a / ?v=b、初回はランダム） ───────
+function getVariant() {
+  if (typeof window === 'undefined') return 'a';
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('v');
+    if (fromUrl === 'a' || fromUrl === 'b') {
+      localStorage.setItem('lo_variant', fromUrl);
+      return fromUrl;
+    }
+    let stored = localStorage.getItem('lo_variant');
+    if (stored !== 'a' && stored !== 'b') {
+      stored = Math.random() < 0.5 ? 'a' : 'b';
+      localStorage.setItem('lo_variant', stored);
+    }
+    return stored;
+  } catch {
+    return 'a';
+  }
+}
+const VARIANT = typeof window !== 'undefined' ? getVariant() : 'a';
+
 // ─── 今の悩みクイックピック ───────────────────────────────
 const CONCERN_PICKS = [
   { id: 'transfer',    icon: '🔄', label: '転職・異動後の「違和感」を解消したい' },
@@ -89,7 +130,7 @@ const CONCERN_PICKS = [
 
 function trackEvent(action, params = {}) {
   if (typeof window.gtag === 'function') {
-    window.gtag('event', action, { event_category: 'diagnostic_flow', ...params });
+    window.gtag('event', action, { event_category: 'diagnostic_flow', variant: VARIANT, ...params });
   }
 }
 
@@ -214,11 +255,14 @@ export default function App() {
   const [page, setPage] = useState('top');
   const [mapFrom, setMapFrom] = useState('top');
   const [phase, setPhase] = useState("intro");
+  const [mode, setMode] = useState(null); // 'simple' | 'precision' | null
   const [occupation, setOccupation] = useState(null);
   const [generation, setGeneration] = useState(null);
   const [currentQ, setCurrentQ] = useState(0);
   const [jungAnswers, setJungAnswers] = useState({});
   const [biasAnswers, setBiasAnswers] = useState({});
+  const [simpleJungAnswers, setSimpleJungAnswers] = useState({});
+  const [simpleBiasAnswers, setSimpleBiasAnswers] = useState({});
   const [selected, setSelected] = useState(null);
   const [animating, setAnimating] = useState(false);
 
@@ -243,14 +287,32 @@ export default function App() {
 
   const isJungPhase = phase === "jung";
   const isBiasPhase = phase === "bias";
-  const activeQuestions = isBiasPhase ? biasQuestions : questions;
-  const currentQuestion = (isJungPhase || isBiasPhase) ? activeQuestions[currentQ] : null;
+  const isSimpleJungPhase = phase === "simple_jung";
+  const isSimpleBiasPhase = phase === "simple_bias";
+  const isSimplePhase = isSimpleJungPhase || isSimpleBiasPhase;
+  const activeQuestions = isSimpleJungPhase
+    ? simpleJungQuestions
+    : isSimpleBiasPhase
+      ? simpleBiasQuestions
+      : isBiasPhase ? biasQuestions : questions;
+  const currentQuestion = (isJungPhase || isBiasPhase || isSimplePhase) ? activeQuestions[currentQ] : null;
   const totalQ = activeQuestions.length;
-  const answeredQ = Object.keys(isBiasPhase ? biasAnswers : jungAnswers).length;
+  const simpleTotalQ = simpleJungQuestions.length + simpleBiasQuestions.length; // 12
+  const answeredQ = Object.keys(
+    isSimpleJungPhase ? simpleJungAnswers
+    : isSimpleBiasPhase ? simpleBiasAnswers
+    : isBiasPhase ? biasAnswers
+    : jungAnswers
+  ).length;
   const progress = totalQ > 0 ? (answeredQ / totalQ) * 100 : 0;
+  const simpleOverallAnswered = Object.keys(simpleJungAnswers).length + Object.keys(simpleBiasAnswers).length;
+  const simpleOverallProgress = (simpleOverallAnswered / simpleTotalQ) * 100;
 
   const scoreResult = phase === "result" ? (() => { try { return calcScore(jungAnswers); } catch { return null; } })() : null;
   const biasResult = phase === "result" ? (() => { try { return calcBiasScores(biasAnswers); } catch { return null; } })() : null;
+  const simpleScoreResult = phase === "simple_result" ? (() => { try { return calcSimpleJungScore(simpleJungAnswers); } catch { return null; } })() : null;
+  const simpleBiasResult = phase === "simple_result" ? (() => { try { return calcSimpleBiasResult(simpleBiasAnswers); } catch { return null; } })() : null;
+  const simpleMbtiType = simpleScoreResult ? getTypeName(simpleScoreResult) : "";
   const mbtiType = scoreResult ? getTypeName(scoreResult) : "";
   const jungTypeId = mbtiType ? (MBTI_TO_JUNG[mbtiType] ?? mbtiType) : "";
   const occupationLabel = occupation ? occupations.find((o) => o.id === occupation)?.label : "";
@@ -295,9 +357,14 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (phase !== 'result' || !mbtiType) return;
-    const cf = cognitiveFunctionMap[mbtiType];
-    const occKeywords = OCCUPATION_RSS_KEYWORDS[occupation] ?? [occupationLabel];
+    const isFullResult = phase === 'result' && mbtiType;
+    const isSimpleResult = phase === 'simple_result' && simpleMbtiType;
+    if (!isFullResult && !isSimpleResult) return;
+    const activeType = isFullResult ? mbtiType : simpleMbtiType;
+    const cf = cognitiveFunctionMap[activeType];
+    const occKeywords = isFullResult
+      ? (OCCUPATION_RSS_KEYWORDS[occupation] ?? [occupationLabel])
+      : [];
     const keywords = [cf?.lightName, ...occKeywords].filter(Boolean);
     fetch('/api/rss')
       .then(res => res.text())
@@ -314,7 +381,7 @@ export default function App() {
         setRssLinks(matched.slice(0, 3));
       })
       .catch(() => {});
-  }, [phase, mbtiType, occupationLabel]);
+  }, [phase, mbtiType, simpleMbtiType, occupationLabel]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -323,8 +390,15 @@ export default function App() {
   }, [chatMessages, chatLoading]);
 
   useEffect(() => { trackEvent('app_loaded'); }, []);
-  useEffect(() => { if (phase === 'intro') trackEvent('step_top'); }, [phase]);
+  useEffect(() => {
+    if (phase !== 'intro') return;
+    trackEvent('step_top');
+    trackEvent('intro_view');
+    const t = setTimeout(() => trackEvent('intro_5s_engaged'), 5000);
+    return () => clearTimeout(t);
+  }, [phase]);
   useEffect(() => { if (phase === 'jung' && currentQ === 0) trackEvent('step_q1_start'); }, [phase]);
+  useEffect(() => { if (phase === 'simple_jung' && currentQ === 0) trackEvent('simple_jung_q1_start'); }, [phase]);
   useEffect(() => {
     if (phase === 'result' && typeProfiles && prescriptions && biasMessages && !resultTrackedRef.current) {
       trackEvent('step_result_shown');
@@ -424,6 +498,10 @@ export default function App() {
         const newAnswers = { ...jungAnswers, [currentQuestion.id]: value };
         setJungAnswers(newAnswers);
         const next = currentQ + 1;
+        if (next === 4)  trackEvent('step_q4_pass');
+        if (next === 12) trackEvent('step_q12_pass');
+        if (next === 20) trackEvent('step_q20_pass');
+        if (next === 28) trackEvent('step_q28_pass');
         if (next === AXIS_END.EI)      { setCurrentQ(next); setPhase("ei_milestone"); trackEvent('step_q8_pass'); }
         else if (next === AXIS_END.SN) { setCurrentQ(next); setPhase("sn_milestone"); trackEvent('step_q16_pass'); }
         else if (next === AXIS_END.TF) { setCurrentQ(next); setPhase("tf_milestone"); trackEvent('step_q24_pass'); }
@@ -433,6 +511,7 @@ export default function App() {
         const newAnswers = { ...biasAnswers, [currentQuestion.id]: value };
         setBiasAnswers(newAnswers);
         if (currentQ + 1 < biasQuestions.length) {
+          if (currentQ + 1 === 4) trackEvent('step_bias_q4_pass');
           if (currentQ + 1 === 8) trackEvent('step_bias_q8_pass');
           setCurrentQ((prev) => prev + 1);
         } else {
@@ -443,11 +522,68 @@ export default function App() {
     }, 300);
   }
 
+  // ─── handleSimpleAnswer（簡易診断・二択 0/1） ────────
+  function handleSimpleAnswer(value) {
+    if (animating) return;
+    setSelected(value);
+    setAnimating(true);
+    setTimeout(() => {
+      setSelected(null);
+      setAnimating(false);
+      if (isSimpleJungPhase) {
+        const newAnswers = { ...simpleJungAnswers, [currentQuestion.id]: value };
+        setSimpleJungAnswers(newAnswers);
+        const next = currentQ + 1;
+        if (next === 4) trackEvent('simple_jung_q4_pass');
+        if (next < simpleJungQuestions.length) {
+          setCurrentQ(next);
+        } else {
+          trackEvent('simple_jung_complete');
+          setCurrentQ(0);
+          setPhase("simple_bias");
+        }
+      } else if (isSimpleBiasPhase) {
+        const newAnswers = { ...simpleBiasAnswers, [currentQuestion.id]: value };
+        setSimpleBiasAnswers(newAnswers);
+        const next = currentQ + 1;
+        if (next < simpleBiasQuestions.length) {
+          setCurrentQ(next);
+        } else {
+          trackEvent('simple_bias_complete');
+          trackEvent('simple_result_shown');
+          setPhase("simple_result");
+        }
+      }
+    }, 250);
+  }
+
   // ─── handleBack ─────────────────────────────────────
   function handleBack() {
     trackEvent('step_back_pressed', { step_name: phase });
-    if (phase === "occupation") { setPhase("intro"); }
+    if (phase === "occupation") { setPhase("intro"); setMode(null); }
     else if (phase === "generation") { setPhase("occupation"); }
+    else if (phase === "simple_jung") {
+      if (currentQ > 0) {
+        const newAnswers = { ...simpleJungAnswers };
+        delete newAnswers[simpleJungQuestions[currentQ - 1].id];
+        setSimpleJungAnswers(newAnswers);
+        setCurrentQ((prev) => prev - 1);
+        setSelected(null);
+      } else { setPhase("intro"); setMode(null); }
+    }
+    else if (phase === "simple_bias") {
+      if (currentQ > 0) {
+        const newAnswers = { ...simpleBiasAnswers };
+        delete newAnswers[simpleBiasQuestions[currentQ - 1].id];
+        setSimpleBiasAnswers(newAnswers);
+        setCurrentQ((prev) => prev - 1);
+        setSelected(null);
+      } else {
+        // 簡易ユング最終問題へ戻る
+        setCurrentQ(simpleJungQuestions.length - 1);
+        setPhase("simple_jung");
+      }
+    }
     else if (MILESTONE_PHASES.includes(phase)) {
       const axis = PHASE_TO_AXIS[phase];
       const lastQIdx = AXIS_END[axis] - 1;
@@ -481,12 +617,22 @@ export default function App() {
 
   function handleReset() {
     resultTrackedRef.current = false;
-    setPage('top'); setPhase("intro"); setOccupation(null); setGeneration(null);
+    setPage('top'); setPhase("intro"); setMode(null);
+    setOccupation(null); setGeneration(null);
     setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
-    setAnimating(false); setShareCopied(false);
+    setSimpleJungAnswers({}); setSimpleBiasAnswers({});
+    setAnimating(false);
     setTypeProfiles(null); setPrescriptions(null); setBiasMessages(null);
     setChatMessages([]); setChatInput(""); setChatLoading(false); setChatError(null);
     setSelectedConcern(null);
+  }
+
+  // 簡易→精密診断への遷移（簡易回答は破棄、新規Q&A）
+  function startPrecisionFromSimple() {
+    trackEvent('simple_to_precision_clicked');
+    setMode('precision');
+    setCurrentQ(0); setJungAnswers({}); setBiasAnswers({}); setSelected(null);
+    setPhase("occupation");
   }
 
 
@@ -513,34 +659,266 @@ export default function App() {
         {/* Intro */}
         {phase === "intro" && (
           <div style={{ ...CARD_STYLE, animation: "lo-fade-in 320ms var(--ease-out)" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20, color: ACCENT }}>
-              <CompassIcon size={120} strokeWidth={1.2} decorative />
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 19, fontWeight: 700, lineHeight: 1.6,
+              color: TEXT, textAlign: "center", marginBottom: 20,
+            }}>
+              職場で<span style={{ color: ACCENT }}>「なぜかうまくいかない」</span>と<br />
+              感じていませんか？
+            </h2>
+
+            <div style={{ marginBottom: 22 }}>
+              <div className="lo-benefit-row">
+                <span className="lo-benefit-check">✓</span>
+                <span>自分の<strong>強み</strong>と無意識の<strong>行動パターン</strong>がわかる</span>
+              </div>
+              <div className="lo-benefit-row">
+                <span className="lo-benefit-check">✓</span>
+                <span>あなたのタイプ別の<strong>「思考のクセ」</strong>を可視化</span>
+              </div>
+              <div className="lo-benefit-row">
+                <span className="lo-benefit-check">✓</span>
+                <span>本格診断は<strong>処方箋とAI相談</strong>つき（ユング心理学×行動経済学）</span>
+              </div>
             </div>
-            <p style={{ fontSize: 14, lineHeight: 1.9, color: TEXT_MUTED, marginBottom: 28, textAlign: "center" }}>
-              自分の動き方を知ることは、<br />
-              行動を変えるはじめの一歩。<br /><br />
-              所要時間：約10〜12分（ユング32問 + バイアス16問）
-            </p>
-            <button onClick={() => { trackEvent('step_start'); setPhase("occupation"); }} style={{ fontFamily: 'var(--font-body)', width: "100%", padding: "16px", background: ACCENT, border: `1px solid ${ACCENT}`, borderRadius: 10, color: "#ffffff", fontSize: 15, fontWeight: 600, letterSpacing: "0.04em", cursor: "pointer", marginBottom: 12 }}>
-              診断を始める
+
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 22, color: ACCENT }}>
+              <CompassIcon size={64} strokeWidth={1.4} decorative />
+            </div>
+
+            <button
+              className="lo-primary-cta"
+              style={{ marginBottom: 6 }}
+              onClick={() => {
+                trackEvent('mode_selected_simple');
+                trackEvent('step_start');
+                setMode('simple');
+                setCurrentQ(0);
+                setSimpleJungAnswers({});
+                setSimpleBiasAnswers({});
+                setPhase("simple_jung");
+              }}
+            >
+              60秒で簡易診断を試す（無料）
             </button>
+            <div style={{ fontSize: 11, color: TEXT_MUTED, textAlign: "center", marginBottom: 16 }}>
+              全12問・登録不要・あなたの仮タイプがわかる
+            </div>
+
+            <button
+              className="lo-secondary-cta"
+              style={{ marginBottom: 8 }}
+              onClick={() => {
+                trackEvent('mode_selected_precision');
+                trackEvent('step_start');
+                setMode('precision');
+                setPhase("occupation");
+              }}
+            >
+              精密診断で処方箋・AI相談を受ける（5〜7分）
+            </button>
+            <div style={{ fontSize: 11, color: TEXT_MUTED, textAlign: "center", marginBottom: 18 }}>
+              職種×年代×タイプから2,016通りの個別処方箋
+            </div>
+
             <button className="map-btn" onClick={() => { setMapFrom('top'); setPage('map'); }}>16タイプ 全体マップを見る</button>
           </div>
         )}
+
+        {/* 簡易診断（ユング8問 + バイアス4問・二択） */}
+        {(phase === "simple_jung" || phase === "simple_bias") && currentQuestion && (
+          <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
+            <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
+            <div style={{ height: 7, background: "rgba(184,131,63,0.12)", borderRadius: 4, marginBottom: 10 }}>
+              <div style={{ height: "100%", width: `${simpleOverallProgress}%`, background: ACCENT, borderRadius: 4, transition: "width 0.3s" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
+                Q{simpleOverallAnswered + 1} / {simpleTotalQ}
+              </div>
+              <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>
+                60秒診断・残り {simpleTotalQ - simpleOverallAnswered - (selected !== null ? 1 : 0)} 問
+              </div>
+            </div>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 10 }}>
+              {isSimpleJungPhase
+                ? `${AXIS_ICONS[currentQuestion.axis] ?? ''} ${currentQuestion.scene}`
+                : `${BIAS_ICON} ${currentQuestion.scene}`}
+            </div>
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 17, fontWeight: 500, lineHeight: 1.9, marginBottom: 18, color: TEXT,
+            }}>
+              {currentQuestion.stem}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {[currentQuestion.optionA, currentQuestion.optionB].map((text, i) => {
+                const activeAnswers = isSimpleJungPhase ? simpleJungAnswers : simpleBiasAnswers;
+                const isSelected = selected === i || activeAnswers[currentQuestion.id] === i;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleSimpleAnswer(i)}
+                    className={`lo-simple-answer-btn ${isSelected ? 'active' : ''}`}
+                  >
+                    <span style={{
+                      display: "inline-block",
+                      width: 22, height: 22, lineHeight: '22px',
+                      textAlign: 'center', borderRadius: '50%',
+                      background: isSelected ? ACCENT : "rgba(184,131,63,0.12)",
+                      color: isSelected ? "#fff" : ACCENT,
+                      fontSize: 12, fontWeight: 700,
+                      marginRight: 10, verticalAlign: 'middle',
+                    }}>
+                      {i === 0 ? 'A' : 'B'}
+                    </span>
+                    <span style={{ verticalAlign: 'middle' }}>{text}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 簡易診断結果 */}
+        {phase === "simple_result" && simpleScoreResult && simpleBiasResult && (() => {
+          const cf = cognitiveFunctionMap[simpleMbtiType];
+          const flagged = simpleBiasResult.flagged;
+          return (
+            <>
+              <div style={{ ...CARD_STYLE, animation: "lo-fade-in 320ms var(--ease-out)" }}>
+                <div style={{ fontSize: 11, letterSpacing: 1, color: ACCENT, marginBottom: 4 }}>あなたの仮タイプ</div>
+                {cf && (
+                  <>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 36, textAlign: "center", marginBottom: 4, fontWeight: 700, color: ACCENT }}>{cf.lightName}</h2>
+                    <div style={{ textAlign: "center", fontSize: 12, color: TEXT_MUTED, marginBottom: 10 }}>
+                      {simpleMbtiType} · {typeLabels[simpleMbtiType] ?? ''}
+                    </div>
+                    {famousPeople[simpleMbtiType] && (
+                      <div style={{ textAlign: "center", fontSize: 12, color: ACCENT, marginBottom: 14 }}>
+                        {famousPeople[simpleMbtiType].people.join(' · ')} と同じタイプ
+                      </div>
+                    )}
+                    <div style={{ background: "rgba(255,255,255,0.8)", border: "1px solid rgba(184,131,63,0.15)", borderRadius: 10, padding: "12px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "4px 0" }}>
+                        <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#3d7a5a" }}>光の状態</span>
+                        <span style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>{cf.lightName}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "4px 0" }}>
+                        <span style={{ fontSize: 11, width: 80, flexShrink: 0, color: "#a05050" }}>影の状態</span>
+                        <span style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>{cf.shadowName}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* バイアス傾向（簡易） */}
+              {flagged.length > 0 && (
+                <div style={CARD_STYLE}>
+                  <h3 style={{ fontSize: 14, color: ACCENT, marginBottom: 10 }}>反応しやすい思考のクセ</h3>
+                  {flagged.slice(0, 2).map((bid, idx) => {
+                    const info = biasInfo[bid];
+                    return (
+                      <div key={bid} style={{ background: idx === 0 ? "rgba(184,131,63,0.08)" : "rgba(255,255,255,0.6)", border: `1px solid ${idx === 0 ? "rgba(184,131,63,0.25)" : "rgba(184,131,63,0.12)"}`, borderRadius: 12, padding: "14px 16px", marginBottom: idx === 0 && flagged.length > 1 ? 10 : 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, color: idx === 0 ? ACCENT : TEXT_MUTED, letterSpacing: 1 }}>第{idx + 1}傾向</span>
+                          <span style={{ fontSize: 14, fontWeight: 600 }}>{info?.name}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: TEXT_MUTED, lineHeight: 1.6 }}>{info?.short}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* 精密診断ナッジ（最重要） */}
+              <div className="lo-precision-nudge" style={{
+                background: "rgba(184, 131, 63, 0.08)",
+                border: `1.5px solid ${ACCENT}`,
+                borderRadius: 14,
+                padding: "20px 20px",
+                marginBottom: 20,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 10, letterSpacing: "0.02em" }}>
+                  💡 これは「表面的なあなた」の判定です
+                </div>
+                <p style={{ fontSize: 13, lineHeight: 1.8, color: TEXT, margin: "0 0 14px 0" }}>
+                  簡易診断は4軸を2問ずつで判定しています。本当のあなたは、潜在的に違う答えを持っているかもしれません。
+                </p>
+                <div style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(184,131,63,0.2)", borderRadius: 10, padding: "12px 14px", marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, color: ACCENT, marginBottom: 8, fontWeight: 600 }}>精密診断（5〜7分）なら：</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.8, color: TEXT }}>
+                    <div>✓ 32問+16問で正確なタイプを確定</div>
+                    <div>✓ 職種×年代×タイプで絞った<strong>個別処方箋</strong></div>
+                    <div>✓ AIコンサルタントへの<strong>個別相談</strong>（3回まで）</div>
+                  </div>
+                </div>
+                <button
+                  className="lo-primary-cta"
+                  onClick={startPrecisionFromSimple}
+                >
+                  本当の自分を確かめる →
+                </button>
+              </div>
+
+              {/* note記事3本（既存RSSから） */}
+              {rssLinks.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 10, letterSpacing: 0.5 }}>
+                    {cf?.lightName ?? simpleMbtiType} に関連する深掘り記事
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {rssLinks.map((item, idx) => (
+                      <a key={idx} href={item.link} target='_blank' rel='noopener noreferrer'
+                        onClick={() => trackEvent('simple_note_click', { article_index: idx })}
+                        style={{ display: 'block', padding: '14px 16px', background: 'rgba(184,131,63,0.06)', border: '1px solid rgba(184,131,63,0.18)', borderRadius: 10, color: TEXT, textDecoration: 'none' }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>{item.title}</div>
+                        <div style={{ fontSize: 11, color: ACCENT, marginTop: 6, textAlign: 'right' }}>noteで読む →</div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button onClick={() => { setMapFrom('simple_result'); setPage('map'); }}
+                style={{ width: "100%", padding: 14, background: "rgba(184,131,63,0.08)", border: `1px solid rgba(184,131,63,0.25)`, borderRadius: 10, color: TEXT, fontSize: 14, cursor: "pointer", marginBottom: 12 }}>
+                16タイプ 全体マップを見る
+              </button>
+              <button onClick={handleReset}
+                style={{ width: "100%", padding: 14, background: "transparent", border: `1px solid rgba(184,131,63,0.2)`, borderRadius: 10, color: TEXT_MUTED, fontSize: 14, cursor: "pointer", marginBottom: 20 }}>
+                もう一度診断する
+              </button>
+            </>
+          );
+        })()}
 
         {/* Occupation */}
         {phase === "occupation" && (
           <div style={CARD_STYLE}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 1 / 3</div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 19, marginBottom: 12, textAlign: "center", fontWeight: 500 }}>あなたの職種に近いのは？</h2>
+            <div style={{ display: "inline-block", fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, background: "rgba(184,131,63,0.10)", padding: "3px 10px", borderRadius: 12, marginBottom: 10 }}>Step 1 / 3</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 19, marginBottom: 14, textAlign: "center", fontWeight: 500 }}>あなたの職種に近いのは？</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-              {occupations.map((o) => (
-                <button key={o.id} onClick={() => { setOccupation(o.id); trackEvent('step_job_selected'); setPhase("generation"); }}
-                  style={{ padding: 14, background: occupation === o.id ? "rgba(184,131,63,0.12)" : "rgba(255,255,255,0.7)", border: `1px solid ${occupation === o.id ? ACCENT : "rgba(184,131,63,0.18)"}`, borderRadius: 10, color: TEXT, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
-                  {o.label}
-                </button>
-              ))}
+              {occupations.map((o) => {
+                const icon = OCCUPATION_ICONS[o.label] ?? '💼';
+                const active = occupation === o.id;
+                return (
+                  <button key={o.id} onClick={() => { setOccupation(o.id); trackEvent('step_job_selected'); setPhase("generation"); }}
+                    style={{
+                      padding: "14px 10px",
+                      background: active ? "rgba(184,131,63,0.12)" : "rgba(255,255,255,0.7)",
+                      border: `1px solid ${active ? ACCENT : "rgba(184,131,63,0.18)"}`,
+                      borderRadius: 10,
+                      color: TEXT, fontSize: 13, cursor: "pointer",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                    }}>
+                    <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
+                    <span style={{ fontSize: 12, fontWeight: active ? 600 : 400 }}>{o.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -549,15 +927,18 @@ export default function App() {
         {phase === "generation" && (
           <div style={CARD_STYLE}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 8 }}>Step 2 / 3</div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 19, marginBottom: 20, textAlign: "center", fontWeight: 500 }}>あなたの年代は？</h2>
+            <div style={{ display: "inline-block", fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, background: "rgba(184,131,63,0.10)", padding: "3px 10px", borderRadius: 12, marginBottom: 10 }}>Step 2 / 3</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 19, marginBottom: 18, textAlign: "center", fontWeight: 500 }}>あなたの年代は？</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-              {generations.map((g) => (
-                <button key={g.id} onClick={() => { setGeneration(g.id); trackEvent('step_age_selected'); setPhase("jung"); }}
-                  style={{ padding: 14, background: generation === g.id ? "rgba(184,131,63,0.12)" : "rgba(255,255,255,0.7)", border: `1px solid ${generation === g.id ? ACCENT : "rgba(184,131,63,0.18)"}`, borderRadius: 10, color: TEXT, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                  {g.label}
-                </button>
-              ))}
+              {generations.map((g) => {
+                const active = generation === g.id;
+                return (
+                  <button key={g.id} onClick={() => { setGeneration(g.id); trackEvent('step_age_selected'); setPhase("jung"); }}
+                    style={{ padding: 14, background: active ? "rgba(184,131,63,0.14)" : "rgba(255,255,255,0.7)", border: `1px solid ${active ? ACCENT : "rgba(184,131,63,0.18)"}`, borderRadius: 10, color: active ? ACCENT : TEXT, fontSize: 14, fontWeight: active ? 700 : 600, cursor: "pointer" }}>
+                    {active && <span style={{ marginRight: 4 }}>✓</span>}{g.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -566,25 +947,50 @@ export default function App() {
         {(phase === "jung" || phase === "bias") && currentQuestion && (
           <div style={{ ...CARD_STYLE, opacity: animating ? 0.7 : 1, transition: "opacity 0.2s" }}>
             <button onClick={handleBack} style={backBtnStyle}>← 戻る</button>
-            <div style={{ height: 3, background: "rgba(184,131,63,0.12)", borderRadius: 2, marginBottom: 10 }}>
-              <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 2, transition: "width 0.3s" }} />
+            <div style={{ height: 7, background: "rgba(184,131,63,0.12)", borderRadius: 4, marginBottom: 10 }}>
+              <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, borderRadius: 4, transition: "width 0.3s" }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-              <div style={{ fontSize: 11, color: TEXT_MUTED }}>Q{currentQ + 1} / {totalQ}</div>
-              {isBiasPhase && <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>思考のクセを調べます</div>}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Q{currentQ + 1} / {totalQ}</div>
+              <div style={{ fontSize: 11, color: ACCENT, letterSpacing: 1 }}>
+                {isBiasPhase ? "思考のクセ" : "性格診断"}・残り {totalQ - currentQ - 1} 問
+              </div>
             </div>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: ACCENT, marginBottom: 6 }}>
-              {isJungPhase ? "Step 3 / 3 — 性格診断" : "Step 3 / 3 — バイアス測定"}
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: ACCENT, marginBottom: 8 }}>
+              {isJungPhase
+                ? `${AXIS_ICONS[currentQuestion.axis] ?? ''} ${currentQuestion.tag}`
+                : `${BIAS_ICON} 思考のクセを測定中`}
             </div>
-            {isJungPhase && <div style={{ fontSize: 12, color: TEXT_MUTED, marginBottom: 14 }}>テーマ：{currentQuestion.tag}</div>}
-            <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 20 }}>{currentQuestion.stem}</p>
+            <p style={{
+              fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 500,
+              lineHeight: 1.9, marginBottom: 18, color: TEXT,
+            }}>
+              {currentQuestion.stem}
+            </p>
+            <div className="lo-spectrum-bar">
+              <span>← 同意する</span>
+              <span>同意しない →</span>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
               {ANSWER_LABELS.map((label, i) => {
                 const activeAnswers = isBiasPhase ? biasAnswers : jungAnswers;
                 const isSelected = selected === i || activeAnswers[currentQuestion.id] === i;
+                const isExtreme = i === 0 || i === 3;
                 return (
                   <button key={i} onClick={() => handleAnswer(i)}
-                    style={{ padding: "12px 4px", background: isSelected ? "rgba(184,131,63,0.14)" : "rgba(255,255,255,0.7)", border: `1px solid ${isSelected ? ACCENT : "rgba(184,131,63,0.18)"}`, borderRadius: 10, color: isSelected ? ACCENT : TEXT, fontSize: 12, lineHeight: 1.4, cursor: "pointer", textAlign: "center", fontWeight: isSelected ? 600 : 400, transition: "all 0.15s" }}>
+                    className="lo-answer-btn"
+                    style={{
+                      padding: "12px 4px",
+                      background: isSelected ? "rgba(184,131,63,0.16)" : "rgba(255,255,255,0.8)",
+                      border: `1px solid ${isSelected ? ACCENT : "rgba(184,131,63,0.20)"}`,
+                      borderRadius: 10,
+                      color: isSelected ? ACCENT : TEXT,
+                      fontSize: isExtreme ? 13 : 12,
+                      lineHeight: 1.4,
+                      cursor: "pointer", textAlign: "center",
+                      fontWeight: isSelected ? 700 : (isExtreme ? 500 : 400),
+                      transition: "all 0.15s",
+                    }}>
                     {label}
                   </button>
                 );
@@ -621,7 +1027,7 @@ export default function App() {
               </div>
               <div style={{ fontSize: 11, color: TEXT_MUTED, textAlign: 'center', marginBottom: 20 }}>{info.axisNum} / 4 軸完了</div>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'rgba(184,131,63,0.10)', border: `2px solid ${ACCENT}`, marginBottom: 12 }}>
+                <div className="lo-milestone-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'rgba(184,131,63,0.10)', border: `2px solid ${ACCENT}`, marginBottom: 12 }}>
                   <span style={{ fontSize: 24, fontWeight: 700, color: ACCENT }}>{isLeft ? info.leftPole : info.rightPole}</span>
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: TEXT, marginBottom: 6 }}>{isLeft ? info.leftLabel : info.rightLabel}</div>

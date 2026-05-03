@@ -90,6 +90,127 @@ button:not(:disabled):active {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── 診断UI拡張（離脱率改善） ─────────────────────────── */
+
+/* 回答ボタンのホバー強化（精密診断・4択） */
+.lo-answer-btn:hover:not(:disabled) {
+  background: rgba(184, 131, 63, 0.12) !important;
+  border-color: rgba(184, 131, 63, 0.50) !important;
+}
+
+/* 簡易診断ボタン（2択・大きめ） */
+.lo-simple-answer-btn {
+  width: 100%;
+  padding: 18px 18px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(184, 131, 63, 0.22);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.7;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all 200ms var(--ease-out);
+}
+.lo-simple-answer-btn:hover:not(:disabled) {
+  background: rgba(184, 131, 63, 0.10);
+  border-color: var(--accent-wood);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(184, 131, 63, 0.15);
+}
+.lo-simple-answer-btn.active {
+  background: rgba(184, 131, 63, 0.16);
+  border-color: var(--accent-wood);
+  font-weight: 600;
+}
+
+/* スペクトルバー（4択の上に表示する強度ガイド） */
+.lo-spectrum-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-subtle);
+  margin-bottom: 6px;
+  padding: 0 4px;
+  letter-spacing: 0.05em;
+}
+
+/* マイルストーンの軸アイコン pulse */
+@keyframes lo-pulse-ring {
+  0%   { box-shadow: 0 0 0 0   rgba(184, 131, 63, 0.40); }
+  70%  { box-shadow: 0 0 0 14px rgba(184, 131, 63, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(184, 131, 63, 0); }
+}
+.lo-milestone-icon {
+  animation: lo-pulse-ring 1.4s ease-out 1 forwards;
+}
+
+/* 簡易結果の精密診断ナッジカード（やわらかく光る） */
+@keyframes lo-soft-glow {
+  0%, 100% { box-shadow: 0 4px 12px rgba(184, 131, 63, 0.10); }
+  50%      { box-shadow: 0 4px 20px rgba(184, 131, 63, 0.22); }
+}
+.lo-precision-nudge {
+  animation: lo-soft-glow 3s ease-in-out infinite;
+}
+
+/* プライマリCTAボタン（intro用・大きめ） */
+.lo-primary-cta {
+  width: 100%;
+  padding: 18px 16px;
+  background: var(--accent-wood);
+  border: 1px solid var(--accent-wood);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(184, 131, 63, 0.20);
+}
+.lo-primary-cta:hover:not(:disabled) {
+  background: var(--accent-wood-deep);
+  border-color: var(--accent-wood-deep);
+  box-shadow: 0 6px 16px rgba(184, 131, 63, 0.30);
+}
+
+/* セカンダリCTA（intro用・透明背景） */
+.lo-secondary-cta {
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: 1.5px solid var(--accent-wood);
+  border-radius: 12px;
+  color: var(--accent-wood-deep);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.lo-secondary-cta:hover:not(:disabled) {
+  background: var(--accent-wood-soft);
+}
+
+/* ベネフィット行（チェックマーク付き） */
+.lo-benefit-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.lo-benefit-check {
+  flex-shrink: 0;
+  color: var(--accent-wood);
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 1px;
+}
+
 /* ─── MapPage ─────────────────────────────────────────── */
 .map-page {
   padding: 1rem;
