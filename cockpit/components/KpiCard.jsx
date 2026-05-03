@@ -15,7 +15,7 @@ function formatValue(value, format) {
   return value;
 }
 
-export default function KpiCard({ title, value, target, status, format, sparkline, footnote }) {
+export default function KpiCard({ title, value, target, status, format, sparkline, sparklineDates, footnote }) {
   const c = STATUS_COLORS[status] ?? STATUS_COLORS.unknown;
   return (
     <div
@@ -39,7 +39,7 @@ export default function KpiCard({ title, value, target, status, format, sparklin
         )}
       </div>
       <div style={{ marginTop: 8 }}>
-        <Sparkline data={sparkline} color={c.border} />
+        <Sparkline data={sparkline} dates={sparklineDates} color={c.border} format={format} />
       </div>
       {footnote && <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>{footnote}</div>}
     </div>

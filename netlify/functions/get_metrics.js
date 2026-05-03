@@ -138,11 +138,23 @@ export default async (req) => {
       dates: recent.map((r) => r.date),
     };
 
-    const ageHours = (Date.now() - stats.mtimeMs) / 1000 / 3600;
+    // 鮮度判定: NetlifyのCIではfile mtimeが復元されないため、CSVの最新date列を起点にする
+    // dateは "YYYY-MM-DD"。当日 = JSTで18:00頃に更新される想定なので、48時間超で古いと判断。
+    let ageHours = null;
+    let stale = false;
+    if (latest?.date) {
+      const dateStr = latest.date;
+      // JST 0:00 として解釈
+      const dt = new Date(`${dateStr}T00:00:00+09:00`);
+      if (!isNaN(dt.getTime())) {
+        ageHours = Math.round(((Date.now() - dt.getTime()) / 1000 / 3600) * 10) / 10;
+        stale = ageHours > 48;
+      }
+    }
     const freshness = {
-      last_csv_update: stats.mtime.toISOString(),
-      age_hours: Math.round(ageHours * 10) / 10,
-      stale: ageHours > 30,
+      last_csv_date: latest?.date ?? null,
+      age_hours: ageHours,
+      stale,
     };
 
     return jsonResponse(200, {

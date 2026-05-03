@@ -247,6 +247,7 @@ export default function App() {
                 status={data.kpi.like_rate.status}
                 format="percent"
                 sparkline={data.sparklines.like_rate}
+                sparklineDates={data.sparklines.dates}
                 footnote="目標15%以上 = 高品質シグナル"
               />
               <KpiCard
@@ -256,6 +257,7 @@ export default function App() {
                 status={data.kpi.completion_rate.status}
                 format="percent"
                 sparkline={data.sparklines.completion_rate}
+                sparklineDates={data.sparklines.dates}
                 footnote="完了/開始（GA4イベント計測）"
               />
               <KpiCard
@@ -264,6 +266,7 @@ export default function App() {
                 status={data.kpi.x_link_clicks.status}
                 format="int"
                 sparkline={data.sparklines.x_link_clicks}
+                sparklineDates={data.sparklines.dates}
                 footnote="X送客KPI（24h）"
               />
               <KpiCard
@@ -272,6 +275,7 @@ export default function App() {
                 status={data.kpi.active_users.status}
                 format="int"
                 sparkline={data.sparklines.active_users}
+                sparklineDates={data.sparklines.dates}
                 footnote={
                   data.kpi.active_users.diff !== null && data.kpi.active_users.diff !== undefined
                     ? `前日比 ${data.kpi.active_users.diff >= 0 ? "+" : ""}${data.kpi.active_users.diff.toFixed(0)}人`
