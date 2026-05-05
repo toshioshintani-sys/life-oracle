@@ -477,11 +477,13 @@ export default function App() {
     if (compassPressTimerRef.current) { clearTimeout(compassPressTimerRef.current); compassPressTimerRef.current = null; }
   }
   useEffect(() => {
-    if (phase === 'result' && typeProfiles && prescriptions && biasMessages && !resultTrackedRef.current) {
+    if (phase === 'result' && scoreResult && typeProfiles && prescriptions && biasMessages && !resultTrackedRef.current) {
+      const archetypeName = cognitiveFunctionMap[mbtiType]?.lightName ?? '';
       trackEvent('step_result_shown');
+      trackEvent('diag_complete', { archetype: archetypeName, mbti_type: mbtiType });
       resultTrackedRef.current = true;
     }
-  }, [phase, typeProfiles, prescriptions, biasMessages]);
+  }, [phase, scoreResult, typeProfiles, prescriptions, biasMessages]);
 
   // ─── 悩みクイックピック → 即AIへ送信 ─────────────────
   async function handleConcernSelect(pick) {
