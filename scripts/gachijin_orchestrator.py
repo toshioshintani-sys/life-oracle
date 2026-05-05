@@ -38,7 +38,7 @@ DEFAULT_OUT = ROOT / "var" / "gachijin" / "jobs"
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from gachijin.article import generate_article_bundle  # noqa: E402
+from gachijin.article import generate_article_bundle, _short_theme  # noqa: E402
 from gachijin.markdown import markdown_to_note_html  # noqa: E402
 from gachijin.thumbnails import IMAGE_SIZE, render_thumbnail  # noqa: E402
 
@@ -191,11 +191,14 @@ def phase_article(job: dict[str, Any], job_dir: Path, supabase: SupabaseClient |
 def _build_thumbnail_spec(job_id: str, bundle: dict[str, Any]) -> dict[str, Any]:
     days = {}
     design = bundle["thumbnail_design"]
+    # Safety: sub_text must always be the short theme name (never a poetic phrase).
+    # This overrides whatever Claude generated to guarantee consistent labelling.
+    short = _short_theme(bundle.get("theme_name", ""))
     for day_key, day_design in design["days"].items():
         days[day_key] = {
             "moment": day_design["moment"],
             "main_text": day_design["main_text"],
-            "sub_text": day_design["sub_text"],
+            "sub_text": short or day_design["sub_text"],
         }
     return {
         "job_id": job_id,
