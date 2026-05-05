@@ -346,18 +346,15 @@ def phase_note(
             )
 
     mode = job.get("mode", "draft_only")
-    if mode == "draft_only" or dry_run:
+
+    # --dry-run: skip note.com entirely
+    if dry_run:
         if supabase:
             supabase.update_job(job["id"], status="note_payload_ready")
-            supabase.log(
-                job["id"],
-                "note_payload_ready",
-                "Stopped before note posting (draft_only or dry-run)",
-                {"mode": mode, "dry_run": dry_run},
-            )
+            supabase.log(job["id"], "note_payload_ready", "Skipped note posting (dry-run)", {"dry_run": True})
         return {day: {"posted": False, "publish_at": payloads[day]["publish_at"]} for day in ("day1", "day2", "day3")}
 
-    # Real posting path
+    # Real posting path (draft_only = no publish_at, schedule_publish = with publish_at)
     try:
         from gachijin import note_client  # type: ignore
     except ImportError:
@@ -372,26 +369,30 @@ def phase_note(
         meta = payloads[day_key]
         image_path = final_paths.get(day_key)
         image_bytes = image_path.read_bytes() if image_path and image_path.exists() else None
-        result = note_client.post(meta["payload"], image_bytes, meta["publish_at"])
+        # draft_only: create draft without scheduling; schedule_publish: include publish_at
+        publish_at = None if mode == "draft_only" else meta["publish_at"]
+        result = note_client.post(meta["payload"], image_bytes, publish_at)
         posted[day_key] = {"posted": True, **result}
 
+        output_status = "draft" if mode == "draft_only" else "scheduled"
         if supabase:
             supabase.update_output(
                 job["id"],
                 index,
                 note_url=result["url"],
                 scheduled_at=meta["publish_at"],
-                status="scheduled",
+                status=output_status,
             )
             supabase.log(
                 job["id"],
-                "scheduled",
-                f"Day {index} scheduled on note.com",
-                {"url": result["url"], "publish_at": meta["publish_at"]},
+                output_status,
+                f"Day {index} {'saved as draft' if mode == 'draft_only' else 'scheduled'} on note.com",
+                {"url": result["url"], "publish_at": publish_at},
             )
 
+    final_status = "draft" if mode == "draft_only" else "scheduled"
     if supabase:
-        supabase.update_job(job["id"], status="scheduled")
+        supabase.update_job(job["id"], status=final_status)
 
     return posted
 
@@ -460,9 +461,13 @@ def run(job: dict[str, Any], out_root: Path, supabase: SupabaseClient | None, dr
             verification_path,
             "application/json",
         )
-        terminal = "verified" if any(r.get("posted") for r in note_results.values()) else "note_payload_ready"
         if dry_run:
             terminal = "verified"
+        elif any(r.get("posted") for r in note_results.values()):
+            mode = job.get("mode", "draft_only")
+            terminal = "draft" if mode == "draft_only" else "scheduled"
+        else:
+            terminal = "note_payload_ready"
         supabase.update_job(job_id, status=terminal)
         supabase.log(job_id, terminal, "Pipeline run completed", {"dry_run": dry_run})
 
