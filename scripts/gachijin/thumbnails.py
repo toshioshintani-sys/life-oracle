@@ -168,6 +168,76 @@ def _scene_description(moment: str, sub_text: str, day_no: int) -> str:
     )
 
 
+def _visual_length(text: str) -> int:
+    return len(text.replace("\n", "").strip())
+
+
+def _main_text_size_instruction(main_text: str) -> str:
+    n = _visual_length(main_text)
+    if n <= 5:
+        return (
+            "The main title is very short, so render it extremely large and powerful, "
+            "at premium movie-poster title scale. Keep it on one line."
+        )
+    if n <= 8:
+        return (
+            "Render the main title large and highly readable. "
+            "Keep it on one line if possible."
+        )
+    return (
+        "Render the main title slightly smaller so it fits safely. "
+        "Allow up to two lines only if necessary. Do not crop the text."
+    )
+
+
+def _sub_text_size_instruction(sub_text: str) -> str:
+    return (
+        "Render the subtitle as one single line below the main title. "
+        "Its visual height should be about 35 to 45 percent of the main title. "
+        "It must be clearly readable but secondary."
+    )
+
+
+def _normalize_bottom_copy(bottom_copy: str) -> str:
+    """Trim bottom copy short enough for AI typography (max 2 lines, ~24 chars total)."""
+    lines = [line.strip() for line in (bottom_copy or "").splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    lines = lines[:2]
+    normalized = []
+    for line in lines:
+        if len(line) > 14:
+            line = line[:14].rstrip("、。") + "。"
+        normalized.append(line)
+
+    joined = "\n".join(normalized)
+    if len(joined.replace("\n", "")) > 24:
+        chars_left = 24
+        clipped = []
+        for line in normalized:
+            take = min(len(line), chars_left)
+            if take <= 0:
+                break
+            clipped_line = line[:take].rstrip("、。") + "。"
+            clipped.append(clipped_line)
+            chars_left -= len(clipped_line.rstrip("。"))
+        joined = "\n".join(clipped[:2])
+    return joined
+
+
+def _bottom_copy_size_instruction(bottom_copy: str) -> str:
+    if not bottom_copy:
+        return "Do not render bottom copy."
+    return (
+        "Render bottom_copy as a compact elegant phrase, maximum two lines. "
+        "Each line should feel short, about 10 to 14 Japanese characters. "
+        "Place it in the lower-middle area of the right title panel, not near the bottom edge. "
+        "Leave a generous empty margin below it, roughly 100px. "
+        "Its visual height should be about 50 to 60 percent of the subtitle."
+    )
+
+
 def _build_integrated_prompt(
     *,
     moment: str,
@@ -176,90 +246,94 @@ def _build_integrated_prompt(
     action_type: str,
     day_no: int,
 ) -> str:
-    number = f"#{_theme_number(sub_text)}-{day_no}"
-    day_label = DAY_LABELS.get(day_no, f"Day{day_no}")
-    bottom_copy = _bottom_copy(sub_text, day_no)
+    bottom_copy = _normalize_bottom_copy(_bottom_copy(sub_text, day_no))
+    main_size = _main_text_size_instruction(main_text)
+    sub_size = _sub_text_size_instruction(sub_text)
+    bottom_size = _bottom_copy_size_instruction(bottom_copy)
     scene = _scene_description(moment, sub_text, day_no)
 
-    return f"""Create a polished Japanese note-thumbnail image, 1536x1024 horizontal source, designed so the central safe area can be cropped to 1280x670 without cutting any text or labels. Place every required text inside the central 1280x670 safe area only.
+    return f"""Create a polished Japanese note-thumbnail image, 1536x1024 horizontal source.
+The final output will be cropped/resized to 1280x670.
 
 This is for the morning note series "ガチ人".
 The style is a morning-friendly cinematic editorial poster:
 elegant, premium, slightly literary, with strong visual impact but not too dark or heavy.
 
-OVERALL FRAME (FIXED):
-- Draw a single thin champagne-gold frame line around the entire 1280x670 area, with small ornamental gold corners at the four corners.
-- Do not draw multiple frames or double borders.
+IMPORTANT TEXT POLICY:
+You must render ONLY the following Japanese text inside the image:
+1. Main title: 「{main_text}」
+2. Subtitle: 「{sub_text}」
+3. Bottom copy:
+「{bottom_copy}」
 
-LEFT HALF (photo, 0% to about 50% of width):
-- Realistic Japanese person, 20s to 40s, in a relatable morning scene.
-- Soft natural morning light.
+Do NOT render any of these labels — they will be drawn later by Python:
+- ガチ人シリーズ
+- #number
+- Day label
+
+Leave clean empty space at the top-left (about 320x80px area inside the photo side) and at the top-right (about 280x80px area on the title panel) for those Python labels.
+
+LEFT SIDE:
+- Show {scene}.
+- Realistic Japanese person or people, depending on what best communicates the behavioral moment.
+- The person count is not fixed. Use one person, two people, or a small group if that better communicates the theme.
+- The key is to show one clear unconscious behavioral moment.
+- Use soft natural morning light.
 - Include concrete props that visually explain the behavioral psychology theme.
+- Avoid abstract symbols such as chains or hourglasses.
 
-RIGHT HALF (title panel, about 50% to 100% of width):
-- Solid elegant dark-but-not-black panel: deep brown / charcoal / dark taupe.
-- Champagne gold and warm ivory typography only.
-- Do not use cyan, red, or any non-gold accent color.
+RIGHT SIDE:
+- Create an elegant dark-but-not-black title panel.
+- Use deep brown / charcoal / dark taupe tones.
+- Blend the panel naturally with the photo side using a soft gradient.
+- Use champagne gold and warm ivory typography.
+- The right title panel must feel like a premium Japanese literary magazine or quiet movie poster.
 
-============================================================
-FIXED ELEMENTS — render EXACTLY as specified, no creative variation
-============================================================
+MAIN TITLE:
+- Render exactly: 「{main_text}」
+- {main_size}
+- Use strong Mincho / serif / literary display typography.
+- It must be the most visually dominant element.
+- Use premium champagne-gold texture, subtle depth, and soft shadow.
+- Keep it inside the safe center area. Do not crop.
 
-(A) Top-left boxed label + number (ONE LINE, INSIDE the photo half):
-- A small horizontal rectangle with a thin champagne-gold border.
-- Inside the rectangle, the text reads exactly: {SERIES_LABEL}
-- Use bold gothic Japanese typography, cream / pale ivory color, single line.
-- IMMEDIATELY TO THE RIGHT of the rectangle, OUTSIDE the box, on the SAME horizontal line, place this number in champagne gold gothic text: {number}
-- Do not put the number inside the box.
-- Do not stack the number below the box.
-- Do not draw a second box around the number.
-- The two elements share one horizontal baseline, like: [{SERIES_LABEL}]  {number}
+SUBTITLE:
+- Render exactly: 「{sub_text}」
+- {sub_size}
+- Place it below the main title.
+- Use champagne gold or warm ivory.
 
-(B) Top-right Day label (ONE PHRASE, INSIDE the title panel, top-right corner):
-- Render this Japanese phrase as a SINGLE INLINE PHRASE on one horizontal line, no splitting, no line break: {day_label}
-- Champagne gold serif/Mincho text, small to medium size.
-- Add a thin gold underline directly below this phrase.
-- Treat the entire phrase as one unit. Do not separate the "Day1" / "Day2" / "Day3" prefix from the kanji label that follows.
+BOTTOM COPY:
+- Render exactly:
+「{bottom_copy}」
+- {bottom_size}
+- Place it below the subtitle, but not near the bottom edge.
+- Do not place it at the image edge.
+- Do not crop it.
+- Do not duplicate it.
 
-(C) Center-right main title:
-- Place {main_text} in the vertical middle of the right title panel.
-- Use very large champagne gold Mincho / serif / literary display typography.
-- This must be the visually dominant element of the entire image.
-- Render on at most TWO lines if needed.
+DECORATION:
+- Add refined thin gold divider lines around the main title/subtitle area.
+- Add a small elegant central ornament on the divider line if appropriate.
+- Keep decoration restrained and premium.
 
-(D) Thin gold horizontal divider with ornament:
-- Directly below the main title, draw a thin horizontal champagne-gold line spanning the title panel width.
-- Place a small symmetrical gold ornament (a tiny diamond, star, or fleur motif) in the EXACT CENTER of this divider line.
-- Use this same divider style for Day1, Day2, and Day3 — do not change it per day.
+COMPOSITION SAFETY:
+- Keep all AI-rendered text in the central-right safe area.
+- Leave at least 100px of visual margin below bottom_copy.
+- Leave top-left and top-right areas clean for Python labels.
+- Do not place any important text near crop edges.
 
-(E) Subtitle directly below the divider:
-- Render {sub_text} in champagne gold serif/Mincho text.
-- Subtitle font size MUST be visibly smaller than the main title — about 35 to 45 percent of the main title height.
-- Center it horizontally within the title panel.
-
-(F) Bottom copy area:
-- Render {bottom_copy} as a SHORT TWO-LINE block below the subtitle.
-- Bottom copy font size MUST be visibly smaller than the subtitle — about 50 to 60 percent of the subtitle height.
-- Use cream / pale ivory color, lighter weight than the subtitle.
-- Render this text EXACTLY ONCE. Do not duplicate or echo it elsewhere in the image.
-
-TYPOGRAPHY SIZE HIERARCHY (STRICT, NON-NEGOTIABLE):
-1. Main title ({main_text}) — largest
-2. Subtitle ({sub_text}) — about 35–45% of main title height
-3. Bottom copy ({bottom_copy}) — about 50–60% of subtitle height
-4. Day label ({day_label}) — small
-5. Series label / number ({SERIES_LABEL} / {number}) — smallest
-
-Scene:
-{scene}
-
-ABSOLUTE PROHIBITIONS:
-- Do not render any required text twice.
-- Do not split the Day label phrase across two corners.
-- Do not put the number inside the series-label box.
-- Do not draw two or more frames or double borders.
-- Do not place any text outside the central 1280x670 safe area.
-- Pure black background, gloomy night mood, cheap YouTube clickbait, generic business stock photo, excessive decoration, chains or hourglasses, random text, misspelled Japanese, cropped labels — all forbidden.
+AVOID:
+- pure black background
+- gloomy night mood
+- cheap YouTube style
+- generic business stock photo
+- excessive decoration
+- random extra Japanese text
+- misspelled Japanese
+- duplicated words
+- cropped letters
+- placing text at the bottom edge
 """
 
 
@@ -456,26 +530,110 @@ def _generate_dry_run_poster(main_text: str, sub_text: str, day_no: int, moment:
     return out.getvalue()
 
 
-def _validate_final(image_bytes: bytes) -> None:
+def _gothic_font(size: int):
+    """Bold gothic font for Python overlay labels (series/number/Day label)."""
+    from PIL import ImageFont  # type: ignore
+
+    candidates = (
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc",
+        "C:\\Windows\\Fonts\\YuGothB.ttc",
+        "C:\\Windows\\Fonts\\meiryob.ttc",
+        "C:\\Windows\\Fonts\\meiryo.ttc",
+    )
+    for path in candidates:
+        if Path(path).exists():
+            try:
+                return ImageFont.truetype(path, size=size)
+            except OSError:
+                continue
+    return ImageFont.load_default()
+
+
+def _overlay_python_labels(image_bytes: bytes, sub_text: str, day_no: int) -> bytes:
+    """Draw fixed labels (ガチ人シリーズ box + #number + Day label) on top of the
+    AI-generated image. Avoids gpt-image-1 unreliability for these elements.
+    """
+    from PIL import Image, ImageDraw  # type: ignore
+
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    gold_box = (224, 198, 138, 255)
+    gold_text = (231, 205, 145, 255)
+    ivory_fill = (250, 240, 215, 235)
+    dark_text = (54, 39, 22, 255)
+
+    # ── Top-left: [ガチ人シリーズ]  #1-1 ──
+    label_font = _gothic_font(34)
+    box_padding_x, box_padding_y = 18, 10
+    label_text = SERIES_LABEL
+    label_w = draw.textbbox((0, 0), label_text, font=label_font)[2]
+    label_h = draw.textbbox((0, 0), label_text, font=label_font)[3]
+    box_x, box_y = 28, 28
+    box_w = label_w + box_padding_x * 2
+    box_h = label_h + box_padding_y * 2
+    draw.rectangle((box_x, box_y, box_x + box_w, box_y + box_h), fill=ivory_fill, outline=gold_box, width=2)
+    draw.text((box_x + box_padding_x, box_y + box_padding_y - 2), label_text, font=label_font, fill=dark_text)
+
+    number_text = f"#{_theme_number(sub_text)}-{day_no}"
+    number_font = _gothic_font(38)
+    number_x = box_x + box_w + 20
+    number_y = box_y + (box_h - draw.textbbox((0, 0), number_text, font=number_font)[3]) // 2 - 2
+    draw.text((number_x, number_y), number_text, font=number_font, fill=gold_text)
+
+    # ── Top-right: Day1 気づき (with thin gold underline) ──
+    day_label = DAY_LABELS.get(day_no, f"Day{day_no}")
+    day_font = _gothic_font(36)
+    day_w = draw.textbbox((0, 0), day_label, font=day_font)[2]
+    day_h = draw.textbbox((0, 0), day_label, font=day_font)[3]
+    day_x = img.width - day_w - 40
+    day_y = 38
+    draw.text((day_x, day_y), day_label, font=day_font, fill=gold_text)
+    # Thin gold underline
+    underline_y = day_y + day_h + 6
+    draw.line((day_x, underline_y, day_x + day_w, underline_y), fill=gold_box, width=1)
+
+    composited = Image.alpha_composite(img, overlay).convert("RGB")
+    out = io.BytesIO()
+    composited.save(out, format="PNG")
+    return out.getvalue()
+
+
+def _validate_integrated_thumbnail(image_bytes: bytes) -> tuple[bool, str]:
+    """Mechanical quality check before accepting an OpenAI thumbnail.
+    Returns (ok, reason)."""
     from PIL import Image  # type: ignore
 
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     if img.size != IMAGE_SIZE:
-        raise ValueError(f"final image size {img.size} != {IMAGE_SIZE}")
+        return False, "bad_size"
 
-    gray = img.convert("L").resize((64, 32))
-    pixels = list(gray.getdata())
+    # Right title panel should be dark enough for gold text but not pure black.
+    right = img.crop((650, 80, 1240, 610)).convert("L")
+    avg = sum(right.getdata()) / (right.width * right.height)
+    if avg > 135:
+        return False, "right_panel_too_bright"
+    if avg < 15:
+        return False, "right_panel_too_dark"
+
+    # Reject flat / mock-like images.
+    small = img.convert("L").resize((64, 32))
+    pixels = list(small.getdata())
     mean = sum(pixels) / len(pixels)
     variance = sum((p - mean) ** 2 for p in pixels) / len(pixels)
     if variance < 40:
-        raise ValueError(f"final image variance too low ({variance:.1f})")
+        return False, "too_flat"
 
-    # The new integrated design should be dark enough on the right for title
-    # typography but not pure black.
-    right = img.crop((760, 80, 1240, 610)).convert("L").resize((24, 24))
-    avg = sum(right.getdata()) / (24 * 24)
-    if avg < 18:
-        raise ValueError("right title area is too close to pure black")
+    return True, "ok"
+
+
+def _validate_final(image_bytes: bytes) -> None:
+    """Hard validator for the FINAL composite (after Python overlay)."""
+    ok, reason = _validate_integrated_thumbnail(image_bytes)
+    if not ok:
+        raise ValueError(f"final image rejected: {reason}")
 
 
 def render_thumbnail(
@@ -498,6 +656,7 @@ def render_thumbnail(
 
     if dry_run:
         final_bytes = _generate_dry_run_poster(main_text, sub_text, day_no, moment)
+        raw_bytes = final_bytes
     else:
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY is not set; refusing to create a production placeholder thumbnail")
@@ -508,11 +667,28 @@ def render_thumbnail(
             action_type=action_type,
             day_no=day_no,
         )
-        generated = _request_openai_image(prompt, api_key)
-        final_bytes = _resize_to_thumbnail(generated)
-        source = "openai_integrated_text"
+
+        # Up to 3 attempts: regenerate if mechanical quality check fails.
+        last_reason = ""
+        raw_bytes = b""
+        for attempt in range(1, 4):
+            generated = _request_openai_image(prompt, api_key)
+            candidate = _resize_to_thumbnail(generated)
+            ok, reason = _validate_integrated_thumbnail(candidate)
+            logger.info("thumbnail attempt %s/%s: %s", attempt, 3, reason)
+            if ok:
+                raw_bytes = candidate
+                break
+            last_reason = reason
+        if not raw_bytes:
+            raise ValueError(f"OpenAI thumbnail failed quality check after 3 attempts: {last_reason}")
+
+        # Hybrid policy: Python overlays the fixed labels (series/number/Day)
+        # so they are always positioned and spelled correctly.
+        final_bytes = _overlay_python_labels(raw_bytes, sub_text, day_no)
+        source = "openai_text_with_python_labels"
 
     _validate_final(final_bytes)
-    raw_path.write_bytes(final_bytes)
+    raw_path.write_bytes(raw_bytes)
     final_path.write_bytes(final_bytes)
     return ThumbnailArtifacts(raw_path=raw_path, final_path=final_path, source=source)
