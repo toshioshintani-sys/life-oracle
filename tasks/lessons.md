@@ -33,6 +33,52 @@ Claude Code・Cowork の両方がセッション開始時に必ず読む共有�
 
 <!-- 新しい教訓はここに追記する（新しいものが上） -->
 
+## 2026-05-06 【設計】GitHub repo secrets は GITHUB_ プレフィックス禁止
+
+**状況**：ガチ人スケジューラ初の自動cron実行（2026-05-06 17:24 JST）が `Process completed with exit code 1` で失敗。失敗メールが俊雄さんに届いた。
+
+**原因**：`.github/workflows/gachijin-scheduler.yml` で `secrets.GITHUB_ACTIONS_TOKEN` を参照していたが、GitHub の仕様で repo secrets 名は `GITHUB_` で始められない。`New repository secret` 画面でその名前を入力すると赤帯で `Secret names must not start with GITHUB_` と弾かれる。Step 6 のチェックリストでは Netlify env のキー名がそのまま GitHub repo secrets にも使えると思い込んでいた（Netlify には制約なし）。結果としてシークレットは未登録のまま、`os.environ.get("GITHUB_ACTIONS_TOKEN")` が None を返し、`dispatch_pipeline()` が False を返して exit 1。
+
+**解決策**：シークレット名を `ACTIONS_DISPATCH_TOKEN` にリネーム。ワークフロー側で `GITHUB_ACTIONS_TOKEN: ${{ secrets.ACTIONS_DISPATCH_TOKEN }}` とマップして、Pythonスクリプトの環境変数名は維持する（既存コードを変えずに済む）。
+
+**再発防止**：
+- 新規ワークフローで PAT を読むときの secrets 名は **`ACTIONS_DISPATCH_TOKEN` / `WORKFLOW_PAT` などの非 GITHUB_ 名で統一**する。
+- Netlify env と GitHub repo secrets はキー命名規則が異なる。GitHub 側は `GITHUB_*` `RUNNER_*` 不可。
+- preflight チェックに「ワークフロー内で参照する secrets が repo secrets に存在するか」を追加すべき（現在の `check_github.py` は固定リストのみ確認している）。
+
+---
+
+## 2026-05-03 【API】note.com サムネイル・予約投稿 確定仕様
+
+**状況**：`post_to_note()` で `thumbnail_uploaded=False` になり続けた。旧エンドポイント `/api/v1/attachments` が 404。
+
+**確定した正しい仕様（実証済み）**：
+
+### サムネイルアップロード
+
+- エンドポイント：`POST /api/v1/image_upload/note_eyecatch`
+- パラメータ：`data={'note_id': note_id}` + `files={'file': (filename, bytes, 'image/png')}`
+- 画像サイズ：**1280×670 必須**（他のサイズは 400 エラー。Pillow で事前リサイズ）
+- セッションに `Content-Type: application/json` を含めてはいけない（multipart が壊れる）
+- レスポンス：`{"data": {"url": "https://assets.st-note.com/production/uploads/images/{ID}/rectangle_large_type_2_{hash}.png"}}`
+- `eye_catch_key` = `int(re.search(r'/images/(\d+)/', url).group(1))` で整数を抽出
+
+### PUT（予約投稿設定）の必須条件
+
+- `status` は **`'reserved'`** でないと 422 エラー（`'draft'` は不可）
+- `publish_at` フィールドをPUTボディに含める → note.com は `reserved_publish_at` として内部保存（GETで確認可能）
+- `reserved_publish_at` をPUTボディに直接入れると 422 「公開日付が不正です」になる
+
+### フロー順序
+
+1. `POST /api/v1/text_notes` (status=draft) → `note_id`（数値）・`note_key`（文字列）取得
+2. `POST /api/v1/image_upload/note_eyecatch` (note_id + resized image) → `eye_catch_key`（整数）
+3. `PUT /api/v1/text_notes/{note_id}` (status=reserved, publish_at, eye_catch_key) → 完了
+
+**再発防止**：`step4_note_api.py` の `upload_image()` を上記仕様で実装済み（2026-05-03）。create_draft() が先に必要なため、post_to_note() の呼び出し順序も修正済み。
+
+---
+
 ## 2026-05-03 【設計】質問データの固定解除（フェーズ2再整合）
 
 **状況**：ライフオラクルの開発初期（4ヶ月前）に固めた質問データが、note中心戦略への移行と現在の発信トーンと噛み合わなくなった。実ユーザーからも「中間がない」「答えづらい」という声があったが、CLAUDE.md の「絶対に触らない」リストに `questions.js` と `biasQuestions.js` が含まれていたため変更を保留していた。
