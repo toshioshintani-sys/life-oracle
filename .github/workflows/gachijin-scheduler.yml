@@ -20,6 +20,6 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          GITHUB_ACTIONS_TOKEN: ${{ secrets.GITHUB_ACTIONS_TOKEN }}
+          GITHUB_ACTIONS_TOKEN: ${{ secrets.ACTIONS_DISPATCH_TOKEN }}
           # GITHUB_REPOSITORY is automatically provided by GitHub Actions
         run: python scripts/gachijin_scheduler_trigger.py
