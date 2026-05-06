@@ -3,8 +3,12 @@
 Gachijin daily scheduler trigger.
 
 Run at 18:30 JST every day via GitHub Actions cron.
-Reads gachijin_schedule.json, finds themes whose day1 matches tomorrow (JST),
-creates Supabase jobs for each, and dispatches gachijin-pipeline.yml.
+Reads gachijin_schedule.json, finds themes whose pipeline_run_date matches
+today (JST), creates Supabase jobs for each, and dispatches
+gachijin-pipeline.yml with start_date = day1 from the schedule.
+
+If a theme has no pipeline_run_date, falls back to the legacy behaviour:
+trigger when day1 == tomorrow (one day before publication).
 """
 from __future__ import annotations
 
@@ -17,6 +21,10 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 JST = timezone(timedelta(hours=9))
+
+
+def today_jst() -> str:
+    return datetime.now(JST).strftime("%Y-%m-%d")
 
 
 def tomorrow_jst() -> str:
@@ -62,30 +70,47 @@ def dispatch_pipeline(job_id: str) -> bool:
         return False
 
 
+def find_todays_themes(schedule: dict) -> list[dict]:
+    today = today_jst()
+    tomorrow = tomorrow_jst()
+    matched = []
+    for t in schedule["themes"]:
+        run_date = t.get("pipeline_run_date")
+        if run_date:
+            if run_date == today:
+                matched.append(t)
+        else:
+            # Legacy fallback: trigger day before publication
+            if t["day1"] == tomorrow:
+                matched.append(t)
+    return matched
+
+
 def main() -> int:
     schedule_path = Path(__file__).resolve().parent / "gachijin_schedule.json"
     schedule = json.loads(schedule_path.read_text(encoding="utf-8"))
 
-    target_date = tomorrow_jst()
     post_time = schedule.get("post_time", "07:00")
     mode = schedule.get("mode", "schedule_publish")
 
-    print(f"Gachijin scheduler: target day1={target_date}, post_time={post_time}, mode={mode}")
+    today = today_jst()
+    print(f"Gachijin scheduler: today (JST)={today}, post_time={post_time}, mode={mode}")
 
-    matched = [t for t in schedule["themes"] if t["day1"] == target_date]
+    matched = find_todays_themes(schedule)
     if not matched:
-        print("No themes scheduled for tomorrow. Nothing to do.")
+        print("No themes scheduled for today. Nothing to do.")
         return 0
 
     exit_code = 0
     for entry in matched:
         theme = entry["theme"]
-        print(f"\nCreating job: theme={theme!r} start_date={target_date}")
+        start_date = entry["day1"]
+        print(f"\nCreating job: theme={theme!r} start_date={start_date}")
 
         job_data = {
             "series": "gachijin",
             "theme": theme,
-            "start_date": target_date,
+            "start_date": start_date,
             "post_time": post_time,
             "mode": mode,
             "style_preset": "gachijin_default",
