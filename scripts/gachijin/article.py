@@ -2,8 +2,8 @@
 """Claude article generation for Gachijin series.
 
 Calls Anthropic API to produce ``article_bundle.json`` (3 articles + thumbnail
-design) from a single theme. Returns a deterministic dry-run mock when the
-API key is missing or ``dry_run=True``.
+design) from a single theme. Returns a deterministic mock only when
+``dry_run=True``; production fails fast if the API key or API call fails.
 
 The system prompt encodes the rules from
 ``ライフオラクルnoteネタ/ガチ人_Cowork指示書.md`` so the orchestrator does not need
@@ -70,10 +70,27 @@ https://life-oracle.jp/
   - moment: そのバイアス・効果の「核となる行動」をしている瞬間を具体的に描写すること。
     「スマホを見ている」「PCの前に座っている」などの汎用的な描写は禁止。
     テーマのバイアスを直接体現する場面を書く（例: 「採算が出ないプロジェクト資料を前に、中止を言えずにいる」「上司に『もう少し』と言いながら目が泳いでいる」）。
-  - main_text: そのバイアス行動を表す動詞フレーズ（10文字以内）。
-    例（サンクコスト）: やめられない / 撤退できない / もう少しと思う
-    例（双曲割引）: また先延ばした / 今日は無理
-    例（アンカリング）: 最初の数字が残る
+  - main_text: 記事の要約ではなく、読者が自分の内側でつぶやく「心の声」を一言化したもの。
+    必須条件:
+      * 5〜10文字程度
+      * 心理ワード・効果名・バイアス名を入れない（「サンクコスト」「ハロー効果」などの語は禁止）
+      * フルタイトルを入れない
+      * 説明文・解説文にしない
+      * 抽象的・詩的・文学的な表現にしない
+      * 0.5秒で意味が伝わる
+      * 「これ自分だ」と読者が思える日常会話の言葉
+      * Day1=気づき、Day2=現場、Day3=対処 の役割を反映する
+    Dayごとの方向性:
+      * Day1（気づき）: 自分の行動の正体に気づく一言
+        OK: やめられない / 禁止に弱い / 見た目で決める / 損が怖い / 変えたくない
+      * Day2（現場）: その心理が職場や日常で起きている場面の一言
+        OK: 撤退できない / みんなに流される / 本音を言えない / 最初が残る / 見たいものだけ
+      * Day3（対処）: 一歩前に進むための行動・視点の一言
+        OK: 逆手に取る / 小さく試す / 基準をずらす / 逆を見る / 自分で選ぶ
+    NG例（絶対に使わない）:
+      * 現場の重力 / 粘る力へ / 判断の壁 / 選択の余白 / 心の静寂（詩的・抽象的）
+      * サンクコストに縛られる / ハロー効果が出る（心理ワードを含む）
+      * 過去に費やしたコストが判断を歪める（説明文）
   - sub_text: 効果・バイアス名そのもの（6文字以内の短縮形）。これ以外の形式は禁止。
     例: サンクコスト / 双曲割引 / アンカリング / 損失回避 / 現在バイアス
     NG例（禁止）: 現場の重力 / 粘る力へ / 判断の壁（詩的・抽象的な表現は絶対に使わない）
@@ -126,6 +143,21 @@ THEME_BEHAVIORS = {
     "後知恵": "そうなると思ってたと言い",
 }
 
+DRY_RUN_THUMB_TEXTS = {
+    "サンクコスト": ("やめられない", "撤退できない", "逆手に取る"),
+    "損失回避": ("損が怖い", "失うのが怖い", "小さく試す"),
+    "現在バイアス": ("今だけ考える", "先延ばしする", "未来を近づける"),
+    "アンカリング": ("数字に縛られる", "最初が残る", "基準をずらす"),
+    "フレーミング": ("言い方に乗る", "印象が変わる", "見方を変える"),
+    "保有効果": ("手放せない", "持つと惜しい", "価値を見直す"),
+    "双曲割引": ("先延ばしする", "今日は無理", "今を小さくする"),
+    "バンドワゴン": ("流行に乗る", "みんなに流される", "自分で選ぶ"),
+    "確証バイアス": ("見たいものだけ", "反対を避ける", "逆を見る"),
+    "現状維持": ("変えたくない", "いつも通り", "一つ変える"),
+    "ハロー": ("見た目で決める", "印象に引かれる", "分けて見る"),
+    "カリギュラ": ("禁止に弱い", "気になる", "見せ方を変える"),
+}
+
 
 def _normalize_theme_id(theme: str) -> str:
     ascii_hint = re.sub(r"[^a-z0-9]+", "-", theme.lower()).strip("-")
@@ -144,6 +176,13 @@ def _behavior_for_theme(theme: str) -> str:
 
 def _short_theme(theme: str) -> str:
     return re.sub(r"[・\s]*(効果|バイアス|理論)$", "", theme).replace("・バイアス", "")
+
+
+def _dry_run_thumb_texts(theme: str) -> tuple[str, str, str]:
+    for key, values in DRY_RUN_THUMB_TEXTS.items():
+        if key in theme:
+            return values
+    return ("気づいてしまう", "現場で起きる", "今日から変える")
 
 
 def _post_dates(start_date: str) -> dict[str, str]:
@@ -198,9 +237,10 @@ https://life-oracle.jp/
 
 
 def build_dry_run_bundle(theme: str, start_date: str) -> dict[str, Any]:
-    """Deterministic article_bundle.json for dry-run / fallback."""
+    """Deterministic article_bundle.json for dry-run."""
     behavior = _behavior_for_theme(theme)
     short = _short_theme(theme)
+    main1, main2, main3 = _dry_run_thumb_texts(theme)
     return {
         "theme_id": _normalize_theme_id(theme),
         "theme_name": theme,
@@ -229,17 +269,17 @@ def build_dry_run_bundle(theme: str, start_date: str) -> dict[str, Any]:
             "days": {
                 "day1": {
                     "moment": "朝のカフェでノートPCの前に座り、手が止まっている",
-                    "main_text": f"{behavior}人",
+                    "main_text": main1,
                     "sub_text": short,
                 },
                 "day2": {
                     "moment": "明るい会議室で資料を前に、誰も切り出せず黙っている",
-                    "main_text": "現場で起きること",
+                    "main_text": main2,
                     "sub_text": short,
                 },
                 "day3": {
                     "moment": "自宅デスクでPCを閉じ、メモ帳に問いを書き始めている",
-                    "main_text": "今日から変える",
+                    "main_text": main3,
                     "sub_text": short,
                 },
             },
@@ -338,12 +378,10 @@ def generate_article_bundle(
     dry_run: bool,
 ) -> tuple[dict[str, Any], str]:
     """Return ``(bundle, source)`` where source is ``"claude"`` or ``"dry_run"``."""
-    if dry_run or not os.environ.get("ANTHROPIC_API_KEY"):
+    if dry_run:
         logger.info("Using deterministic dry-run article bundle (theme=%s)", theme)
         return build_dry_run_bundle(theme, start_date), "dry_run"
-    try:
-        bundle = call_claude(theme, start_date, post_time)
-        return bundle, "claude"
-    except Exception:
-        logger.exception("Claude article generation failed; falling back to dry-run bundle")
-        return build_dry_run_bundle(theme, start_date), "dry_run_fallback"
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is not set; refusing to create production dry-run articles")
+    bundle = call_claude(theme, start_date, post_time)
+    return bundle, "claude"
