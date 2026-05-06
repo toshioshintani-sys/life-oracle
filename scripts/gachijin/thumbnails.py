@@ -181,54 +181,85 @@ def _build_integrated_prompt(
     bottom_copy = _bottom_copy(sub_text, day_no)
     scene = _scene_description(moment, sub_text, day_no)
 
-    return f"""Create a polished Japanese note-thumbnail image, 1536x1024 horizontal source, designed so the central safe area can be cropped to 1280x670 without cutting any text or labels.
+    return f"""Create a polished Japanese note-thumbnail image, 1536x1024 horizontal source, designed so the central safe area can be cropped to 1280x670 without cutting any text or labels. Place every required text inside the central 1280x670 safe area only.
 
 This is for the morning note series "ガチ人".
-The style should be a morning-friendly cinematic editorial poster:
+The style is a morning-friendly cinematic editorial poster:
 elegant, premium, slightly literary, with strong visual impact but not too dark or heavy.
 
-Fully integrated thumbnail design.
-Do not create a plain photo for later text overlay.
+OVERALL FRAME (FIXED):
+- Draw a single thin champagne-gold frame line around the entire 1280x670 area, with small ornamental gold corners at the four corners.
+- Do not draw multiple frames or double borders.
 
-Left side:
-- realistic Japanese person in a relatable morning scene
-- soft natural morning light
-- concrete props that visually explain the behavioral psychology theme
+LEFT HALF (photo, 0% to about 50% of width):
+- Realistic Japanese person, 20s to 40s, in a relatable morning scene.
+- Soft natural morning light.
+- Include concrete props that visually explain the behavioral psychology theme.
 
-Right side:
-- elegant dark-but-not-black title area
-- deep brown / charcoal / dark taupe tones
-- champagne gold and warm ivory typography
-- thin gold frame lines
-- restrained decorative accents
+RIGHT HALF (title panel, about 50% to 100% of width):
+- Solid elegant dark-but-not-black panel: deep brown / charcoal / dark taupe.
+- Champagne gold and warm ivory typography only.
+- Do not use cyan, red, or any non-gold accent color.
 
-Required text:
-- Top-left boxed label: {SERIES_LABEL}
-- Number: {number}
-- Top-right label: {day_label}
-- Main title: {main_text}
-- Subtitle: {sub_text}
-- Bottom copy: {bottom_copy}
+============================================================
+FIXED ELEMENTS — render EXACTLY as specified, no creative variation
+============================================================
+
+(A) Top-left boxed label + number (ONE LINE, INSIDE the photo half):
+- A small horizontal rectangle with a thin champagne-gold border.
+- Inside the rectangle, the text reads exactly: {SERIES_LABEL}
+- Use bold gothic Japanese typography, cream / pale ivory color, single line.
+- IMMEDIATELY TO THE RIGHT of the rectangle, OUTSIDE the box, on the SAME horizontal line, place this number in champagne gold gothic text: {number}
+- Do not put the number inside the box.
+- Do not stack the number below the box.
+- Do not draw a second box around the number.
+- The two elements share one horizontal baseline, like: [{SERIES_LABEL}]  {number}
+
+(B) Top-right Day label (ONE PHRASE, INSIDE the title panel, top-right corner):
+- Render this Japanese phrase as a SINGLE INLINE PHRASE on one horizontal line, no splitting, no line break: {day_label}
+- Champagne gold serif/Mincho text, small to medium size.
+- Add a thin gold underline directly below this phrase.
+- Treat the entire phrase as one unit. Do not separate the "Day1" / "Day2" / "Day3" prefix from the kanji label that follows.
+
+(C) Center-right main title:
+- Place {main_text} in the vertical middle of the right title panel.
+- Use very large champagne gold Mincho / serif / literary display typography.
+- This must be the visually dominant element of the entire image.
+- Render on at most TWO lines if needed.
+
+(D) Thin gold horizontal divider with ornament:
+- Directly below the main title, draw a thin horizontal champagne-gold line spanning the title panel width.
+- Place a small symmetrical gold ornament (a tiny diamond, star, or fleur motif) in the EXACT CENTER of this divider line.
+- Use this same divider style for Day1, Day2, and Day3 — do not change it per day.
+
+(E) Subtitle directly below the divider:
+- Render {sub_text} in champagne gold serif/Mincho text.
+- Subtitle font size MUST be visibly smaller than the main title — about 35 to 45 percent of the main title height.
+- Center it horizontally within the title panel.
+
+(F) Bottom copy area:
+- Render {bottom_copy} as a SHORT TWO-LINE block below the subtitle.
+- Bottom copy font size MUST be visibly smaller than the subtitle — about 50 to 60 percent of the subtitle height.
+- Use cream / pale ivory color, lighter weight than the subtitle.
+- Render this text EXACTLY ONCE. Do not duplicate or echo it elsewhere in the image.
+
+TYPOGRAPHY SIZE HIERARCHY (STRICT, NON-NEGOTIABLE):
+1. Main title ({main_text}) — largest
+2. Subtitle ({sub_text}) — about 35–45% of main title height
+3. Bottom copy ({bottom_copy}) — about 50–60% of subtitle height
+4. Day label ({day_label}) — small
+5. Series label / number ({SERIES_LABEL} / {number}) — smallest
 
 Scene:
 {scene}
 
-Typography:
-- Top-left label is bold gothic
-- Main title is strong Mincho / serif / literary display style
-- Main title must be the dominant element
-- Text must be accurate, readable, and not cropped
-
-Avoid:
-- pure black background
-- gloomy night mood
-- cheap YouTube style
-- generic business stock photo
-- excessive decoration
-- chains or hourglasses
-- random text
-- misspelled Japanese
-- cropped labels
+ABSOLUTE PROHIBITIONS:
+- Do not render any required text twice.
+- Do not split the Day label phrase across two corners.
+- Do not put the number inside the series-label box.
+- Do not draw two or more frames or double borders.
+- Do not place any text outside the central 1280x670 safe area.
+- Pure black background, gloomy night mood, cheap YouTube clickbait, generic business stock photo, excessive decoration, chains or hourglasses, random text, misspelled Japanese, cropped labels — all forbidden.
 """
 
 
