@@ -200,20 +200,21 @@ def post(payload: dict[str, Any], image_bytes: bytes | None, publish_at: str | N
 
     thumbnail_uploaded = False
     if image_bytes:
-        try:
-            payload["eye_catch_key"] = upload_eyecatch(image_bytes, note_id)
-            thumbnail_uploaded = True
-        except Exception:
-            logger.exception("eyecatch upload failed; continuing without thumbnail")
+        payload["eye_catch_key"] = upload_eyecatch(image_bytes, note_id)
+        thumbnail_uploaded = True
+    # When no image is provided, the post is created without an eyecatch.
+    # The user is expected to add the thumbnail manually via the note editor.
 
     if publish_at:
         schedule(note_id, payload, publish_at)
 
     note_url = f"https://note.com/{NOTE_USERNAME}/n/{note_key}"
+    note_edit_url = f"https://editor.note.com/notes/{note_key}/edit"
     return {
         "note_id": note_id,
         "note_key": note_key,
         "url": note_url,
+        "edit_url": note_edit_url,
         "publish_at": publish_at,
         "thumbnail_uploaded": thumbnail_uploaded,
     }

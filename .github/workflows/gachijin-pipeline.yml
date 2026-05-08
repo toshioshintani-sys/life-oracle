@@ -15,6 +15,14 @@ on:
         options:
           - "false"
           - "true"
+      no_thumbnail:
+        description: Skip OpenAI thumbnail generation (manual upload mode)
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   run:
@@ -49,7 +57,8 @@ jobs:
         run: |
           python -X utf8 scripts/gachijin_orchestrator.py \
             --job-id "${{ inputs.job_id }}" \
-            ${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
+            ${{ inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            ${{ inputs.no_thumbnail == 'true' && '--no-thumbnail' || '' }}
 
       - name: Upload artifacts
         if: always()

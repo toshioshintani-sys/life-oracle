@@ -10,10 +10,9 @@ Each phase writes artifacts to ``var/gachijin/jobs/{job_id}/`` and, when
 Supabase is configured, also uploads to Storage and updates the
 ``jobs`` / ``job_outputs`` / ``job_logs`` tables.
 
-External APIs (Anthropic, OpenAI, note.com) are only called when their
-respective env vars are set AND ``--dry-run`` is not passed. Missing keys
-gracefully fall back to deterministic dry-run artifacts so local validation
-works without secrets.
+External APIs (Anthropic, OpenAI, note.com) are only called when ``--dry-run``
+is not passed. Missing keys are fatal in production so the pipeline never posts
+placeholder articles or thumbnails by accident.
 """
 from __future__ import annotations
 
@@ -234,7 +233,10 @@ def phase_thumbnails(
     final_paths: dict[str, Path] = {}
 
     for index, day_key in enumerate(("day1", "day2", "day3"), start=1):
-        day_design = bundle["thumbnail_design"]["days"][day_key]
+        # Use the normalized thumbnail spec, not Claude's raw design text.
+        # This keeps sub_text locked to the short psychology term and prevents
+        # poetic labels such as "現場の重力" from reaching the thumbnail prompt.
+        day_design = spec["days"][day_key]
         raw_path = job_dir / f"raw_day{index}.png"
         final_path = job_dir / f"final_day{index}.png"
         try:
@@ -383,6 +385,7 @@ def phase_note(
                 job["id"],
                 index,
                 note_url=result["url"],
+                note_edit_url=result.get("edit_url"),
                 scheduled_at=meta["publish_at"],
                 status=output_status,
             )
@@ -426,6 +429,7 @@ def _verification_payload(
             "final_thumbnails": [f"final_day{i}.png" for i in range(1, 4)],
             "note_payloads": [f"note_payload_day{i}.json" for i in range(1, 4)],
         },
+        "thumbnail_policy": "openai_integrated_text; no Pillow production text overlay",
         "note_results": note_results,
         "titles": {day: bundle["articles"][day]["title"] for day in ("day1", "day2", "day3")},
     }
@@ -445,13 +449,32 @@ def load_local_job(input_json: Path | None) -> dict[str, Any]:
     }
 
 
-def run(job: dict[str, Any], out_root: Path, supabase: SupabaseClient | None, dry_run: bool) -> Path:
+def run(
+    job: dict[str, Any],
+    out_root: Path,
+    supabase: SupabaseClient | None,
+    dry_run: bool,
+    no_thumbnail: bool = False,
+) -> Path:
     job_id = job["id"]
     job_dir = out_root / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
 
     bundle = phase_article(job, job_dir, supabase, dry_run)
-    final_paths = phase_thumbnails(job, job_dir, bundle, supabase, dry_run)
+    if no_thumbnail:
+        # Manual-thumbnail mode: skip OpenAI image generation entirely.
+        # Posts will be created on note.com without an eyecatch; the user
+        # uploads thumbnails manually before each scheduled publish time.
+        if supabase:
+            supabase.update_job(job["id"], status="thumbnail_skipped")
+            supabase.log(
+                job["id"],
+                "thumbnail_skipped",
+                "Skipping thumbnail generation (manual upload mode)",
+            )
+        final_paths: dict[str, Path] = {}
+    else:
+        final_paths = phase_thumbnails(job, job_dir, bundle, supabase, dry_run)
     note_results = phase_note(job, job_dir, bundle, final_paths, supabase, dry_run)
 
     verification = _verification_payload(job, job_dir, bundle, final_paths, note_results, dry_run)
@@ -495,6 +518,11 @@ def main() -> int:
     parser.add_argument("--input-json", type=Path, help="Local job JSON for dry-run")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--dry-run", action="store_true", help="Skip external paid/posting steps")
+    parser.add_argument(
+        "--no-thumbnail",
+        action="store_true",
+        help="Skip OpenAI thumbnail generation; post articles only (manual thumbnail upload)",
+    )
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
 
@@ -515,7 +543,7 @@ def main() -> int:
 
     sb = supabase if args.job_id else None
     try:
-        job_dir = run(job, args.out_dir, sb, args.dry_run)
+        job_dir = run(job, args.out_dir, sb, args.dry_run, no_thumbnail=args.no_thumbnail)
         logger.info("Gachijin pipeline finished: %s", job_dir)
         return 0
     except Exception as exc:
