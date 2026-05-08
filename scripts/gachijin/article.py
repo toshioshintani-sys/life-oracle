@@ -329,6 +329,41 @@ def _extract_json_block(text: str) -> str:
     return text
 
 
+def _fix_invalid_json_escapes(s: str) -> str:
+    """Replace invalid JSON escape sequences with double-backslash.
+
+    JSON allows only \" \\ \/ \b \f \n \r \t \uXXXX after a backslash.
+    Claude occasionally emits \あ or \M etc. which make json.loads raise
+    ``Invalid \\escape``.  We double the offending backslash so the character
+    is preserved literally in the parsed value.
+
+    Note: strict=False (used elsewhere) handles raw control chars in strings
+    but does NOT fix invalid escape sequences — this helper covers that gap.
+    """
+    VALID = frozenset('"\\\/bfnrtu')
+    result: list[str] = []
+    i = 0
+    while i < len(s):
+        ch = s[i]
+        if ch == "\\" and i + 1 < len(s):
+            nxt = s[i + 1]
+            if nxt in VALID:
+                # Valid escape sequence — copy both chars and advance past them.
+                result.append(ch)
+                result.append(nxt)
+                i += 2
+            else:
+                # Invalid escape — insert an extra backslash and let the
+                # original character be processed on the next iteration.
+                result.append("\\")
+                result.append("\\")
+                i += 1  # do NOT advance past nxt; it will be handled next loop
+        else:
+            result.append(ch)
+            i += 1
+    return "".join(result)
+
+
 def call_claude(theme: str, start_date: str, post_time: str) -> dict[str, Any]:
     """Call Anthropic API to produce article_bundle.json."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -357,10 +392,13 @@ def call_claude(theme: str, start_date: str, post_time: str) -> dict[str, Any]:
     raw_text = "".join(
         block.text for block in response.content if getattr(block, "type", None) == "text"
     )
-    # strict=False allows literal control characters (e.g. raw newlines)
-    # inside string values. Claude occasionally emits raw \n inside body_md
-    # rather than the escaped \\n, which a strict parser rejects.
-    payload = json.loads(_extract_json_block(raw_text), strict=False)
+    # Two-step JSON tolerance:
+    # 1. _fix_invalid_json_escapes: replaces \X (invalid escape) with \\X
+    #    so chars like \あ or \M no longer trigger "Invalid \escape".
+    # 2. strict=False: allows literal control chars (raw newlines) inside
+    #    string values, which Claude occasionally emits instead of \\n.
+    raw_json = _fix_invalid_json_escapes(_extract_json_block(raw_text))
+    payload = json.loads(raw_json, strict=False)
     payload.setdefault("series", "gachijin")
     payload.setdefault("theme_name", theme)
     payload.setdefault("theme_id", _normalize_theme_id(theme))
