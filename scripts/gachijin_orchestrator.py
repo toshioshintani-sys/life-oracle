@@ -381,14 +381,29 @@ def phase_note(
 
         output_status = "draft" if mode == "draft_only" else "scheduled"
         if supabase:
-            supabase.update_output(
-                job["id"],
-                index,
-                note_url=result["url"],
-                note_edit_url=result.get("edit_url"),
-                scheduled_at=meta["publish_at"],
-                status=output_status,
-            )
+            update_fields = {
+                "note_url": result["url"],
+                "scheduled_at": meta["publish_at"],
+                "status": output_status,
+            }
+            # note_edit_url is optional; the column is not present in older
+            # Supabase deployments. Try with it first, fall back without it
+            # so a missing column never blocks production posting.
+            try:
+                supabase.update_output(
+                    job["id"],
+                    index,
+                    note_edit_url=result.get("edit_url"),
+                    **update_fields,
+                )
+            except RuntimeError as exc:
+                if "note_edit_url" in str(exc) or "PGRST204" in str(exc):
+                    logger.warning(
+                        "note_edit_url column missing in Supabase; saving without it"
+                    )
+                    supabase.update_output(job["id"], index, **update_fields)
+                else:
+                    raise
             supabase.log(
                 job["id"],
                 output_status,
