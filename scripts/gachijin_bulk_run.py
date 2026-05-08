@@ -43,6 +43,16 @@ def _load_env() -> None:
         os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 
 
+def _supabase_get(path: str) -> list | dict:
+    url = f"{os.environ['SUPABASE_URL'].rstrip('/')}/rest/v1/{path}"
+    key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+    req = urllib.request.Request(url)
+    req.add_header("apikey", key)
+    req.add_header("Authorization", f"Bearer {key}")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read())
+
+
 def _supabase_post(path: str, data: dict | list) -> list | dict:
     url = f"{os.environ['SUPABASE_URL'].rstrip('/')}/rest/v1/{path}"
     key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
@@ -89,8 +99,8 @@ def _dispatch_pipeline(job_id: str, no_thumbnail: bool) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--skip-themes", nargs="*", default=[],
-                        help="Theme names to skip (already processed).")
+    parser.add_argument("--skip-themes", default="",
+                        help="Comma-separated theme names to skip (manual override).")
     parser.add_argument("--start-from", default=None,
                         help="Start dispatching from this theme (inclusive).")
     parser.add_argument("--throttle-seconds", type=int, default=15,
@@ -114,8 +124,24 @@ def main() -> int:
             print(f"ERROR: --start-from theme not found: {args.start_from}", file=sys.stderr)
             return 1
         themes = themes[idx:]
-    if args.skip_themes:
-        themes = [t for t in themes if t["theme"] not in args.skip_themes]
+
+    # Skip themes that already have a 'scheduled' job in Supabase (idempotent guard).
+    try:
+        existing = _supabase_get("jobs?select=theme,status&status=eq.scheduled&limit=200")
+        already_done = {r["theme"] for r in existing}
+        if already_done:
+            before = len(themes)
+            themes = [t for t in themes if t["theme"] not in already_done]
+            print(f"Auto-skip: {before - len(themes)} themes already scheduled in Supabase.")
+    except Exception as exc:
+        print(f"WARNING: could not query Supabase for existing jobs: {exc}", file=sys.stderr)
+
+    # Manual skip list (comma-separated from --skip-themes flag).
+    manual_skip = {s.strip() for s in args.skip_themes.split(",") if s.strip()}
+    if manual_skip:
+        before = len(themes)
+        themes = [t for t in themes if t["theme"] not in manual_skip]
+        print(f"Manual skip: {before - len(themes)} themes skipped via --skip-themes.")
 
     print(f"Plan: {len(themes)} themes, mode={args.mode}, no_thumbnail=True")
     print(f"Throttle: {args.throttle_seconds}s between dispatches")

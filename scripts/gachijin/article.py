@@ -330,17 +330,18 @@ def _extract_json_block(text: str) -> str:
 
 
 def _fix_invalid_json_escapes(s: str) -> str:
-    """Replace invalid JSON escape sequences with double-backslash.
-
-    JSON allows only \" \\ \/ \b \f \n \r \t \uXXXX after a backslash.
-    Claude occasionally emits \あ or \M etc. which make json.loads raise
-    ``Invalid \\escape``.  We double the offending backslash so the character
-    is preserved literally in the parsed value.
-
-    Note: strict=False (used elsewhere) handles raw control chars in strings
-    but does NOT fix invalid escape sequences — this helper covers that gap.
-    """
-    VALID = frozenset('"\\\/bfnrtu')
+    # Replace invalid JSON escape sequences with double-backslash.
+    #
+    # JSON only allows these after a backslash:
+    #   double-quote, backslash, slash, b, f, n, r, t, uXXXX
+    # Claude sometimes emits a backslash before arbitrary characters
+    # (e.g. backslash-hiragana) which json.loads rejects with
+    # "Invalid escape".  We double the offending backslash so the
+    # character is preserved literally in the parsed value.
+    #
+    # NOTE: strict=False handles raw control chars in strings but does
+    # NOT fix invalid escape sequences — this helper covers that gap.
+    VALID = frozenset('"' + "\\" + "/" + "bfnrtu")
     result: list[str] = []
     i = 0
     while i < len(s):
