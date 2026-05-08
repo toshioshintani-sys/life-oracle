@@ -357,7 +357,10 @@ def call_claude(theme: str, start_date: str, post_time: str) -> dict[str, Any]:
     raw_text = "".join(
         block.text for block in response.content if getattr(block, "type", None) == "text"
     )
-    payload = json.loads(_extract_json_block(raw_text))
+    # strict=False allows literal control characters (e.g. raw newlines)
+    # inside string values. Claude occasionally emits raw \n inside body_md
+    # rather than the escaped \\n, which a strict parser rejects.
+    payload = json.loads(_extract_json_block(raw_text), strict=False)
     payload.setdefault("series", "gachijin")
     payload.setdefault("theme_name", theme)
     payload.setdefault("theme_id", _normalize_theme_id(theme))
