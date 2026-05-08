@@ -54,6 +54,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           NOTE_SESSION_TOKEN: ${{ secrets.NOTE_SESSION_TOKEN }}
           NOTE_USERNAME: ${{ secrets.NOTE_USERNAME }}
+          GACHIJIN_CLAUDE_MODEL: claude-sonnet-4-5
         run: |
           python -X utf8 scripts/gachijin_orchestrator.py \
             --job-id "${{ inputs.job_id }}" \
