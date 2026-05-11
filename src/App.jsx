@@ -10,6 +10,7 @@ import {
 import { calcScore, getTypeName, calcBiasScores, biasInfo, getTendencyLabel } from "./utils/scoring.js";
 import { OCCUPATIONS_18, GENERATIONS_7 } from "../life_oracle_questions_data.js";
 import MapPage from "./pages/MapPage.jsx";
+import GachijinPipelinePage from "./pages/GachijinPipelinePage.jsx";
 
 // ─── 定数 ────────────────────────────────────────────────
 const CARD_STYLE = {
@@ -269,6 +270,10 @@ function buildSystemPrompt(mbtiType, axisScores, biasTop2, typeProfile, occupati
 
 // ─── App ────────────────────────────────────────────────
 export default function App() {
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/gachijin")) {
+    return <GachijinPipelinePage />;
+  }
+
   const [page, setPage] = useState('top');
   const [mapFrom, setMapFrom] = useState('top');
   const [phase, setPhase] = useState("intro");
@@ -570,6 +575,8 @@ export default function App() {
     if (animating) return;
     setSelected(value);
     setAnimating(true);
+    // ターボモードはアニメーション短縮（連打テスト・素早い再診断のため）
+    const delay = turboMode ? 60 : 300;
     setTimeout(() => {
       setSelected(null);
       setAnimating(false);
@@ -600,7 +607,7 @@ export default function App() {
           setPhase("result");
         }
       }
-    }, 300);
+    }, delay);
   }
 
   // ─── スライダー操作（ユング・通常モード）────────────────
@@ -1183,66 +1190,34 @@ export default function App() {
                 {stem}
               </p>
 
-              {turboMode ? (
-                /* ターボモード：4マークボタン */
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-                  {TURBO_MARKS.map((mark, i) => {
-                    const isSelected = selected === i || recordedValue === i;
-                    return (
-                      <button key={i} onClick={() => handleAnswer(i)}
-                        className="lo-answer-btn"
-                        style={{
-                          padding: "14px 4px",
-                          background: isSelected ? "rgba(184,131,63,0.16)" : "rgba(255,255,255,0.8)",
-                          border: `1px solid ${isSelected ? ACCENT : "rgba(184,131,63,0.20)"}`,
-                          borderRadius: 10,
-                          color: isSelected ? ACCENT : TEXT,
-                          fontSize: 22, lineHeight: 1,
-                          cursor: "pointer", textAlign: "center",
-                          fontWeight: isSelected ? 700 : 500,
-                          transition: "all 0.15s",
-                        }}>
-                        {mark}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                /* 通常モード：スライダー（つまむ操作） */
-                <div>
-                  <div style={{ position: 'relative', padding: '6px 14px 0', marginBottom: 4 }}>
-                    {/* 4スナップ点 */}
-                    <div style={{ position: 'absolute', top: 26, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', pointerEvents: 'none', zIndex: 0 }}>
-                      {[0,1,2,3].map(i => (
-                        <div key={i} style={{
-                          width: 8, height: 8, borderRadius: '50%',
-                          background: sliderTouched && sliderValue === i ? ACCENT : 'rgba(184,131,63,0.30)',
-                          transition: 'background 0.2s',
-                        }} />
-                      ))}
-                    </div>
-                    <input
-                      type="range"
-                      min="0" max="3" step="1"
-                      value={recordedValue !== undefined ? recordedValue : sliderValue}
-                      onChange={(e) => handleSliderChange(parseInt(e.target.value))}
-                      className={`lo-jung-slider ${sliderTouched || recordedValue !== undefined ? 'committed' : ''}`}
-                      aria-label={stem}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: TEXT_MUTED, marginTop: 2, padding: '0 4px' }}>
-                    <span>強くそう</span>
-                    <span style={{ color: 'transparent' }}>·</span>
-                    <span style={{ color: 'transparent' }}>·</span>
-                    <span>強くちがう</span>
-                  </div>
-                  {!sliderTouched && recordedValue === undefined && (
-                    <div style={{ fontSize: 11, color: TEXT_MUTED, textAlign: 'center', marginTop: 8 }}>
-                      ↑ つまんで自分の位置までドラッグ
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* 強度マーク4ボタン（●◐◑○）。タップで即進む */}
+              <div className="lo-spectrum-bar" style={{ marginBottom: 6 }}>
+                <span>← そう（強い）</span>
+                <span>（強い）ちがう →</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                {TURBO_MARKS.map((mark, i) => {
+                  const isSelected = selected === i || recordedValue === i;
+                  return (
+                    <button key={i} onClick={() => handleAnswer(i)}
+                      className="lo-answer-btn"
+                      aria-label={['強くそう','ややそう','ややちがう','強くちがう'][i]}
+                      style={{
+                        padding: "16px 4px",
+                        background: isSelected ? "rgba(184,131,63,0.18)" : "rgba(255,255,255,0.85)",
+                        border: `1.5px solid ${isSelected ? ACCENT : "rgba(184,131,63,0.22)"}`,
+                        borderRadius: 10,
+                        color: isSelected ? ACCENT : (i === 0 || i === 3 ? ACCENT : TEXT),
+                        fontSize: 26, lineHeight: 1,
+                        cursor: "pointer", textAlign: "center",
+                        fontWeight: 500,
+                        transition: "all 0.15s",
+                      }}>
+                      {mark}
+                    </button>
+                  );
+                })}
+              </div>
 
               {/* 飛ばすボタン */}
               <button
