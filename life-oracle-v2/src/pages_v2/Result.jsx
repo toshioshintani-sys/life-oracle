@@ -1,76 +1,92 @@
-// 結果画面 — 行動パターン予測を主軸に、タイプは説明として脇役
-// 「当てられた」体験を作るオラクルUX
+import { getResult } from '../data_v2/results/index.js';
+import { biasInfo }  from '../data_v2/meta/biasInfo.js';
 
-import { buildResultData } from '../engine_v2/result.js';
+const SITUATION_LABELS = {
+  w_boss_power:      '上司との関係',
+  w_boss_unfair:     '評価・不公平感',
+  w_boss_values:     '方針・価値観の不一致',
+  w_col_isolation:   '職場での孤立',
+  w_col_rivalry:     '同僚との摩擦',
+  w_work_empty:      'やりがい・意味',
+  w_work_overload:   '仕事量・消耗',
+  w_career_change:   '転職・キャリアの転換',
+  w_career_indep:    '独立・起業',
+  w_career_stuck:    '昇進・成長の頭打ち',
+};
 
 export function Result({ result, onRetry }) {
-  const data = buildResultData(result);
+  if (!result) return null;
+
+  const text = getResult(result.situation, result.age);
+  const label = SITUATION_LABELS[result.situation] ?? result.situation;
+
+  const topBiases = (result.topBiases ?? [])
+    .map(key => biasInfo[key])
+    .filter(Boolean);
 
   return (
     <div className="result-screen">
 
-      {/* ① 見透かし感オープニング */}
+      {/* ① 問題の特定 */}
       <div className="result-oracle">
-        <p className="result-oracle-eyebrow">診断結果</p>
-        <p className="result-oracle-text">{data.opening}</p>
+        <p className="result-oracle-eyebrow">今のあなたが直面していること</p>
+        <p className="result-label-tag">{label}</p>
+        {text && <p className="result-oracle-text">{text.hook}</p>}
       </div>
 
-      {/* ② 行動パターン予測（メインコンテンツ） */}
-      {data.accident ? (
-        <div className="result-accident">
-          <div className="result-accident-label-row">
-            <span className="result-accident-label">起きやすいパターン</span>
+      {/* ② 2択の毒舌テキスト */}
+      {text ? (
+        <div className="result-two-sides">
+          <div className="result-side result-side-a">
+            <p className="result-side-label">可能性 A</p>
+            <p className="result-side-text">{text.sideA}</p>
           </div>
-          <h2 className="result-accident-headline">{data.accident.headline}</h2>
-          <p className="result-accident-body">{data.accident.body}</p>
-          <div className="result-accident-when">
-            <span className="result-accident-when-label">こんな時に特に強まる</span>
-            <p className="result-accident-when-text">{data.accident.when}</p>
+          <div className="result-side result-side-b">
+            <p className="result-side-label">可能性 B</p>
+            <p className="result-side-text">{text.sideB}</p>
           </div>
+          <p className="result-closing">{text.closing}</p>
         </div>
       ) : (
         <div className="result-accident">
           <p className="result-accident-body">
-            あなたの行動パターンに特定の偏りは見られませんでした。バランスの取れた動き方をしているようです。
+            {label}の問題が見えてきました。もう少し質問を増やすと、より精度が上がります。
           </p>
         </div>
       )}
 
-      {/* ③ なぜそうなるか（バイアス＋タイプ） */}
-      <div className="result-why-card">
-        <p className="result-why-text">{data.whyExplanation}</p>
-
-        {data.topBiases.length > 0 && (
-          <div className="result-biases-mini">
-            {data.topBiases.map((b, i) => (
-              <div key={b.key} className={`result-bias-mini bias-rank-${i + 1}`}>
-                <span className="bias-name-mini">{b.name}</span>
-                {b.short && <span className="bias-short-mini">{b.short}</span>}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="result-type-mini">
-          {data.mbtiType && (
-            <span className="result-type-code-mini">{data.mbtiType}</span>
+      {/* ③ ユング・バイアスで「なぜ」 */}
+      {text && (text.jungNote || text.biasNote) && (
+        <div className="result-why-card">
+          <p className="result-section-title">なぜそうなっているか</p>
+          {text.jungNote && (
+            <p className="result-why-text">{text.jungNote}</p>
           )}
-          {data.famousPeople.length > 0 && (
-            <span className="result-type-famous-mini">
-              {data.famousPeople.join('・')}と同じタイプ
-            </span>
+          {text.biasNote && (
+            <p className="result-why-text" style={{ marginTop: 10 }}>{text.biasNote}</p>
           )}
-        </div>
-      </div>
-
-      {/* ④ 今日の一歩 */}
-      {data.accident?.action && (
-        <div className="result-action">
-          <h3 className="result-section-title">今日の一歩</h3>
-          <p className="result-recovery">{data.accident.action}</p>
+          {topBiases.length > 0 && (
+            <div className="result-biases-mini" style={{ marginTop: 12 }}>
+              {topBiases.map((b, i) => (
+                <div key={i} className={`result-bias-mini bias-rank-${i + 1}`}>
+                  <span className="bias-name-mini">{b.name}</span>
+                  <span className="bias-short-mini">{b.short}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
+      {/* ④ 今日の一歩 */}
+      {text?.action && (
+        <div className="result-action">
+          <h3 className="result-section-title">今日の一歩</h3>
+          <p className="result-recovery">{text.action}</p>
+        </div>
+      )}
+
+      {/* ⑤ フッター */}
       <div className="result-footer">
         <button className="retry-button" onClick={onRetry}>
           もう一度診断する

@@ -483,3 +483,62 @@ button {
 .retry-button:hover {
   background: var(--accent-bg);
 }
+
+/* ===== 新結果画面 ===== */
+.result-label-tag {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  line-height: 1.4;
+}
+
+.result-two-sides {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-side {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-side-a {
+  border: 1.5px solid rgba(61, 122, 90, 0.35);
+}
+
+.result-side-b {
+  border: 1.5px solid rgba(160, 80, 80, 0.35);
+}
+
+.result-side-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+}
+
+.result-side-a .result-side-label { color: var(--light); }
+.result-side-b .result-side-label { color: var(--shadow-cl); }
+
+.result-side-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.85;
+}
+
+.result-closing {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.75;
+  padding: 4px 0;
+  border-left: 3px solid var(--accent);
+  padding-left: 14px;
+}
