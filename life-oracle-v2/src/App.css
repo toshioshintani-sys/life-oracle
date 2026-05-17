@@ -152,6 +152,42 @@ button {
   color: var(--text-sub);
 }
 
+/* ===== Flow Choice ===== */
+.flow-choices {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flow-choice {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  background: var(--card-bg);
+  text-align: left;
+  line-height: 1.5;
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s, transform 0.10s;
+}
+
+.flow-choice:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  transform: translateY(-1px);
+}
+
+.flow-primary-label {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.04em;
+}
+
 /* ===== Quiz 画面 ===== */
 .quiz-screen {
   width: 100%;

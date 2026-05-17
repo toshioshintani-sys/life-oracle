@@ -1,48 +1,45 @@
 import { useState, useCallback } from 'react';
 import { Entry } from './pages_v2/Entry.jsx';
-import { SelfIntent } from './pages_v2/SelfIntent.jsx';
-import { Quiz } from './pages_v2/Quiz.jsx';
-import { Result } from './pages_v2/Result.jsx';
-import { createSession } from './engine_v2/session.js';
-import { applyAnswer, nextQuestion, buildResult } from './engine_v2/flowSelf.js';
+import { FlowQuiz } from './pages_v2/FlowQuiz.jsx';
+import { FlowResult } from './pages_v2/FlowResult.jsx';
+import {
+  createFlowSession,
+  recordFlowAnswer,
+  shouldFinish,
+  getNextFlowQuestion,
+} from './engine_v2/flowEngine.js';
 import './App.css';
 
 export default function App() {
-  const [screen, setScreen] = useState('entry'); // 'entry' | 'subintent' | 'quiz' | 'result'
-  const [intent, setIntent] = useState(null);
+  const [screen, setScreen] = useState('entry'); // 'entry' | 'quiz' | 'result'
   const [session, setSession] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [result, setResult] = useState(null);
 
-  const handleStart = useCallback(({ intent: selectedIntent, flow }) => {
-    setIntent(selectedIntent);
-    setScreen('subintent');
-  }, []);
-
-  const handleSubIntent = useCallback((opt) => {
-    const sess = createSession('self');
-    sess.intent = intent;
-    sess.subIntent = opt.key;
-    sess.axisPriority = opt.axisPriority;
-    sess.anglePriority = opt.anglePriority;
-    const first = nextQuestion(sess);
+  const handleStart = useCallback(({ intent }) => {
+    const sess = createFlowSession(intent);
+    const first = getNextFlowQuestion(sess);
     setSession(sess);
     setCurrentQuestion(first);
     setScreen('quiz');
-  }, [intent]);
+  }, []);
 
-  const handleAnswer = useCallback((question, response) => {
+  const handleAnswer = useCallback((question, choice) => {
     if (!session) return;
 
-    applyAnswer(session, question, response);
+    recordFlowAnswer(session, question, choice);
 
-    const next = nextQuestion(session);
+    if (shouldFinish(session)) {
+      setSession({ ...session });
+      setScreen('result');
+      return;
+    }
+
+    const next = getNextFlowQuestion(session);
     if (next) {
       setCurrentQuestion(next);
       setSession({ ...session });
     } else {
-      const res = buildResult(session);
-      setResult(res);
+      setSession({ ...session });
       setScreen('result');
     }
   }, [session]);
@@ -50,8 +47,6 @@ export default function App() {
   const handleRetry = useCallback(() => {
     setSession(null);
     setCurrentQuestion(null);
-    setResult(null);
-    setIntent(null);
     setScreen('entry');
   }, []);
 
@@ -59,22 +54,18 @@ export default function App() {
     return <Entry onStart={handleStart} />;
   }
 
-  if (screen === 'subintent') {
-    return <SelfIntent intent={intent} onSelect={handleSubIntent} />;
-  }
-
   if (screen === 'quiz') {
     return (
-      <Quiz
+      <FlowQuiz
         question={currentQuestion}
-        questionNumber={session?.questionCount ?? 0}
+        questionNumber={session?.answeredCount + 1 ?? 1}
         onAnswer={handleAnswer}
       />
     );
   }
 
   if (screen === 'result') {
-    return <Result result={result} onRetry={handleRetry} />;
+    return <FlowResult session={session} onRetry={handleRetry} />;
   }
 
   return null;
