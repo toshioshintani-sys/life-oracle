@@ -1,4 +1,5 @@
-// 結果画面 — 悩みへの回答を起点に、タイプは説明として登場する
+// 結果画面 — 行動パターン予測を主軸に、タイプは説明として脇役
+// 「当てられた」体験を作るオラクルUX
 
 import { buildResultData } from '../engine_v2/result.js';
 
@@ -8,53 +9,67 @@ export function Result({ result, onRetry }) {
   return (
     <div className="result-screen">
 
-      {/* ① 悩みに応えるオープニング */}
-      <div className="result-opening">
-        <p className="result-intent-label">「{data.intentLabel}」について</p>
-        <p className="result-why">{data.why}</p>
+      {/* ① 見透かし感オープニング */}
+      <div className="result-oracle">
+        <p className="result-oracle-eyebrow">診断結果</p>
+        <p className="result-oracle-text">{data.opening}</p>
       </div>
 
-      {/* ② なぜそうなのか（タイプを理由として登場させる） */}
-      <div className="result-type-card">
-        <p className="result-type-explain">
-          この動き方は、<strong>{data.axisLabels.TF}</strong>かつ
-          <strong>{data.axisLabels.JP}</strong>の人に多いパターンです。
-        </p>
-        <div className="result-type-badge">
-          <span className="result-type-code">{data.mbtiType}</span>
+      {/* ② 行動パターン予測（メインコンテンツ） */}
+      {data.accident ? (
+        <div className="result-accident">
+          <div className="result-accident-label-row">
+            <span className="result-accident-label">起きやすいパターン</span>
+          </div>
+          <h2 className="result-accident-headline">{data.accident.headline}</h2>
+          <p className="result-accident-body">{data.accident.body}</p>
+          <div className="result-accident-when">
+            <span className="result-accident-when-label">こんな時に特に強まる</span>
+            <p className="result-accident-when-text">{data.accident.when}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="result-accident">
+          <p className="result-accident-body">
+            あなたの行動パターンに特定の偏りは見られませんでした。バランスの取れた動き方をしているようです。
+          </p>
+        </div>
+      )}
+
+      {/* ③ なぜそうなるか（バイアス＋タイプ） */}
+      <div className="result-why-card">
+        <p className="result-why-text">{data.whyExplanation}</p>
+
+        {data.topBiases.length > 0 && (
+          <div className="result-biases-mini">
+            {data.topBiases.map((b, i) => (
+              <div key={b.key} className={`result-bias-mini bias-rank-${i + 1}`}>
+                <span className="bias-name-mini">{b.name}</span>
+                {b.short && <span className="bias-short-mini">{b.short}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="result-type-mini">
+          {data.mbtiType && (
+            <span className="result-type-code-mini">{data.mbtiType}</span>
+          )}
           {data.famousPeople.length > 0 && (
-            <span className="result-type-famous">
+            <span className="result-type-famous-mini">
               {data.famousPeople.join('・')}と同じタイプ
             </span>
           )}
         </div>
       </div>
 
-      {/* ③ 思考のクセがその悩みにどう影響しているか */}
-      {data.topBiases.length > 0 && (
-        <div className="result-biases">
-          <h3 className="result-section-title">それを強めているクセ</h3>
-          {data.topBiases.map((b, i) => (
-            <div key={b.key} className={`result-bias bias-rank-${i + 1}`}>
-              <div className="bias-header">
-                <span className="bias-rank">#{i + 1}</span>
-                <span className="bias-name">{b.name}</span>
-                <span className="bias-short">{b.short}</span>
-              </div>
-              <p className="bias-impact">{b.impact}</p>
-            </div>
-          ))}
+      {/* ④ 今日の一歩 */}
+      {data.accident?.action && (
+        <div className="result-action">
+          <h3 className="result-section-title">今日の一歩</h3>
+          <p className="result-recovery">{data.accident.action}</p>
         </div>
       )}
-
-      {/* ④ 今日できること */}
-      <div className="result-action">
-        <h3 className="result-section-title">今日の一歩</h3>
-        <p className="result-recovery">{data.recovery}</p>
-        {data.todayAction && (
-          <p className="result-today-action">{data.todayAction}</p>
-        )}
-      </div>
 
       <div className="result-footer">
         <button className="retry-button" onClick={onRetry}>

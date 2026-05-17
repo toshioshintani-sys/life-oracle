@@ -246,134 +246,171 @@ button {
   padding: 32px 24px 72px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-/* ① オープニング */
-.result-opening {
+/* ① オラクルオープニング */
+.result-oracle {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-oracle-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.result-oracle-text {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.75;
+}
+
+/* ② 行動パターン予測カード */
+.result-accident {
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.result-intent-label {
-  font-size: 12px;
+.result-accident-label-row {
+  display: flex;
+  align-items: center;
+}
+
+.result-accident-label {
+  font-size: 11px;
   font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.10em;
   text-transform: uppercase;
+  background: var(--accent-bg);
+  padding: 3px 10px;
+  border-radius: 20px;
 }
 
-.result-why {
-  font-size: 16px;
-  line-height: 1.8;
+.result-accident-headline {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+.result-accident-body {
+  font-size: 14px;
   color: var(--text);
-  font-weight: 500;
+  line-height: 1.85;
 }
 
-/* ② タイプカード（説明として） */
-.result-type-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
+.result-accident-when {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
-.result-type-explain {
-  font-size: 14px;
+.result-accident-when-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.06em;
+}
+
+.result-accident-when-text {
+  font-size: 13px;
   color: var(--text-sub);
   line-height: 1.7;
 }
 
-.result-type-explain strong {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.result-type-badge {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.result-type-code {
-  font-family: var(--serif);
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--accent-dark);
-  letter-spacing: 0.10em;
-}
-
-.result-type-famous {
-  font-size: 13px;
-  color: var(--text-sub);
-}
-
-/* ③ バイアス */
-.result-section-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--accent-dark);
-  letter-spacing: 0.06em;
-  margin-bottom: 10px;
-}
-
-.result-biases {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.result-bias {
+/* ③ なぜ説明カード */
+.result-why-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 18px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.result-why-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.result-biases-mini {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.bias-rank-1 { border-left: 3px solid var(--accent); }
-.bias-rank-2 { border-left: 3px solid rgba(184, 131, 63, 0.40); }
-
-.bias-header {
+.result-bias-mini {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--bg);
 }
 
-.bias-rank {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.08em;
-  flex-shrink: 0;
-}
+.bias-rank-1 { border-left: 3px solid var(--accent); }
+.bias-rank-2 { border-left: 3px solid rgba(184, 131, 63, 0.35); }
 
-.bias-name {
-  font-size: 15px;
+.bias-name-mini {
+  font-size: 13px;
   font-weight: 700;
   color: var(--text);
 }
 
-.bias-short {
+.bias-short-mini {
   font-size: 12px;
   color: var(--text-sub);
 }
 
-.bias-impact {
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.7;
+.result-type-mini {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.result-type-code-mini {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.08em;
+}
+
+.result-type-famous-mini {
+  font-size: 12px;
+  color: var(--text-sub);
 }
 
 /* ④ 今日の一歩 */
+.result-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
 .result-action {
   background: var(--accent-bg);
   border: 1px solid var(--border);
@@ -381,7 +418,7 @@ button {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .result-recovery {
@@ -389,14 +426,6 @@ button {
   color: var(--text);
   line-height: 1.75;
   font-weight: 500;
-}
-
-.result-today-action {
-  font-size: 13px;
-  color: var(--text-sub);
-  line-height: 1.65;
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
 }
 
 .result-footer {

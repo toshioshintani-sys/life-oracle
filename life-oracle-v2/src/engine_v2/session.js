@@ -25,6 +25,25 @@ export function createSession(flow = 'self') {
       B9: 0, B10: 0, B11: 0, B12: 0,
     },
 
+    // 感情トリガースコア（rejected/ignored/compared/rushed/expected）
+    triggerScores: {
+      rejected: 0,  // 否定される
+      ignored: 0,   // 放置される
+      compared: 0,  // 比較される
+      rushed: 0,    // 急かされる
+      expected: 0,  // 期待される
+    },
+
+    // 行動事故スコア（burnout/jobLoop/explosion/procrastination/impulse/selfNegation）
+    accidentScores: {
+      burnout: 0,
+      jobLoop: 0,
+      explosion: 0,
+      procrastination: 0,
+      impulse: 0,
+      selfNegation: 0,
+    },
+
     // 出題済み質問IDのセット
     asked: new Set(),
 

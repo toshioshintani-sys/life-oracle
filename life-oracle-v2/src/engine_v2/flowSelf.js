@@ -3,6 +3,7 @@
 
 import {
   updateTheta,
+  updatePatternScores,
   confidence,
   buildType,
   CONFIDENCE_THRESHOLD,
@@ -66,6 +67,9 @@ export function applyAnswer(session, question, response) {
     session.biasScores = updateBiasScore(session.biasScores, question, response);
   }
 
+  // 全質問に対して事故・トリガースコアを更新
+  updatePatternScores(session, question, response);
+
   return session;
 }
 
@@ -90,7 +94,10 @@ export function buildResult(session) {
     thetas: { ...session.thetas },
     confidences: { ...session.confidences },
     biasScores: { ...session.biasScores },
+    triggerScores: { ...session.triggerScores },
+    accidentScores: { ...session.accidentScores },
     questionCount: session.questionCount,
     intent: session.intent,
+    subIntent: session.subIntent,
   };
 }
