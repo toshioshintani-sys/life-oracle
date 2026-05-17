@@ -221,9 +221,9 @@ export const FLOW_QUESTIONS = [
     targetFlows: ['over_adaptation'],
     purpose: '過剰適応Flowの確度を上げる',
     choices: [
-      { id: 'yes', label: 'かなり考える', scores: { over_adaptation: 3 } },
-      { id: 'somewhat', label: '少し考える', scores: { over_adaptation: 1 } },
-      { id: 'no', label: 'あまり考えない', scores: { over_adaptation: -1, stagnation: 1 } },
+      { id: 'yes', label: 'かなり考える', scores: { over_adaptation: 3 }, nextQuestionId: 'over_adaptation_deep_001' },
+      { id: 'somewhat', label: '少し考える', scores: { over_adaptation: 1 }, nextQuestionId: 'over_adaptation_deep_001' },
+      { id: 'no', label: 'あまり考えない', scores: { over_adaptation: -1, stagnation: 1 }, nextQuestionId: 'over_adaptation_deep_001' },
     ],
   },
 
@@ -234,9 +234,9 @@ export const FLOW_QUESTIONS = [
     targetFlows: ['stagnation'],
     purpose: '一時的な疲れか、停滞Flowかを切り分ける',
     choices: [
-      { id: 'yes', label: 'ある', scores: { stagnation: 3 } },
-      { id: 'sometimes', label: '時々ある', scores: { stagnation: 1 } },
-      { id: 'no', label: '休めば戻る', scores: { recovery: 1 } },
+      { id: 'yes', label: 'ある', scores: { stagnation: 3 }, nextQuestionId: 'stagnation_deep_001' },
+      { id: 'sometimes', label: '時々ある', scores: { stagnation: 1 }, nextQuestionId: 'stagnation_deep_001' },
+      { id: 'no', label: '休めば戻る', scores: { recovery: 1 }, nextQuestionId: 'stagnation_deep_001' },
     ],
   },
 
@@ -247,9 +247,9 @@ export const FLOW_QUESTIONS = [
     targetFlows: ['avoidance'],
     purpose: '回避による安心があるか確認する',
     choices: [
-      { id: 'yes', label: 'ある', scores: { avoidance: 3 } },
-      { id: 'somewhat', label: '少しある', scores: { avoidance: 1 } },
-      { id: 'no', label: '安心というより、ただ面倒', scores: { stagnation: 1 } },
+      { id: 'yes', label: 'ある', scores: { avoidance: 3 }, nextQuestionId: 'avoidance_deep_001' },
+      { id: 'somewhat', label: '少しある', scores: { avoidance: 1 }, nextQuestionId: 'avoidance_deep_001' },
+      { id: 'no', label: '安心というより、ただ面倒', scores: { stagnation: 1 }, nextQuestionId: 'avoidance_deep_001' },
     ],
   },
 
@@ -260,9 +260,9 @@ export const FLOW_QUESTIONS = [
     targetFlows: ['self_denial'],
     purpose: '自己否定Flowの確度を上げる',
     choices: [
-      { id: 'yes', label: '思いやすい', scores: { self_denial: 3 } },
-      { id: 'sometimes', label: '時々ある', scores: { self_denial: 1 } },
-      { id: 'no', label: 'あまり思わない', scores: { self_denial: -1 } },
+      { id: 'yes', label: '思いやすい', scores: { self_denial: 3 }, nextQuestionId: 'self_denial_deep_001' },
+      { id: 'sometimes', label: '時々ある', scores: { self_denial: 1 }, nextQuestionId: 'self_denial_deep_001' },
+      { id: 'no', label: 'あまり思わない', scores: { self_denial: -1 }, nextQuestionId: 'self_denial_deep_001' },
     ],
   },
 
@@ -273,7 +273,150 @@ export const FLOW_QUESTIONS = [
     targetFlows: ['impulse'],
     purpose: '衝動Flowの確度を上げる',
     choices: [
-      { id: 'yes', label: 'ある', scores: { impulse: 3 } },
+      { id: 'yes', label: 'ある', scores: { impulse: 3 }, nextQuestionId: 'impulse_deep_001' },
+      { id: 'sometimes', label: '時々ある', scores: { impulse: 1 }, nextQuestionId: 'impulse_deep_001' },
+      { id: 'no', label: 'あまりない', scores: { stagnation: 1 }, nextQuestionId: 'impulse_deep_001' },
+    ],
+  },
+
+  // ═══ Q4・Q5：各Flowの明示的な深掘りチェーン ════════════════════
+  // confirmation → deep_001 → deep_002 の順で nextQuestionId で繋ぐ
+
+  // ── 過剰適応Flow ─────────────────────────────────────────────
+
+  {
+    id: 'over_adaptation_deep_001',
+    layer: 'emotion',
+    text: '最近、誰かに頼まれると、断りにくいと感じることが増えましたか？',
+    targetFlows: ['over_adaptation'],
+    purpose: '過剰適応のパターンを行動レベルで確認する',
+    choices: [
+      { id: 'yes', label: 'ある', scores: { over_adaptation: 2 }, nextQuestionId: 'over_adaptation_deep_002', tags: ['cant_refuse'] },
+      { id: 'somewhat', label: '時々ある', scores: { over_adaptation: 1 }, nextQuestionId: 'over_adaptation_deep_002' },
+      { id: 'no', label: 'あまりない', scores: { over_adaptation: -1, stagnation: 1 }, nextQuestionId: 'over_adaptation_deep_002' },
+    ],
+  },
+
+  {
+    id: 'over_adaptation_deep_002',
+    layer: 'emotion',
+    text: '後で疲れるとわかっていても、その場の空気に合わせてしまうことがありますか？',
+    targetFlows: ['over_adaptation', 'self_denial'],
+    purpose: '過剰適応Flowの核心的なパターンを確認する',
+    choices: [
+      { id: 'yes', label: 'よくある', scores: { over_adaptation: 3 }, tags: ['situation_compliance'] },
+      { id: 'sometimes', label: '時々ある', scores: { over_adaptation: 1, self_denial: 1 } },
+      { id: 'no', label: 'あまりない', scores: { recovery: 1 } },
+    ],
+  },
+
+  // ── 停滞Flow ─────────────────────────────────────────────────
+
+  {
+    id: 'stagnation_deep_001',
+    layer: 'emotion',
+    text: '最近、以前は楽しめていたことへの関心が、薄れていますか？',
+    targetFlows: ['stagnation'],
+    purpose: '停滞Flowの深さを確認する（興味喪失の有無）',
+    choices: [
+      { id: 'yes', label: 'ある', scores: { stagnation: 2 }, nextQuestionId: 'stagnation_deep_002', tags: ['anhedonia'] },
+      { id: 'somewhat', label: '少しある', scores: { stagnation: 1 }, nextQuestionId: 'stagnation_deep_002' },
+      { id: 'no', label: 'あまりない', scores: { recovery: 1 }, nextQuestionId: 'stagnation_deep_002' },
+    ],
+  },
+
+  {
+    id: 'stagnation_deep_002',
+    layer: 'emotion',
+    text: '「なんとなく過ごした」と感じる日が、増えていますか？',
+    targetFlows: ['stagnation', 'avoidance'],
+    purpose: '停滞Flowの継続性を確認する',
+    choices: [
+      { id: 'yes', label: '増えている', scores: { stagnation: 3 }, tags: ['drifting'] },
+      { id: 'somewhat', label: '少し増えた', scores: { stagnation: 1 } },
+      { id: 'no', label: 'あまり変わらない', scores: { recovery: 1 } },
+    ],
+  },
+
+  // ── 回避Flow ─────────────────────────────────────────────────
+
+  {
+    id: 'avoidance_deep_001',
+    layer: 'emotion',
+    text: '最近、予定を入れることに、以前より抵抗を感じますか？',
+    targetFlows: ['avoidance'],
+    purpose: '回避行動が広がっているか確認する',
+    choices: [
+      { id: 'yes', label: '感じる', scores: { avoidance: 2 }, nextQuestionId: 'avoidance_deep_002', tags: ['schedule_avoidance'] },
+      { id: 'somewhat', label: '少し感じる', scores: { avoidance: 1 }, nextQuestionId: 'avoidance_deep_002' },
+      { id: 'no', label: 'あまり感じない', scores: { recovery: 1 }, nextQuestionId: 'avoidance_deep_002' },
+    ],
+  },
+
+  {
+    id: 'avoidance_deep_002',
+    layer: 'emotion',
+    text: '連絡を後回しにしているうちに、さらに連絡しにくくなった経験がありますか？',
+    targetFlows: ['avoidance', 'self_denial'],
+    purpose: '回避スパイラルのパターンを確認する',
+    choices: [
+      { id: 'yes', label: 'ある', scores: { avoidance: 3 }, tags: ['avoidance_spiral'] },
+      { id: 'sometimes', label: '時々ある', scores: { avoidance: 1, self_denial: 1 } },
+      { id: 'no', label: 'あまりない', scores: { recovery: 1 } },
+    ],
+  },
+
+  // ── 自己否定Flow ─────────────────────────────────────────────
+
+  {
+    id: 'self_denial_deep_001',
+    layer: 'emotion',
+    text: 'うまくいった時も、「たまたまだ」「運が良かっただけ」と思いやすいですか？',
+    targetFlows: ['self_denial'],
+    purpose: '自己否定Flowの根深さを確認する（成功の内在化ができているか）',
+    choices: [
+      { id: 'yes', label: '思いやすい', scores: { self_denial: 2 }, nextQuestionId: 'self_denial_deep_002', tags: ['impostor'] },
+      { id: 'somewhat', label: '時々思う', scores: { self_denial: 1 }, nextQuestionId: 'self_denial_deep_002' },
+      { id: 'no', label: 'あまり思わない', scores: { recovery: 1 }, nextQuestionId: 'self_denial_deep_002' },
+    ],
+  },
+
+  {
+    id: 'self_denial_deep_002',
+    layer: 'emotion',
+    text: '誰かに褒められても、素直に受け取れないことが多いですか？',
+    targetFlows: ['self_denial', 'over_adaptation'],
+    purpose: '自己否定Flowの外部評価への反応を確認する',
+    choices: [
+      { id: 'yes', label: 'よくある', scores: { self_denial: 3 }, tags: ['cant_accept_praise'] },
+      { id: 'sometimes', label: '時々ある', scores: { self_denial: 1 } },
+      { id: 'no', label: 'わりと受け取れる', scores: { recovery: 1 } },
+    ],
+  },
+
+  // ── 衝動Flow ─────────────────────────────────────────────────
+
+  {
+    id: 'impulse_deep_001',
+    layer: 'emotion',
+    text: '感情が動いた後、「なぜあんなことをしたんだろう」と後悔することが多いですか？',
+    targetFlows: ['impulse', 'self_denial'],
+    purpose: '衝動後の後悔パターンを確認する',
+    choices: [
+      { id: 'yes', label: '多い', scores: { impulse: 2, self_denial: 1 }, nextQuestionId: 'impulse_deep_002', tags: ['post_impulse_regret'] },
+      { id: 'sometimes', label: '時々ある', scores: { impulse: 1 }, nextQuestionId: 'impulse_deep_002' },
+      { id: 'no', label: 'あまりない', scores: { recovery: 1 }, nextQuestionId: 'impulse_deep_002' },
+    ],
+  },
+
+  {
+    id: 'impulse_deep_002',
+    layer: 'emotion',
+    text: '不安や焦りを感じると、何かを「すぐ決めたい」衝動に駆られますか？',
+    targetFlows: ['impulse'],
+    purpose: '衝動Flowの核心的なトリガーを確認する',
+    choices: [
+      { id: 'yes', label: 'よくある', scores: { impulse: 3 }, tags: ['anxiety_driven_impulse'] },
       { id: 'sometimes', label: '時々ある', scores: { impulse: 1 } },
       { id: 'no', label: 'あまりない', scores: { stagnation: 1 } },
     ],
