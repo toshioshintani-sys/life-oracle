@@ -238,179 +238,163 @@ button {
   padding: 32px 24px 72px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
-.result-header {
-  text-align: center;
+/* ① オープニング */
+.result-opening {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.result-intent-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.result-why {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ② タイプカード（説明として） */
+.result-type-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.result-narrative {
+.result-type-explain {
   font-size: 14px;
   color: var(--text-sub);
-  line-height: 1.65;
+  line-height: 1.7;
 }
 
-.result-type {
+.result-type-explain strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.result-type-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.result-type-code {
   font-family: var(--serif);
-  font-size: 48px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--accent-dark);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.10em;
 }
 
-.result-names {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.result-light  { color: var(--light); }
-.result-shadow { color: var(--shadow-cl); }
-
-.result-famous {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  text-align: center;
-}
-
-.result-famous-label {
-  font-size: 11px;
+.result-type-famous {
+  font-size: 13px;
   color: var(--text-sub);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
 }
 
-.result-famous-names {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-}
-
+/* ③ バイアス */
 .result-section-title {
-  font-family: var(--serif);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--accent-dark);
   letter-spacing: 0.06em;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .result-biases {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .result-bias {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .bias-rank-1 { border-left: 3px solid var(--accent); }
-.bias-rank-2 { border-left: 3px solid rgba(184, 131, 63, 0.45); }
+.bias-rank-2 { border-left: 3px solid rgba(184, 131, 63, 0.40); }
+
+.bias-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .bias-rank {
   font-size: 11px;
   font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.08em;
+  flex-shrink: 0;
 }
 
 .bias-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text);
-  margin-left: 6px;
-}
-
-.bias-rank + .bias-name {
-  display: inline;
 }
 
 .bias-short {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
   color: var(--text-sub);
 }
 
-.bias-desc {
-  font-size: 13px;
-  color: var(--text-sub);
-  line-height: 1.65;
+.bias-impact {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
 }
 
+/* ④ 今日の一歩 */
 .result-action {
   background: var(--accent-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
-}
-
-.result-today-action {
-  font-size: 15px;
-  color: var(--text);
-  line-height: 1.7;
-}
-
-.result-axis-strength {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.axis-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.result-recovery {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.75;
+  font-weight: 500;
 }
 
-.axis-label {
+.result-today-action {
   font-size: 13px;
-  font-weight: 700;
   color: var(--text-sub);
-  width: 28px;
-  flex-shrink: 0;
-}
-
-.axis-bar-track {
-  flex: 1;
-  height: 6px;
-  background: var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.axis-bar-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 4px;
-}
-
-.axis-conf {
-  font-size: 12px;
-  color: var(--text-sub);
-  width: 32px;
-  text-align: right;
-  flex-shrink: 0;
+  line-height: 1.65;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
 }
 
 .result-footer {
   display: flex;
   justify-content: center;
+  padding-top: 8px;
 }
 
 .retry-button {

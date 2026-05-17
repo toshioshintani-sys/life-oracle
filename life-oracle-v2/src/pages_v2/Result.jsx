@@ -1,67 +1,59 @@
-// 結果画面
+// 結果画面 — 悩みへの回答を起点に、タイプは説明として登場する
 
-import { buildResultData, intentNarrative } from '../engine_v2/result.js';
+import { buildResultData } from '../engine_v2/result.js';
 
-/**
- * @param {{ result, onRetry }} props
- */
 export function Result({ result, onRetry }) {
   const data = buildResultData(result);
-  const narrative = intentNarrative(result.intent, data.mbtiType);
 
   return (
     <div className="result-screen">
-      <div className="result-header">
-        <p className="result-narrative">{narrative}</p>
-        <h2 className="result-type">{data.mbtiType}</h2>
-        <div className="result-names">
-          <span className="result-light">光：{data.lightName}</span>
-          <span className="result-shadow">影：{data.shadowName}</span>
+
+      {/* ① 悩みに応えるオープニング */}
+      <div className="result-opening">
+        <p className="result-intent-label">「{data.intentLabel}」について</p>
+        <p className="result-why">{data.why}</p>
+      </div>
+
+      {/* ② なぜそうなのか（タイプを理由として登場させる） */}
+      <div className="result-type-card">
+        <p className="result-type-explain">
+          この動き方は、<strong>{data.axisLabels.TF}</strong>かつ
+          <strong>{data.axisLabels.JP}</strong>の人に多いパターンです。
+        </p>
+        <div className="result-type-badge">
+          <span className="result-type-code">{data.mbtiType}</span>
+          {data.famousPeople.length > 0 && (
+            <span className="result-type-famous">
+              {data.famousPeople.join('・')}と同じタイプ
+            </span>
+          )}
         </div>
       </div>
 
-      {data.famousPeople.length > 0 && (
-        <div className="result-famous">
-          <p className="result-famous-label">同じタイプの人物</p>
-          <p className="result-famous-names">{data.famousPeople.join('　')}</p>
-        </div>
-      )}
-
+      {/* ③ 思考のクセがその悩みにどう影響しているか */}
       {data.topBiases.length > 0 && (
         <div className="result-biases">
-          <h3 className="result-section-title">あなたの思考のクセ</h3>
+          <h3 className="result-section-title">それを強めているクセ</h3>
           {data.topBiases.map((b, i) => (
             <div key={b.key} className={`result-bias bias-rank-${i + 1}`}>
-              <div>
-                <span className="bias-rank">#{i + 1}　</span>
+              <div className="bias-header">
+                <span className="bias-rank">#{i + 1}</span>
                 <span className="bias-name">{b.name}</span>
+                <span className="bias-short">{b.short}</span>
               </div>
-              <p className="bias-short">{b.short}</p>
-              <p className="bias-desc">{b.description}</p>
+              <p className="bias-impact">{b.impact}</p>
             </div>
           ))}
         </div>
       )}
 
+      {/* ④ 今日できること */}
       <div className="result-action">
         <h3 className="result-section-title">今日の一歩</h3>
-        <p className="result-today-action">{data.todayAction}</p>
-      </div>
-
-      <div className="result-axis-strength">
-        <h3 className="result-section-title">診断の確信度</h3>
-        {Object.entries(data.axisStrength).map(([axis, conf]) => (
-          <div key={axis} className="axis-bar-row">
-            <span className="axis-label">{axis}</span>
-            <div className="axis-bar-track">
-              <div
-                className="axis-bar-fill"
-                style={{ width: `${Math.round(conf * 100)}%` }}
-              />
-            </div>
-            <span className="axis-conf">{Math.round(conf * 100)}%</span>
-          </div>
-        ))}
+        <p className="result-recovery">{data.recovery}</p>
+        {data.todayAction && (
+          <p className="result-today-action">{data.todayAction}</p>
+        )}
       </div>
 
       <div className="result-footer">
@@ -69,6 +61,7 @@ export function Result({ result, onRetry }) {
           もう一度診断する
         </button>
       </div>
+
     </div>
   );
 }
