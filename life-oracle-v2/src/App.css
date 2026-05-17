@@ -75,6 +75,14 @@ button {
   line-height: 1.5;
 }
 
+.self-intent-back {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .intent-list {
   width: 100%;
   display: flex;
