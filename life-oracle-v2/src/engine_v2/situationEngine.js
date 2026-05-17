@@ -140,9 +140,25 @@ export function buildResult(session) {
   };
 }
 
+function getDomain(situation) {
+  return situation.split('_')[0]; // 'w' | 'r' | 's' | 'f'
+}
+
 function getTopSituations(scores, n) {
-  return Object.entries(scores)
-    .sort(([,a],[,b]) => b - a)
-    .slice(0, n)
-    .map(([s]) => s);
+  const sorted = Object.entries(scores).sort(([,a],[,b]) => b - a);
+  const positive = sorted.filter(([,s]) => s > 0);
+
+  // スコアが付いた状況が n 個以上あればそのまま返す
+  if (positive.length >= n) return positive.slice(0, n).map(([s]) => s);
+
+  // 0点の同点群から「先頭状況と同じドメイン」を優先して埋める
+  // （仕事ドメイン選択後に人間関係の質問が混入するのを防ぐ）
+  const topDomain = positive.length > 0 ? getDomain(positive[0][0]) : null;
+  const fills = topDomain
+    ? sorted.filter(([s, v]) => v === 0 && getDomain(s) === topDomain)
+    : sorted.filter(([,v]) => v === 0);
+
+  const result = positive.map(([s]) => s);
+  result.push(...fills.slice(0, n - result.length).map(([s]) => s));
+  return result;
 }
