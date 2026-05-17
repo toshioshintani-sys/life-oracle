@@ -32,8 +32,10 @@ export function Result({ result, onRetry }) {
           <h3 className="result-section-title">あなたの思考のクセ</h3>
           {data.topBiases.map((b, i) => (
             <div key={b.key} className={`result-bias bias-rank-${i + 1}`}>
-              <span className="bias-rank">#{i + 1}</span>
-              <span className="bias-name">{b.name}</span>
+              <div>
+                <span className="bias-rank">#{i + 1}　</span>
+                <span className="bias-name">{b.name}</span>
+              </div>
               <p className="bias-short">{b.short}</p>
               <p className="bias-desc">{b.description}</p>
             </div>
