@@ -49,6 +49,15 @@ export function createSession(flow = 'self') {
 
     // ユーザーが申告した「知りたいこと」（Entry画面の選択）
     intent: null,
+
+    // SelfIntent で選んだ具体的な悩み
+    subIntent: null,
+
+    // subIntent から決まる軸の探索優先順（序盤に使う）
+    axisPriority: ['EI', 'SN', 'TF', 'JP'],
+
+    // subIntent から決まる angle の優先順
+    anglePriority: ['work', 'relation', 'stress', 'choice'],
   };
 }
 
