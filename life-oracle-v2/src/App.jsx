@@ -7,32 +7,35 @@ import {
   recordAnswer,
   shouldFinish,
   getNextQuestion,
+  getSessionMessage,
   buildResult,
 } from './engine_v2/situationEngine.js';
 import { ALL_QUESTIONS } from './data_v2/questions/index.js';
 import './App.css';
 
 export default function App() {
-  const [screen, setScreen]               = useState('entry');
-  const [session, setSession]             = useState(null);
+  const [screen, setScreen]                   = useState('entry');
+  const [session, setSession]                 = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [result, setResult]               = useState(null);
+  const [sessionMessage, setSessionMessage]   = useState(null);
+  const [result, setResult]                   = useState(null);
 
-  const handleStart = useCallback(({ intent }) => {
-    const sess = createSession(intent);
+  const handleStart = useCallback(() => {
+    const sess = createSession();
     const first = getNextQuestion(sess, ALL_QUESTIONS);
     setSession(sess);
     setCurrentQuestion(first);
+    setSessionMessage(getSessionMessage(sess));
     setScreen('quiz');
   }, []);
 
   const handleAnswer = useCallback((question, choice) => {
     if (!session) return;
     recordAnswer(session, question, choice);
+    setSessionMessage(getSessionMessage(session));
 
     if (shouldFinish(session)) {
       setResult(buildResult(session));
-      setSession({ ...session });
       setScreen('result');
       return;
     }
@@ -50,6 +53,7 @@ export default function App() {
   const handleRetry = useCallback(() => {
     setSession(null);
     setCurrentQuestion(null);
+    setSessionMessage(null);
     setResult(null);
     setScreen('entry');
   }, []);
@@ -58,7 +62,7 @@ export default function App() {
   if (screen === 'quiz')   return (
     <Quiz
       question={currentQuestion}
-      questionNumber={(session?.questionCount ?? 0) + 1}
+      sessionMessage={sessionMessage}
       onAnswer={handleAnswer}
     />
   );

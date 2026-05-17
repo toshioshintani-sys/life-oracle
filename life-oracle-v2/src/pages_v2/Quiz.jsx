@@ -1,14 +1,16 @@
-export function Quiz({ question, questionNumber, onAnswer }) {
+export function Quiz({ question, sessionMessage, onAnswer }) {
   if (!question) return null;
   return (
     <div className="quiz-screen">
-      <p className="quiz-count">Q{questionNumber}</p>
+      {sessionMessage && (
+        <p className="quiz-oracle-message">{sessionMessage}</p>
+      )}
       <p className="quiz-stem">{question.text}</p>
-      <div className="flow-choices">
+      <div className="quiz-choices">
         {question.choices.map((choice) => (
           <button
             key={choice.id}
-            className="flow-choice"
+            className="quiz-choice"
             onClick={() => onAnswer(question, choice)}
           >
             {choice.label}

@@ -542,3 +542,72 @@ button {
   border-left: 3px solid var(--accent);
   padding-left: 14px;
 }
+
+/* ===== Quiz オラクルメッセージ ===== */
+.quiz-oracle-message {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-dark);
+  text-align: center;
+  line-height: 1.65;
+  padding: 10px 16px;
+  background: var(--accent-bg);
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  align-self: stretch;
+}
+
+/* ===== Result：あなたはこう答えました ===== */
+.result-readings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.result-readings-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.10em;
+  margin-bottom: 4px;
+}
+
+.result-reading-item {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* ===== Result：年代・職業の推定 ===== */
+.result-inference {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(184,131,63,0.08), rgba(184,131,63,0.04));
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.result-inference-item {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.03em;
+}
+
+.result-inference-note {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-sub);
+  letter-spacing: 0.02em;
+}

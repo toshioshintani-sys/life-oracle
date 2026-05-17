@@ -41,10 +41,35 @@ export function Result({ result, onRetry }) {
     .map(key => biasInfo[key])
     .filter(Boolean);
 
+  const keyAnswers = (result.keyAnswers ?? []).slice(0, 3);
+
   return (
     <div className="result-screen">
 
-      {/* ① 問題の特定 */}
+      {/* ① あなたはこう答えました（読み返し）*/}
+      {keyAnswers.length > 0 && (
+        <div className="result-readings">
+          <p className="result-readings-label">あなたはこう答えました。</p>
+          {keyAnswers.map((label, i) => (
+            <p key={i} className="result-reading-item">「{label}」</p>
+          ))}
+        </div>
+      )}
+
+      {/* ② 年代・職業の推定（ゾクっポイント）*/}
+      {(result.inferredAge || result.inferredJob) && (
+        <div className="result-inference">
+          {result.inferredAge && (
+            <span className="result-inference-item">{result.inferredAge}</span>
+          )}
+          {result.inferredJob && (
+            <span className="result-inference-item">{result.inferredJob}</span>
+          )}
+          <span className="result-inference-note">と推定しました。</span>
+        </div>
+      )}
+
+      {/* ③ 問題の特定 */}
       <div className="result-oracle">
         <p className="result-oracle-eyebrow">今のあなたが直面していること</p>
         <p className="result-label-tag">{label}</p>

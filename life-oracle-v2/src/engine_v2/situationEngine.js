@@ -1,49 +1,60 @@
-// アキネーターエンジン
-// 状況スコアの拮抗を見て、最もそれを識別できる質問を選ぶ
+// アキネーターエンジン v2
+// - 汎用入口5問を先に出し、その後スコアベースで質問を選ぶ
+// - demographicHints で年齢・職業を行動から推定（直接聞かない）
+// - keyAnswers で「あなたはこう答えました」を生成
+// - getSessionMessage で対話的な進行メッセージを返す
 
 export const ALL_SITUATIONS = [
-  // 仕事
-  'w_boss_power',      // パワハラ・威圧的な上司
-  'w_boss_unfair',     // 評価されない・不公平
-  'w_boss_values',     // 価値観・方針が合わない
-  'w_col_isolation',   // 職場での孤立
-  'w_col_rivalry',     // 競争・嫉妬・押し付け
-  'w_work_empty',      // やりがいがない・向いていない
-  'w_work_overload',   // 量が多すぎる・消耗
-  'w_career_change',   // 転職を考えている
-  'w_career_indep',    // 独立・起業を考えている
-  'w_career_stuck',    // 昇進・評価が止まっている
-  // 人間関係（今後追加）
-  'r_partner_drift',
-  'r_partner_divorce',
-  'r_parent_pressure',
-  'r_parent_care',
-  'r_friend_isolation',
-  'r_friend_toxic',
-  // 自己理解（今後追加）
-  's_self_esteem',
-  's_emotion_control',
-  's_no_direction',
-  's_burnout',
-  // 将来（今後追加）
-  'f_job_decision',
-  'f_independence',
-  'f_life_change',
+  'w_boss_power', 'w_boss_unfair', 'w_boss_values',
+  'w_col_isolation', 'w_col_rivalry',
+  'w_work_empty', 'w_work_overload',
+  'w_career_change', 'w_career_indep', 'w_career_stuck',
+  'r_partner_drift', 'r_partner_divorce',
+  'r_parent_pressure', 'r_parent_care',
+  'r_friend_isolation', 'r_friend_toxic',
+  's_self_esteem', 's_emotion_control', 's_no_direction', 's_burnout',
+  'f_job_decision', 'f_independence', 'f_life_change',
 ];
 
-export function createSession(intent) {
+const DEMOGRAPHIC_KEYS = [
+  'age_early20s', 'age_late20s', 'age_30s', 'age_40s', 'age_50s',
+  'job_employee', 'job_freelance', 'job_homemaker', 'job_student', 'job_parttime',
+];
+
+const AGE_KEY_TO_LABEL = {
+  age_early20s: '20代前半',
+  age_late20s:  '20代後半',
+  age_30s:      '30代',
+  age_40s:      '40代',
+  age_50s:      '50代以上',
+};
+
+const JOB_KEY_TO_LABEL = {
+  job_employee:  '会社員',
+  job_freelance: 'フリーランス・自営業',
+  job_homemaker: '主婦・主夫',
+  job_student:   '学生',
+  job_parttime:  '非正規雇用',
+};
+
+export function createSession() {
   const situationScores = {};
   ALL_SITUATIONS.forEach(s => { situationScores[s] = 0; });
 
+  const demographicScores = {};
+  DEMOGRAPHIC_KEYS.forEach(k => { demographicScores[k] = 0; });
+
   return {
-    intent,
     situationScores,
-    biasScores: { B1: 0, B2: 0, B3: 0, B4: 0, B6: 0, B8: 0, B12: 0 },
-    jungHints:  { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 },
-    demographic: { age: null, job: null },
-    answeredIds: [],
-    questionCount: 0,
-    tags: [],
+    demographicScores,
+    biasScores:       { B1: 0, B2: 0, B3: 0, B4: 0, B6: 0, B8: 0, B12: 0 },
+    jungHints:        { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 },
+    keyAnswers:       [],
+    tags:             [],
+    answeredIds:      [],
+    questionCount:    0,
+    prevTopSituation: null,
+    lastPivotAt:      -99,
   };
 }
 
@@ -65,47 +76,78 @@ export function recordAnswer(session, question, choice) {
       if (session.jungHints[f] !== undefined) session.jungHints[f] += score;
     });
   }
-  if (question.type === 'demographic_age') session.demographic.age = choice.value;
-  if (question.type === 'demographic_job') session.demographic.job = choice.value;
+  if (choice.demographicHints) {
+    Object.entries(choice.demographicHints).forEach(([k, score]) => {
+      if (session.demographicScores[k] !== undefined) session.demographicScores[k] += score;
+    });
+  }
   if (choice.tags) session.tags.push(...choice.tags);
+
+  // スコアが高い答えを「読み返し」用に保存
+  const maxScore = choice.situationScores
+    ? Math.max(...Object.values(choice.situationScores))
+    : 0;
+  if (maxScore >= 2 && session.keyAnswers.length < 4) {
+    session.keyAnswers.push(choice.label);
+  }
+
+  // ピボット検出：Q5以降で1位状況が入れ替わったとき
+  const currentTop = getTopSituationKey(session.situationScores);
+  if (
+    session.questionCount >= 5 &&
+    session.prevTopSituation &&
+    session.prevTopSituation !== currentTop
+  ) {
+    session.lastPivotAt = session.questionCount;
+  }
+  session.prevTopSituation = currentTop;
 
   session.answeredIds.push(question.id);
   session.questionCount++;
 }
 
 export function shouldFinish(session) {
-  if (!session.demographic.age || !session.demographic.job) return false;
-  if (session.questionCount < 8) return false;
-  if (session.questionCount >= 15) return true;
+  if (session.questionCount < 12) return false;
+  if (session.questionCount >= 22) return true;
 
   const sorted = Object.values(session.situationScores).sort((a, b) => b - a);
   return sorted[0] >= 8 && (sorted[0] - (sorted[1] ?? 0)) >= 4;
+}
+
+export function getSessionMessage(session) {
+  const q = session.questionCount;
+  if (q === 0) return null;
+
+  // ピボット直後
+  if (q - session.lastPivotAt <= 1 && session.lastPivotAt > 0) {
+    return '少し別の角度から確認させてください。';
+  }
+
+  const sorted = Object.values(session.situationScores).sort((a, b) => b - a);
+  const gap = (sorted[0] ?? 0) - (sorted[1] ?? 0);
+
+  if (q <= 3)   return 'あなたのことを、静かに読んでいます。';
+  if (q <= 5)   return '輪郭が見えてきました。';
+  if (gap < 2)  return 'もう少しだけ聞かせてください。';
+  if (gap < 4)  return 'だいぶ絞れてきました。';
+  if (q >= 18)  return 'もうすぐです。';
+  return 'あと数問だけ聞かせてください。';
 }
 
 export function getNextQuestion(session, allQuestions) {
   const asked = new Set(session.answeredIds);
   const available = allQuestions.filter(q => !asked.has(q.id));
 
-  // Q1: intent に対応した入口
-  if (session.questionCount === 0) {
-    return available.find(q => q.startFor === session.intent) ?? available[0];
-  }
+  // フェーズ1：汎用入口質問を順番に出す
+  const universalRemaining = available
+    .filter(q => q.type === 'universal')
+    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+  if (universalRemaining.length > 0) return universalRemaining[0];
 
-  // Q5以降で年代未取得 → 年代を聞く
-  if (session.questionCount >= 5 && !session.demographic.age) {
-    return available.find(q => q.type === 'demographic_age');
-  }
-
-  // 年代取得済・職種未取得 → 職種を聞く
-  if (session.demographic.age && !session.demographic.job) {
-    return available.find(q => q.type === 'demographic_job');
-  }
-
-  // アキネーターフェーズ: 上位3状況を最もよく識別する質問を選ぶ
+  // フェーズ2：アキネーター（universal・demographic は除外）
   const top3 = getTopSituations(session.situationScores, 3);
-
   const candidates = available
-    .filter(q => q.type !== 'demographic_age' && q.type !== 'demographic_job')
+    .filter(q => q.type !== 'universal' && q.type !== 'demographic_age' && q.type !== 'demographic_job')
     .map(q => ({
       q,
       power: (q.discriminates ?? []).filter(d => top3.includes(d)).length,
@@ -113,14 +155,14 @@ export function getNextQuestion(session, allQuestions) {
     .filter(({ power }) => power > 0)
     .sort((a, b) => b.power - a.power);
 
-  return candidates[0]?.q ?? available.find(q =>
-    q.type !== 'demographic_age' && q.type !== 'demographic_job'
+  return candidates[0]?.q ?? available.find(
+    q => q.type !== 'universal' && q.type !== 'demographic_age' && q.type !== 'demographic_job'
   );
 }
 
 export function buildResult(session) {
   const entries = Object.entries(session.situationScores).sort(([,a],[,b]) => b - a);
-  const topSituation = entries[0][0];
+  const topSituation    = entries[0][0];
   const secondSituation = entries[1][0];
 
   const topBiases = Object.entries(session.biasScores)
@@ -128,31 +170,41 @@ export function buildResult(session) {
   const topJung = Object.entries(session.jungHints)
     .sort(([,a],[,b]) => b - a).slice(0, 2).map(([f]) => f);
 
+  const inferredAgeKey = inferFromScores(session.demographicScores, 'age_');
+  const inferredJobKey = inferFromScores(session.demographicScores, 'job_');
+  const ageLabel = inferredAgeKey ? AGE_KEY_TO_LABEL[inferredAgeKey] : null;
+  const jobLabel = inferredJobKey ? JOB_KEY_TO_LABEL[inferredJobKey] : null;
+
   return {
-    situation: topSituation,
+    situation:      topSituation,
     secondSituation,
-    age: session.demographic.age,
-    job: session.demographic.job,
+    age:            ageLabel ?? '30代', // result text fallback
+    job:            jobLabel,
+    inferredAge:    ageLabel,
+    inferredJob:    jobLabel,
     topBiases,
     topJung,
-    tags: session.tags,
-    scores: session.situationScores,
+    keyAnswers:     [...session.keyAnswers],
+    tags:           session.tags,
+    scores:         session.situationScores,
   };
 }
 
+// ── helpers ────────────────────────────────────────────────────────────────
+
+function getTopSituationKey(scores) {
+  return Object.entries(scores).sort(([,a],[,b]) => b - a)[0]?.[0] ?? null;
+}
+
 function getDomain(situation) {
-  return situation.split('_')[0]; // 'w' | 'r' | 's' | 'f'
+  return situation.split('_')[0];
 }
 
 function getTopSituations(scores, n) {
   const sorted = Object.entries(scores).sort(([,a],[,b]) => b - a);
   const positive = sorted.filter(([,s]) => s > 0);
-
-  // スコアが付いた状況が n 個以上あればそのまま返す
   if (positive.length >= n) return positive.slice(0, n).map(([s]) => s);
 
-  // 0点の同点群から「先頭状況と同じドメイン」を優先して埋める
-  // （仕事ドメイン選択後に人間関係の質問が混入するのを防ぐ）
   const topDomain = positive.length > 0 ? getDomain(positive[0][0]) : null;
   const fills = topDomain
     ? sorted.filter(([s, v]) => v === 0 && getDomain(s) === topDomain)
@@ -161,4 +213,12 @@ function getTopSituations(scores, n) {
   const result = positive.map(([s]) => s);
   result.push(...fills.slice(0, n - result.length).map(([s]) => s));
   return result;
+}
+
+function inferFromScores(scores, prefix) {
+  const relevant = Object.entries(scores)
+    .filter(([k]) => k.startsWith(prefix))
+    .sort(([,a], [,b]) => b - a);
+  if (!relevant.length || relevant[0][1] === 0) return null;
+  return relevant[0][0];
 }
