@@ -6,8 +6,6 @@ import { createSession } from './engine_v2/session.js';
 import { applyAnswer, nextQuestion, buildResult } from './engine_v2/flowSelf.js';
 import './App.css';
 
-const TOTAL_ESTIMATE = 18;
-
 export default function App() {
   const [screen, setScreen] = useState('entry'); // 'entry' | 'quiz' | 'result'
   const [session, setSession] = useState(null);
@@ -55,7 +53,6 @@ export default function App() {
       <Quiz
         question={currentQuestion}
         questionNumber={session?.questionCount ?? 0}
-        totalEstimate={TOTAL_ESTIMATE}
         onAnswer={handleAnswer}
       />
     );

@@ -7,18 +7,14 @@ const CHOICES = [
 ];
 
 /**
- * @param {{ question, questionNumber, totalEstimate, onAnswer }} props
+ * @param {{ question, questionNumber, onAnswer }} props
  */
-export function Quiz({ question, questionNumber, totalEstimate, onAnswer }) {
+export function Quiz({ question, questionNumber, onAnswer }) {
   if (!question) return null;
-
-  const progress = Math.round((questionNumber / totalEstimate) * 100);
 
   return (
     <div className="quiz-screen">
-      <div className="quiz-progress-bar">
-        <div className="quiz-progress-fill" style={{ width: `${progress}%` }} />
-      </div>
+      <p className="quiz-count">Q{questionNumber}</p>
 
       <div className="quiz-tag">{question.tag}</div>
 
@@ -35,8 +31,6 @@ export function Quiz({ question, questionNumber, totalEstimate, onAnswer }) {
           </button>
         ))}
       </div>
-
-      <p className="quiz-count">{questionNumber} 問目</p>
     </div>
   );
 }
