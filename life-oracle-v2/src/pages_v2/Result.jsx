@@ -2,16 +2,33 @@ import { getResult } from '../data_v2/results/index.js';
 import { biasInfo }  from '../data_v2/meta/biasInfo.js';
 
 const SITUATION_LABELS = {
-  w_boss_power:      '上司との関係',
-  w_boss_unfair:     '評価・不公平感',
-  w_boss_values:     '方針・価値観の不一致',
-  w_col_isolation:   '職場での孤立',
-  w_col_rivalry:     '同僚との摩擦',
-  w_work_empty:      'やりがい・意味',
-  w_work_overload:   '仕事量・消耗',
-  w_career_change:   '転職・キャリアの転換',
-  w_career_indep:    '独立・起業',
-  w_career_stuck:    '昇進・成長の頭打ち',
+  // 仕事
+  w_boss_power:       '上司との関係',
+  w_boss_unfair:      '評価・不公平感',
+  w_boss_values:      '方針・価値観の不一致',
+  w_col_isolation:    '職場での孤立',
+  w_col_rivalry:      '同僚との摩擦',
+  w_work_empty:       'やりがい・意味',
+  w_work_overload:    '仕事量・消耗',
+  w_career_change:    '転職・キャリアの転換',
+  w_career_indep:     '独立・起業',
+  w_career_stuck:     '昇進・成長の頭打ち',
+  // 人間関係
+  r_partner_drift:    'パートナーとの距離感',
+  r_partner_divorce:  '別れ・離婚への迷い',
+  r_parent_pressure:  '親からのプレッシャー',
+  r_parent_care:      '親の介護',
+  r_friend_isolation: '友人関係での孤立',
+  r_friend_toxic:     '消耗する人間関係',
+  // 自己理解
+  s_self_esteem:      '自己肯定感',
+  s_emotion_control:  '感情のコントロール',
+  s_no_direction:     '方向性が見えない',
+  s_burnout:          '燃え尽き・無気力',
+  // 将来
+  f_job_decision:     '仕事・キャリアの決断',
+  f_independence:     '自立・独立への迷い',
+  f_life_change:      '人生の転換点',
 };
 
 export function Result({ result, onRetry }) {
