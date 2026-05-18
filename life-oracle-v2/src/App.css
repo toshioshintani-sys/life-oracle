@@ -665,3 +665,112 @@ button {
   color: var(--text-sub);
   letter-spacing: 0.02em;
 }
+
+/* ===== トランジション画面 ===== */
+.transition-screen {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  animation: transitionFade 1.6s ease-in-out forwards;
+}
+
+.transition-message {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 0.08em;
+  line-height: 1.8;
+  padding: 0 2rem;
+}
+
+@keyframes transitionFade {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ===== Result：顕在→深層（縦構造） ===== */
+.result-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.result-layer {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+}
+
+.result-layer-surface {
+  background: rgba(184, 131, 63, 0.07);
+  border-left: 3px solid var(--accent);
+}
+
+.result-layer-root {
+  background: rgba(160, 80, 80, 0.07);
+  border-left: 3px solid var(--shadow-cl);
+}
+
+.result-layer-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+
+.result-layer-surface .result-layer-label { color: var(--accent-dark); }
+.result-layer-root    .result-layer-label { color: var(--shadow-cl); }
+
+.result-layer-text {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--text);
+}
+
+/* ===== Result：このまま続くと（動的予言） ===== */
+.result-forecast {
+  background: rgba(61, 122, 90, 0.07);
+  border-left: 3px solid var(--light);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+
+.result-forecast-text {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #2d4a3e;
+}
+
+/* ===== Result：近くにあるかもしれないテーマ（拮抗時のみ） ===== */
+.result-adjacent {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin: 16px 0;
+  text-align: center;
+  background: rgba(45, 35, 24, 0.03);
+}
+
+.result-adjacent-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.result-adjacent-tag {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}

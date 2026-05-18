@@ -1,10 +1,10 @@
 // アキネーターエンジン v2
-// - 汎用入口5問を先に出し、その後スコアベースで質問を選ぶ
-// - demographicHints で年齢・職業を行動から推定（直接聞かない）
-// - keyAnswers で「あなたはこう答えました」を生成
-// - getSessionMessage で対話的な進行メッセージを返す
-// - discriminating questions で上位2候補を積極的に切り分ける
-// - evidenceLog で「私はこう読みました」の推論ログを生成
+// 主な改良点：
+// - normalizedScore: 出題済み質問ベースで状況スコアを正規化
+// - inferAgeGroupWithConfidence: 信頼度＋証拠数で年代テキスト使用可否を判定
+// - confidenceGap: 絶対差→比率ベースに変更（序盤の偶然確定を防止）
+// - shouldFinish: rawTop + ratio の2条件で確定
+// - evidenceLog: 切り分け質問で「AではなくB」比較形式の推論ログを生成
 
 export const ALL_SITUATIONS = [
   'w_boss_power', 'w_boss_unfair', 'w_boss_values',
@@ -44,11 +44,15 @@ export function createSession() {
   const situationScores = {};
   ALL_SITUATIONS.forEach(s => { situationScores[s] = 0; });
 
+  const maxPossibleScores = {};
+  ALL_SITUATIONS.forEach(s => { maxPossibleScores[s] = 0; });
+
   const demographicScores = {};
   DEMOGRAPHIC_KEYS.forEach(k => { demographicScores[k] = 0; });
 
   return {
     situationScores,
+    maxPossibleScores,
     demographicScores,
     biasScores:       { B1: 0, B2: 0, B3: 0, B4: 0, B6: 0, B8: 0, B12: 0 },
     jungHints:        { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 },
@@ -63,6 +67,16 @@ export function createSession() {
 }
 
 export function recordAnswer(session, question, choice) {
+  // normalizedScore 用：この質問で各状況が取り得た最大点を累積
+  if (question.choices) {
+    ALL_SITUATIONS.forEach(sit => {
+      const maxForThisQ = Math.max(
+        ...question.choices.map(c => c.situationScores?.[sit] ?? 0)
+      );
+      session.maxPossibleScores[sit] += maxForThisQ;
+    });
+  }
+
   if (choice.situationScores) {
     Object.entries(choice.situationScores).forEach(([sit, score]) => {
       if (session.situationScores[sit] !== undefined) {
@@ -87,12 +101,19 @@ export function recordAnswer(session, question, choice) {
   }
   if (choice.tags) session.tags.push(...choice.tags);
 
-  // 推論ログ：切り分け質問の reasonText を保存
-  if (question.type === 'discriminating' && choice.reasonText) {
-    session.evidenceLog.push(choice.reasonText);
+  // 推論ログ：切り分け質問で「AではなくBを選んだ」比較形式で生成
+  if (question.type === 'discriminating') {
+    const otherChoice = question.choices.find(c => c.id !== choice.id);
+    if (otherChoice && choice.reasonText) {
+      session.evidenceLog.push(
+        `「${otherChoice.label}」より「${choice.label}」に近い状況と読みました。`
+      );
+    } else if (choice.reasonText) {
+      session.evidenceLog.push(choice.reasonText);
+    }
   }
 
-  // スコアが高い答えを「読み返し」用に保存
+  // スコアが高い答えを「読み返し」用に保存（最大4件）
   const maxScore = choice.situationScores
     ? Math.max(...Object.values(choice.situationScores))
     : 0;
@@ -101,7 +122,8 @@ export function recordAnswer(session, question, choice) {
   }
 
   // ピボット検出：Q5以降で1位状況が入れ替わったとき
-  const currentTop = getTopSituationKey(session.situationScores);
+  const sorted = getNormalizedEntries(session);
+  const currentTop = sorted[0]?.[0] ?? null;
   if (
     session.questionCount >= 5 &&
     session.prevTopSituation &&
@@ -119,36 +141,43 @@ export function shouldFinish(session) {
   if (session.questionCount < 12) return false;
   if (session.questionCount >= 22) return true;
 
-  const sorted = Object.values(session.situationScores).sort((a, b) => b - a);
-  return sorted[0] >= 8 && (sorted[0] - (sorted[1] ?? 0)) >= 4;
+  const entries = getNormalizedEntries(session);
+  const topNorm   = entries[0]?.[1] ?? 0;
+  const secNorm   = entries[1]?.[1] ?? 0;
+  const gap       = topNorm > 0 ? (topNorm - secNorm) / topNorm : 0;
+  const rawTop    = session.situationScores[entries[0]?.[0]] ?? 0;
+
+  return rawTop >= 6 && gap >= 0.25;
 }
 
 export function getSessionMessage(session) {
   const q = session.questionCount;
   if (q === 0) return null;
 
-  // ピボット直後
   if (q - session.lastPivotAt <= 1 && session.lastPivotAt > 0) {
     return '少し別の角度から確認させてください。';
   }
 
-  const sorted = Object.values(session.situationScores).sort((a, b) => b - a);
-  const gap = (sorted[0] ?? 0) - (sorted[1] ?? 0);
+  const entries = getNormalizedEntries(session);
+  const top  = entries[0]?.[1] ?? 0;
+  const sec  = entries[1]?.[1] ?? 0;
+  const gap  = top > 0 ? (top - sec) / top : 0;
 
-  if (q <= 3)   return 'あなたのことを、静かに読んでいます。';
-  if (q <= 5)   return '輪郭が見えてきました。';
-  if (gap < 2)  return 'もう少しだけ聞かせてください。';
-  if (gap < 4)  return 'だいぶ絞れてきました。';
-  if (q >= 18)  return 'もうすぐです。';
+  if (q <= 3)    return 'あなたのことを、静かに読んでいます。';
+  if (q <= 5)    return '輪郭が見えてきました。';
+  if (gap < 0.1) return 'もう少しだけ聞かせてください。';
+  if (gap < 0.2) return 'だいぶ絞れてきました。';
+  if (q >= 18)   return 'もうすぐです。';
   return 'あと数問だけ聞かせてください。';
 }
 
-// 確信度を 0〜1 で返す（UIの●ドット表示用）
 export function getSessionConfidence(session) {
   if (session.questionCount === 0) return 0;
-  const sorted = Object.values(session.situationScores).sort((a, b) => b - a);
-  const gap = (sorted[0] ?? 0) - (sorted[1] ?? 0);
-  return Math.min(gap / 8, 0.95);
+  const entries = getNormalizedEntries(session);
+  const top = entries[0]?.[1] ?? 0;
+  const sec = entries[1]?.[1] ?? 0;
+  const gap = top > 0 ? (top - sec) / top : 0;
+  return Math.min(gap / 0.5, 0.95);
 }
 
 export function getNextQuestion(session, allQuestions) {
@@ -162,13 +191,13 @@ export function getNextQuestion(session, allQuestions) {
   if (universalRemaining.length > 0) return universalRemaining[0];
 
   // フェーズ2a：上位2候補が接近していたら切り分け質問を優先
-  const sorted = Object.entries(session.situationScores).sort(([,a],[,b]) => b - a);
-  const top1Score = sorted[0]?.[1] ?? 0;
-  const top2Score = sorted[1]?.[1] ?? 0;
-  const currentGap = top1Score - top2Score;
+  const entries = getNormalizedEntries(session);
+  const top1Norm = entries[0]?.[1] ?? 0;
+  const top2Norm = entries[1]?.[1] ?? 0;
+  const gap      = top1Norm > 0 ? (top1Norm - top2Norm) / top1Norm : 0;
 
-  if (currentGap < 3 && top1Score > 0) {
-    const top2Situations = [sorted[0][0], sorted[1][0]];
+  if (gap < 0.25 && top1Norm > 0) {
+    const top2Situations = [entries[0][0], entries[1][0]];
     const discriminatingCandidate = available.find(q =>
       q.type === 'discriminating' &&
       Array.isArray(q.pair) &&
@@ -178,8 +207,8 @@ export function getNextQuestion(session, allQuestions) {
     if (discriminatingCandidate) return discriminatingCandidate;
   }
 
-  // フェーズ2b：アキネーター（universal・demographic・discriminating 以外）
-  const top3 = getTopSituations(session.situationScores, 3);
+  // フェーズ2b：アキネーター（上位3状況を discriminate する質問を優先）
+  const top3 = entries.slice(0, 3).map(([s]) => s);
   const candidates = available
     .filter(q =>
       q.type !== 'universal' &&
@@ -203,65 +232,91 @@ export function getNextQuestion(session, allQuestions) {
 }
 
 export function buildResult(session) {
-  const entries = Object.entries(session.situationScores).sort(([,a],[,b]) => b - a);
+  const entries = getNormalizedEntries(session);
   const topSituation    = entries[0][0];
   const secondSituation = entries[1][0];
+  const top1Norm        = entries[0][1];
+  const top2Norm        = entries[1][1];
+  const situationGap    = top1Norm > 0 ? (top1Norm - top2Norm) / top1Norm : 1;
 
   const topBiases = Object.entries(session.biasScores)
     .sort(([,a],[,b]) => b - a).slice(0, 2).map(([b]) => b);
   const topJung = Object.entries(session.jungHints)
     .sort(([,a],[,b]) => b - a).slice(0, 2).map(([f]) => f);
 
-  const inferredAgeKey = inferFromScores(session.demographicScores, 'age_');
-  const inferredJobKey = inferFromScores(session.demographicScores, 'job_');
-  const ageLabel = inferredAgeKey ? AGE_KEY_TO_LABEL[inferredAgeKey] : null;
+  const thirdSituation = entries[2]?.[0] ?? null;
+  const top3Norm       = entries[2]?.[1] ?? 0;
+  // 3位は top の 80% 以上のスコアがある場合のみ「隣接テーマ」として表示
+  const showThird = top3Norm > 0 && top1Norm > 0 && (top1Norm - top3Norm) / top1Norm < 0.20;
+
+  const { ageLabel, confidence: ageConfidence, useAgeText } =
+    inferAgeGroupWithConfidence(session.demographicScores);
+
+  const inferredJobKey = inferJobFromScores(session.demographicScores);
   const jobLabel = inferredJobKey ? JOB_KEY_TO_LABEL[inferredJobKey] : null;
 
   return {
     situation:      topSituation,
     secondSituation,
-    age:            ageLabel ?? '30代', // result text fallback
-    job:            jobLabel,
-    inferredAge:    ageLabel,
+    situationGap,
+    thirdSituation,
+    showThird,
+    // age は信頼度が高い時のみ年代ラベル、低い時は 'neutral'
+    age:            useAgeText ? (ageLabel ?? 'neutral') : 'neutral',
+    ageLabel,
+    ageConfidence:  ageConfidence ?? 0,
+    useAgeText:     useAgeText ?? false,
     inferredJob:    jobLabel,
     topBiases,
     topJung,
     keyAnswers:     [...session.keyAnswers],
     evidenceLog:    [...session.evidenceLog],
-    tags:           session.tags,
-    scores:         session.situationScores,
+    tags:           [...session.tags],
+    scores:         { ...session.situationScores },
+    normalizedScores: Object.fromEntries(entries),
   };
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
-function getTopSituationKey(scores) {
-  return Object.entries(scores).sort(([,a],[,b]) => b - a)[0]?.[0] ?? null;
-}
-
-function getDomain(situation) {
-  return situation.split('_')[0];
-}
-
-function getTopSituations(scores, n) {
-  const sorted = Object.entries(scores).sort(([,a],[,b]) => b - a);
-  const positive = sorted.filter(([,s]) => s > 0);
-  if (positive.length >= n) return positive.slice(0, n).map(([s]) => s);
-
-  const topDomain = positive.length > 0 ? getDomain(positive[0][0]) : null;
-  const fills = topDomain
-    ? sorted.filter(([s, v]) => v === 0 && getDomain(s) === topDomain)
-    : sorted.filter(([,v]) => v === 0);
-
-  const result = positive.map(([s]) => s);
-  result.push(...fills.slice(0, n - result.length).map(([s]) => s));
-  return result;
-}
-
-function inferFromScores(scores, prefix) {
-  const relevant = Object.entries(scores)
-    .filter(([k]) => k.startsWith(prefix))
+function getNormalizedEntries(session) {
+  return ALL_SITUATIONS
+    .map(sit => {
+      const raw     = session.situationScores[sit] ?? 0;
+      const maxPoss = session.maxPossibleScores[sit] ?? 0;
+      return [sit, maxPoss > 0 ? raw / maxPoss : 0];
+    })
     .sort(([,a], [,b]) => b - a);
-  if (!relevant.length || relevant[0][1] === 0) return null;
-  return relevant[0][0];
+}
+
+function inferAgeGroupWithConfidence(demographicScores) {
+  const AGE_KEYS = ['age_early20s', 'age_late20s', 'age_30s', 'age_40s', 'age_50s', 'age_60s'];
+  const ageEntries = AGE_KEYS
+    .map(k => ({ key: k, score: demographicScores[k] || 0 }))
+    .sort((a, b) => b.score - a.score);
+
+  const topScore    = ageEntries[0].score;
+  const secondScore = ageEntries[1].score;
+  const totalEvidence = ageEntries.reduce((s, { score }) => s + score, 0);
+
+  if (topScore === 0) return { ageLabel: null, confidence: 0, useAgeText: false };
+
+  const confidence = (topScore - secondScore) / Math.max(topScore, 1);
+  // 3条件：比率差 + 合計証拠量 + トップスコア単体
+  const useAgeText = confidence >= 0.25 && totalEvidence >= 3 && topScore >= 2;
+
+  return {
+    ageLabel: AGE_KEY_TO_LABEL[ageEntries[0].key] ?? null,
+    confidence,
+    useAgeText,
+  };
+}
+
+function inferJobFromScores(demographicScores) {
+  const JOB_KEYS = Object.keys(JOB_KEY_TO_LABEL);
+  const sorted = JOB_KEYS
+    .map(k => [k, demographicScores[k] || 0])
+    .sort(([,a], [,b]) => b - a);
+  if (!sorted.length || sorted[0][1] === 0) return null;
+  return sorted[0][0];
 }
