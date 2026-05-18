@@ -93,7 +93,7 @@ export const FUTURE_QUESTIONS = [
         id: 'fut_004_a',
         label: 'そう。年齢的にも、今動かないと後がない気がする',
         situationScores: { f_job_decision: 2, f_life_change: 2 },
-        demographicHints: { age_late20s: 1, age_30s: 1, age_50s: 1 },
+        demographicHints: { age_late20s: 1, age_30s: 1, age_50s: 1, age_60s: 1 },
       },
       {
         id: 'fut_004_b',
@@ -198,7 +198,7 @@ export const FUTURE_QUESTIONS = [
         id: 'fut_008_a',
         label: 'そう。仕事というより、もっと広い範囲に感じる',
         situationScores: { f_life_change: 3, s_no_direction: 1, f_job_decision: -1 },
-        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1 },
+        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1, age_60s: 1 },
       },
       {
         id: 'fut_008_b',
@@ -223,7 +223,7 @@ export const FUTURE_QUESTIONS = [
         id: 'fut_009_a',
         label: 'そう。何かが節目を越えた感じがする',
         situationScores: { f_life_change: 3, s_burnout: -1 },
-        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1 },
+        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1, age_60s: 1 },
       },
       {
         id: 'fut_009_b',
@@ -248,7 +248,7 @@ export const FUTURE_QUESTIONS = [
         id: 'fut_010_a',
         label: 'そう。思っていたのとは違う場所にいる',
         situationScores: { f_life_change: 3, f_job_decision: 1 },
-        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1 },
+        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1, age_60s: 1 },
       },
       {
         id: 'fut_010_b',

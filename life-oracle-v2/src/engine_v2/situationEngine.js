@@ -19,7 +19,7 @@ export const ALL_SITUATIONS = [
 ];
 
 const DEMOGRAPHIC_KEYS = [
-  'age_early20s', 'age_late20s', 'age_30s', 'age_40s', 'age_50s',
+  'age_early20s', 'age_late20s', 'age_30s', 'age_40s', 'age_50s', 'age_60s',
   'job_employee', 'job_freelance', 'job_homemaker', 'job_student', 'job_parttime',
 ];
 
@@ -28,7 +28,8 @@ const AGE_KEY_TO_LABEL = {
   age_late20s:  '20代後半',
   age_30s:      '30代',
   age_40s:      '40代',
-  age_50s:      '50代以上',
+  age_50s:      '50代',
+  age_60s:      '60代以上',
 };
 
 const JOB_KEY_TO_LABEL = {
