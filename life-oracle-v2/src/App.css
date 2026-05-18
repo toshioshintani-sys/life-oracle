@@ -1140,3 +1140,227 @@ button {
   line-height: 1.85;
   color: var(--text);
 }
+
+/* ===== PostQuiz 画面 ===== */
+.post-quiz-screen {
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.post-quiz-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.post-quiz-lead {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.post-quiz-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+.post-quiz-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-quiz-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.10em;
+}
+
+.post-quiz-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.post-quiz-gen-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.post-quiz-chip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.post-quiz-chip:hover {
+  border-color: var(--accent);
+}
+
+.post-quiz-chip.selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.post-quiz-submit {
+  align-self: center;
+  padding: 14px 40px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: background 0.18s, opacity 0.18s;
+}
+
+.post-quiz-submit:hover:not(:disabled) { background: var(--accent-dark); }
+.post-quiz-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ===== MbtiResult：v1スタイル結果 ===== */
+.mbti-result-famous-inline {
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+.mbti-result-poles {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mbti-result-pole {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+.mbti-result-pole--light {
+  background: rgba(61, 122, 90, 0.10);
+  color: #3d7a5a;
+}
+
+.mbti-result-pole--shadow {
+  background: rgba(160, 80, 80, 0.10);
+  color: var(--shadow-cl);
+}
+
+.mbti-result-loading {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-sub);
+  padding: 24px;
+}
+
+.mbti-result-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-dark);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.mbti-result-prescription {
+  background: var(--card-bg);
+  border: 1.5px solid rgba(184, 131, 63, 0.30);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mbti-result-prescription-meta {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.mbti-result-prescription-sub {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.mbti-result-prescription-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.mbti-result-prescription-empty {
+  font-size: 14px;
+  color: var(--text-sub);
+}
+
+.mbti-bias-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mbti-bias-card--top {
+  background: var(--accent-bg);
+  border-color: rgba(184, 131, 63, 0.25);
+}
+
+.mbti-bias-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mbti-bias-rank {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.mbti-result-profile {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+.mbti-result-profile-text {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.mbti-bias-msg {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text);
+  margin: 0;
+}

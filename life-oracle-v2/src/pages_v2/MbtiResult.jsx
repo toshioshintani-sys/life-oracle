@@ -1,26 +1,15 @@
+import { useState, useEffect } from 'react';
 import { cognitiveFunctionMap, famousPeople } from '../data_v2/meta/cognitiveFunctions.js';
 import { biasInfo } from '../data_v2/meta/biasInfo.js';
 
-const TYPE_DESC = {
-  ENTJ: 'ゴールを決め、最短でたどり着く力を持つ。人を動かし、組織を動かす。',
-  INTJ: '静かに、しかし確実に前進する。見えていないものが見え、計画通りに実現させる。',
-  ENTP: 'アイデアが止まらない。可能性を広げ、既成概念を塗り替えることに喜びを感じる。',
-  INTP: '深く考え、自分だけの体系をつくる。正確に理解することへの純粋な喜びがある。',
-  ENFJ: '人の可能性を見抜き、引き出す。いつのまにかその場の核になっている。',
-  INFJ: '他者の内面を深く感じ取り、大きなビジョンで動く。静かな影響力がある。',
-  ENFP: '情熱とアイデアで周囲を引き込む。人に希望を与え、可能性を信じさせる力がある。',
-  INFP: '自分の価値観に忠実に生きる。人の痛みに深く共感し、誠実さで信頼される。',
-  ESTJ: '実際的で頼れる。責任を引き受け、計画を確実に実行する力がある。',
-  ISTJ: '誠実で正確。約束を守り、細部まで丁寧に仕上げることで信頼を積み上げる。',
-  ESTP: '今この瞬間の判断が速い。変化の多い状況でこそ、本来の力が出る。',
-  ISTP: '静かに観察し、最善の方法を見つける。実用的で、いざとなれば誰より頼れる。',
-  ESFJ: '周囲の調和を大切にし、人が安心できる環境を自然とつくる。',
-  ISFJ: '大切な人を細部まで気にかける。静かな献身が、チームや家族の基盤を支えている。',
-  ESFP: '今この場を輝かせる力がある。その場にいるだけで空気が変わる。',
-  ISFP: '感受性豊かで、独自の美的センスを持つ。自分のペースで、深く誠実に生きる。',
+const MBTI_TO_JUNG = {
+  ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
+  ESTP: 'Se-光', ESFP: 'Se-影', ENTP: 'Ne-光', ENFP: 'Ne-影',
+  ISTJ: 'Si-光', ISFJ: 'Si-影', ISTP: 'Ti-光', INTP: 'Ti-影',
+  INTJ: 'Ni-光', INFJ: 'Ni-影', ISFP: 'Fi-光', INFP: 'Fi-影',
 };
 
-// 結果冒頭の「私はこう読みました」—— タイプ別コールドリーディング
+// 結果冒頭の「私はこう読みました」
 const TYPE_READING = {
   ENTJ: 'あなたの答えを見ていると、一つのことが見えました。あなたは「決める」ことで、周囲が動き出すのを知っている人です。',
   INTJ: 'あなたの答えには一貫した線があります。遠くを見ながら、静かに動いている人です。',
@@ -40,24 +29,52 @@ const TYPE_READING = {
   ISFP: '答えのひとつひとつが、あなた自身のペースで選ばれています。感じたことに正直な人です。',
 };
 
-export function MbtiResult({ result, onRetry }) {
+export function MbtiResult({ result, occupation, generation, onRetry }) {
+  const [typeProfiles, setTypeProfiles]   = useState(null);
+  const [prescriptions, setPrescriptions] = useState(null);
+  const [biasMessages, setBiasMessages]   = useState(null);
+  const [loading, setLoading]             = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/data/type_profiles.json').then(r => r.json()),
+      fetch('/data/prescriptions.json').then(r => r.json()),
+      fetch('/data/bias_messages.json').then(r => r.json()),
+    ]).then(([tp, pr, bm]) => {
+      setTypeProfiles(tp);
+      setPrescriptions(pr);
+      setBiasMessages(bm);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
   if (!result) return null;
 
   const { mbtiType, biasScores } = result;
-  const typeInfo = cognitiveFunctionMap[mbtiType] ?? {};
-  const famous   = famousPeople[mbtiType]?.people ?? [];
-  const desc     = TYPE_DESC[mbtiType] ?? '';
-  const reading  = TYPE_READING[mbtiType] ?? null;
+  const jungTypeId  = MBTI_TO_JUNG[mbtiType] ?? mbtiType;
+  const cf          = cognitiveFunctionMap[mbtiType] ?? {};
+  const famous      = famousPeople[mbtiType]?.people ?? [];
+  const reading     = TYPE_READING[mbtiType] ?? null;
+  const typeProfile = typeProfiles?.[jungTypeId] ?? null;
 
-  const topBiases = Object.entries(biasScores ?? {})
+  const prescriptionKey  = occupation && jungTypeId && generation
+    ? `${occupation}_${jungTypeId}_${generation}` : '';
+  const prescriptionText = prescriptions?.[prescriptionKey]?.text ?? null;
+
+  const top2 = Object.entries(biasScores ?? {})
     .sort(([, a], [, b]) => b - a)
     .slice(0, 2)
-    .map(([key]) => ({ key, ...biasInfo[key] }))
-    .filter(b => b.name);
+    .map(([key]) => key);
+
+  const biasMsg1 = biasMessages && top2[0]
+    ? (biasMessages[`${jungTypeId}_${biasInfo[top2[0]]?.messageKey}`] ?? null) : null;
+  const biasMsg2 = biasMessages && top2[1]
+    ? (biasMessages[`${jungTypeId}_${biasInfo[top2[1]]?.messageKey}`] ?? null) : null;
 
   return (
     <div className="mbti-result-screen">
 
+      {/* 私はこう読みました */}
       {reading && (
         <div className="mbti-result-reading-intro">
           <p className="mbti-result-reading-label">私はこう読みました。</p>
@@ -65,42 +82,74 @@ export function MbtiResult({ result, onRetry }) {
         </div>
       )}
 
+      {/* タイプ発表 */}
       <div className="mbti-result-type-block">
         <p className="mbti-result-type-code">{mbtiType}</p>
-        <p className="mbti-result-light-name">{typeInfo.lightName}</p>
-        <p className="mbti-result-desc">{desc}</p>
+        <p className="mbti-result-light-name">{cf.lightName}</p>
+        {famous.length > 0 && (
+          <p className="mbti-result-famous-inline">{famous.join(' · ')} と同じタイプ</p>
+        )}
+        <div className="mbti-result-poles">
+          <span className="mbti-result-pole mbti-result-pole--light">光：{cf.lightName}</span>
+          <span className="mbti-result-pole mbti-result-pole--shadow">影：{cf.shadowName}</span>
+        </div>
       </div>
 
-      {famous.length > 0 && (
-        <div className="mbti-result-famous">
-          <p className="mbti-result-famous-label">同じパターンの人</p>
-          <p className="mbti-result-famous-names">{famous.join(' / ')}</p>
+      {/* 処方箋 */}
+      {loading ? (
+        <div className="mbti-result-loading">処方箋を読み込んでいます...</div>
+      ) : (
+        <div className="mbti-result-prescription">
+          <p className="mbti-result-section-label">あなただけの処方箋</p>
+          <p className="mbti-result-prescription-meta">
+            {occupation} × {mbtiType} × {generation}
+          </p>
+          <p className="mbti-result-prescription-sub">
+            職種・タイプ・年代の組み合わせ2,016通りから、あなた専用の処方箋を導き出しました。
+          </p>
+          {prescriptionText
+            ? <p className="mbti-result-prescription-text">{prescriptionText}</p>
+            : <p className="mbti-result-prescription-empty">該当する処方箋のデータがありません。</p>
+          }
         </div>
       )}
 
-      {typeInfo.shadowName && (
-        <div className="mbti-result-shadow">
-          <p className="mbti-result-shadow-label">表れやすいクセ</p>
-          <p className="mbti-result-shadow-name">{typeInfo.shadowName}</p>
-        </div>
-      )}
-
-      {topBiases.length > 0 && (
+      {/* 思考のクセ */}
+      {top2.length > 0 && (
         <div className="mbti-result-biases">
-          <p className="mbti-result-biases-label">思考のクセ</p>
-          {topBiases.map(b => (
-            <div key={b.key} className="mbti-result-bias-item">
-              <span className="mbti-bias-name">{b.name}</span>
-              <span className="mbti-bias-short">{b.short}</span>
-            </div>
-          ))}
+          <p className="mbti-result-section-label">あなたの思考のクセ</p>
+          {top2.map((biasId, idx) => {
+            const info = biasInfo[biasId];
+            const msg  = idx === 0 ? biasMsg1 : biasMsg2;
+            return (
+              <div key={biasId} className={`mbti-bias-card${idx === 0 ? ' mbti-bias-card--top' : ''}`}>
+                <div className="mbti-bias-card-header">
+                  <span className="mbti-bias-rank">{idx + 1}位</span>
+                  <span className="mbti-bias-name">{info?.name}</span>
+                </div>
+                <p className="mbti-bias-short">{info?.short}</p>
+                <p className="mbti-bias-msg">{msg ?? info?.description}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {typeInfo.todayAction && (
+      {/* 強み・心の癖 */}
+      {typeProfile && (
+        <div className="mbti-result-profile">
+          <p className="mbti-result-section-label">あなたの強み</p>
+          <p className="mbti-result-profile-text">{typeProfile.praiseText}</p>
+          <p className="mbti-result-section-label" style={{ marginTop: 16 }}>心の癖</p>
+          <p className="mbti-result-profile-text">{typeProfile.habitText}</p>
+        </div>
+      )}
+
+      {/* 今日のアクション */}
+      {cf.todayAction && (
         <div className="mbti-result-action">
           <p className="mbti-result-action-label">今日ひとつだけ試すなら</p>
-          <p className="mbti-result-action-text">{typeInfo.todayAction}</p>
+          <p className="mbti-result-action-text">{cf.todayAction}</p>
         </div>
       )}
 

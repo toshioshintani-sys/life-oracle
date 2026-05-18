@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Entry }       from './pages_v2/Entry.jsx';
 import { TopicSelect } from './pages_v2/TopicSelect.jsx';
 import { Quiz }        from './pages_v2/Quiz.jsx';
+import { PostQuiz }    from './pages_v2/PostQuiz.jsx';
 import { MbtiResult }  from './pages_v2/MbtiResult.jsx';
 import { Result }      from './pages_v2/Result.jsx';
 
@@ -29,6 +30,7 @@ import { DISCRIMINATING_QUESTIONS } from './data_v2/questions/discriminating.js'
 
 import './App.css';
 
+const MBTI_MAX_QUESTIONS   = 12;
 const MBTI_ESTIMATED_TOTAL = 12;
 const SITU_ESTIMATED_TOTAL = 8;
 const SITU_MIN_QUESTIONS   = 4;
@@ -94,15 +96,17 @@ export default function App() {
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [oracleMessage, setOracleMessage] = useState(null);
   const [mbtiResult, setMbtiResult]       = useState(null);
+  const [mbtiOccupation, setMbtiOccupation] = useState(null);
+  const [mbtiGeneration, setMbtiGeneration] = useState(null);
   const [situResult, setSituResult]       = useState(null);
-  const [transitionMsg, setTransitionMsg] = useState(null);
   const timerRef = useRef(null);
 
   // ── MBTI flow ───────────────────────────────────────────────────────────
 
   const startMbti = useCallback(() => {
     const sess = createMbtiSession();
-    const q    = nextQuestion(sess);
+    sess.maxQuestions = MBTI_MAX_QUESTIONS; // 12問固定
+    const q = nextQuestion(sess);
     setMbtiSession(sess);
     setCurrentQuestion(q);
     setOracleMessage(null);
@@ -116,14 +120,14 @@ export default function App() {
 
     if (isFinished(mbtiSession)) {
       setMbtiResult(buildMbtiResult(mbtiSession));
-      setScreen('result-mbti');
+      setScreen('post-quiz');
       return;
     }
 
     const next = nextQuestion(mbtiSession);
     if (!next) {
       setMbtiResult(buildMbtiResult(mbtiSession));
-      setScreen('result-mbti');
+      setScreen('post-quiz');
       return;
     }
 
@@ -131,6 +135,12 @@ export default function App() {
     setCurrentQuestion(next);
     setOracleMessage(getMbtiOracleMessage(mbtiSession));
   }, [mbtiSession]);
+
+  const handlePostQuizComplete = useCallback((occupation, generation) => {
+    setMbtiOccupation(occupation);
+    setMbtiGeneration(generation);
+    setScreen('result-mbti');
+  }, []);
 
   // ── Situation flow ──────────────────────────────────────────────────────
 
@@ -191,8 +201,9 @@ export default function App() {
     setCurrentQuestion(null);
     setOracleMessage(null);
     setMbtiResult(null);
+    setMbtiOccupation(null);
+    setMbtiGeneration(null);
     setSituResult(null);
-    setTransitionMsg(null);
   }, []);
 
   // ── Answer dispatcher ───────────────────────────────────────────────────
@@ -221,14 +232,6 @@ export default function App() {
     return <TopicSelect onSelect={handleTopicSelect} onBack={handleRetry} />;
   }
 
-  if (screen === 'transition') {
-    return (
-      <div className="transition-screen">
-        <p className="transition-message">{transitionMsg}</p>
-      </div>
-    );
-  }
-
   if (screen === 'quiz') {
     return (
       <Quiz
@@ -242,8 +245,19 @@ export default function App() {
     );
   }
 
+  if (screen === 'post-quiz') {
+    return <PostQuiz onComplete={handlePostQuizComplete} />;
+  }
+
   if (screen === 'result-mbti') {
-    return <MbtiResult result={mbtiResult} onRetry={handleRetry} />;
+    return (
+      <MbtiResult
+        result={mbtiResult}
+        occupation={mbtiOccupation}
+        generation={mbtiGeneration}
+        onRetry={handleRetry}
+      />
+    );
   }
 
   if (screen === 'result-situation') {
