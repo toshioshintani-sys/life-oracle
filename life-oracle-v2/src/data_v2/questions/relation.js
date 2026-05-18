@@ -20,7 +20,8 @@ export const RELATION_QUESTIONS = [
       {
         id: 'parent',
         label: '親・家族',
-        situationScores: { r_parent_pressure: 2 },
+        situationScores: { r_parent_pressure: 2, r_parent_care: 1 },
+        demographicHints: { age_40s: 1, age_50s: 1, age_60s: 1 },
         tags: ['parent_domain'],
       },
       {
@@ -194,6 +195,7 @@ export const RELATION_QUESTIONS = [
         label: '対応しなければならない用件が増える、という重さ',
         situationScores: { r_parent_care: 3 },
         biasHints: { B8: 1 },
+        demographicHints: { age_50s: 2, age_60s: 2 },
         tags: ['parent_care_burden'],
       },
       {
@@ -253,6 +255,7 @@ export const RELATION_QUESTIONS = [
         label: 'かなり使っている。自分の生活が犠牲になっていると感じる',
         situationScores: { r_parent_care: 4 },
         biasHints: { B8: 1 },
+        demographicHints: { age_50s: 2, age_60s: 2 },
         tags: ['care_heavy'],
       },
       {
@@ -260,12 +263,14 @@ export const RELATION_QUESTIONS = [
         label: '少しある。これからもっと増えそうで不安',
         situationScores: { r_parent_care: 2 },
         jungHints: { Ni: 1 },
+        demographicHints: { age_40s: 1, age_50s: 2, age_60s: 1 },
         tags: ['care_increasing'],
       },
       {
         id: 'not_yet',
         label: '今はまだないが、頭の中にはある',
         situationScores: { r_parent_care: 1 },
+        demographicHints: { age_40s: 1, age_50s: 1 },
         tags: ['care_anticipating'],
       },
       {
@@ -289,6 +294,7 @@ export const RELATION_QUESTIONS = [
         situationScores: { r_parent_pressure: 2, r_parent_care: 2 },
         biasHints: { B3: 2 },
         jungHints: { Fe: 2 },
+        demographicHints: { age_50s: 1, age_60s: 1 },
         tags: ['guilt_chronic'],
       },
       {
@@ -547,6 +553,7 @@ export const RELATION_QUESTIONS = [
         label: 'このままだと悪くなっていると思う',
         situationScores: { r_parent_care: 2, r_partner_drift: 1 },
         biasHints: { B1: 1 },
+        demographicHints: { age_50s: 1, age_60s: 1 },
         tags: ['anticipating_worse'],
       },
       {
