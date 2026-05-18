@@ -70,7 +70,7 @@ export default function App() {
   const handleAnswer = useCallback((question, choice) => {
     if (!session) return;
 
-    recordAnswer(session, question, choice);
+    if (!recordAnswer(session, question, choice)) return;
     setSessionMessage(getSessionMessage(session));
     setSessionConfidence(getSessionConfidence(session));
 

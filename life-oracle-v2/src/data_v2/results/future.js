@@ -164,9 +164,5 @@ export const FUTURE_RESULTS = {
 };
 
 export function getFutureResult(situation, ageGroup) {
-  const key = `${situation}_${ageGroup}`;
-  if (FUTURE_RESULTS[key]) return FUTURE_RESULTS[key];
-
-  const fallbackKey = `${situation}_30代`;
-  return FUTURE_RESULTS[fallbackKey] ?? null;
+  return FUTURE_RESULTS[`${situation}_${ageGroup}`] ?? null;
 }

@@ -67,8 +67,7 @@ export function createSession() {
 }
 
 export function recordAnswer(session, question, choice) {
-  // Strict Mode 二重実行ガード（同一質問への重複記録を防ぐ）
-  if (session.answeredIds.includes(question.id)) return;
+  if (session.answeredIds.includes(question.id)) return false;
 
   // normalizedScore 用：この質問で各状況が取り得た最大点を累積
   // Math.max(0, ...) で空配列スプレッド時の -Infinity を防止
@@ -140,6 +139,7 @@ export function recordAnswer(session, question, choice) {
 
   session.answeredIds.push(question.id);
   session.questionCount++;
+  return true;
 }
 
 export function shouldFinish(session) {
@@ -150,9 +150,9 @@ export function shouldFinish(session) {
   const topNorm   = entries[0]?.[1] ?? 0;
   const secNorm   = entries[1]?.[1] ?? 0;
   const gap       = topNorm > 0 ? (topNorm - secNorm) / topNorm : 0;
-  const rawTop    = Math.max(...Object.values(session.situationScores));
+  const rawTop    = session.situationScores[entries[0]?.[0]] ?? 0;
 
-  return rawTop >= 6 && gap >= 0.25;
+  return rawTop >= 4 && gap >= 0.25;
 }
 
 export function getSessionMessage(session) {
@@ -251,7 +251,7 @@ export function buildResult(session) {
 
   const thirdSituation = entries[2]?.[0] ?? null;
   const top3Norm       = entries[2]?.[1] ?? 0;
-  // 3位は top の 80% 以上のスコアがある場合のみ「隣接テーマ」として表示
+  // 3位は top との差が 10% 未満（top の 90% 超）のときのみ「このまま続くと」表示
   const showThird = top3Norm > 0 && top1Norm > 0 && (top1Norm - top3Norm) / top1Norm < 0.10;
 
   const { ageLabel, confidence: ageConfidence, useAgeText } =

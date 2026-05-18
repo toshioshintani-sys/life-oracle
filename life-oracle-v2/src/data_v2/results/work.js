@@ -282,12 +282,6 @@ export const WORK_RESULTS = {
 
 };
 
-// 年代フォールバック（年代別テキストがない場合は30代を基本として返す）
 export function getWorkResult(situation, ageGroup) {
-  const key = `${situation}_${ageGroup}`;
-  if (WORK_RESULTS[key]) return WORK_RESULTS[key];
-
-  // フォールバック: 30代版
-  const fallbackKey = `${situation}_30代`;
-  return WORK_RESULTS[fallbackKey] ?? null;
+  return WORK_RESULTS[`${situation}_${ageGroup}`] ?? null;
 }

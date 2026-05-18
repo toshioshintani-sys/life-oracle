@@ -192,9 +192,5 @@ export const SELF_RESULTS = {
 };
 
 export function getSelfResult(situation, ageGroup) {
-  const key = `${situation}_${ageGroup}`;
-  if (SELF_RESULTS[key]) return SELF_RESULTS[key];
-
-  const fallbackKey = `${situation}_30代`;
-  return SELF_RESULTS[fallbackKey] ?? null;
+  return SELF_RESULTS[`${situation}_${ageGroup}`] ?? null;
 }

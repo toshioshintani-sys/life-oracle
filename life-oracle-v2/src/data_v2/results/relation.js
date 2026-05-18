@@ -232,11 +232,6 @@ export const RELATION_RESULTS = {
 
 };
 
-// 年代フォールバック（年代別テキストがない場合は30代を返す）
 export function getRelationResult(situation, ageGroup) {
-  const key = `${situation}_${ageGroup}`;
-  if (RELATION_RESULTS[key]) return RELATION_RESULTS[key];
-
-  const fallbackKey = `${situation}_30代`;
-  return RELATION_RESULTS[fallbackKey] ?? null;
+  return RELATION_RESULTS[`${situation}_${ageGroup}`] ?? null;
 }
