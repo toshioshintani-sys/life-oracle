@@ -112,7 +112,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'not_boss',
         label: '上司とのやり取りはそれほど問題じゃない',
-        situationScores: { w_boss_power: -1, w_boss_unfair: -1 },
+        situationScores: { w_boss_power: -3, w_boss_unfair: -3 },
         tags: [],
       },
     ],
@@ -221,7 +221,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'no',
         label: '見ていない。転職は今のところ考えていない',
-        situationScores: { w_career_change: -2 },
+        situationScores: { w_career_change: -3 },
         tags: [],
       },
     ],
@@ -257,7 +257,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'yes',
         label: '何人かいる。人間関係は比較的大丈夫',
-        situationScores: { w_col_isolation: -2, w_boss_power: -1 },
+        situationScores: { w_col_isolation: -3, w_boss_power: -2 },
         tags: [],
       },
     ],
@@ -294,7 +294,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'okay',
         label: 'まあ、動ける。特別嫌ではない',
-        situationScores: { w_boss_power: -1, w_work_empty: -1 },
+        situationScores: { w_boss_power: -2, w_work_empty: -2 },
         tags: [],
       },
     ],
@@ -463,7 +463,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'no',
         label: 'あまりない。会社員が自分には合っていると思う',
-        situationScores: { w_career_indep: -2 },
+        situationScores: { w_career_indep: -3 },
         tags: [],
       },
     ],
@@ -494,7 +494,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'no_change',
         label: '特に変化はない',
-        situationScores: { w_boss_power: -2 },
+        situationScores: { w_boss_power: -3 },
         tags: [],
       },
     ],
@@ -533,7 +533,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'recovery',
         label: 'どう立て直すか。原因と対策の方が気になる',
-        situationScores: { w_boss_power: -1 },
+        situationScores: { w_boss_power: -2 },
         jungHints: { Te: 2 },
         tags: ['solution_focus'],
       },
@@ -571,7 +571,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'yes',
         label: 'ある。そこだけが今の職場での支えになっている',
-        situationScores: { w_work_empty: -2 },
+        situationScores: { w_work_empty: -3 },
         tags: ['meaning_found'],
       },
     ],
@@ -608,7 +608,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'manageable',
         label: '量自体はそれほど問題ではない',
-        situationScores: { w_work_overload: -2 },
+        situationScores: { w_work_overload: -3 },
         tags: [],
       },
     ],
@@ -682,7 +682,7 @@ export const WORK_QUESTIONS = [
       {
         id: 'talk',
         label: '普通に話す。深刻なことにはなっていない',
-        situationScores: { w_boss_power: -1, w_work_empty: -1 },
+        situationScores: { w_boss_power: -2, w_work_empty: -2 },
         tags: [],
       },
     ],

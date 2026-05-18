@@ -199,7 +199,7 @@ export const RELATION_QUESTIONS = [
       {
         id: 'normal',
         label: '特に何も感じない。普通に出る',
-        situationScores: { r_parent_pressure: -1, r_parent_care: -1 },
+        situationScores: { r_parent_pressure: -2, r_parent_care: -2 },
         tags: [],
       },
     ],
@@ -236,7 +236,7 @@ export const RELATION_QUESTIONS = [
       {
         id: 'no',
         label: 'あまりない',
-        situationScores: { r_parent_pressure: -1 },
+        situationScores: { r_parent_pressure: -2 },
         tags: [],
       },
     ],
@@ -271,7 +271,7 @@ export const RELATION_QUESTIONS = [
       {
         id: 'no',
         label: 'ない',
-        situationScores: { r_parent_care: -1 },
+        situationScores: { r_parent_care: -2 },
         tags: [],
       },
     ],
@@ -301,7 +301,7 @@ export const RELATION_QUESTIONS = [
       {
         id: 'no',
         label: 'あまりない',
-        situationScores: { r_parent_pressure: -1 },
+        situationScores: { r_parent_pressure: -2 },
         tags: [],
       },
     ],
@@ -340,7 +340,7 @@ export const RELATION_QUESTIONS = [
       {
         id: 'natural',
         label: '普通にある。特に問題はない',
-        situationScores: { r_friend_isolation: -1, r_friend_toxic: -1 },
+        situationScores: { r_friend_isolation: -2, r_friend_toxic: -2 },
         tags: [],
       },
     ],
