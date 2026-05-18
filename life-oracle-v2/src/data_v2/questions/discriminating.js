@@ -352,4 +352,178 @@ export const DISCRIMINATING_QUESTIONS = [
       },
     ],
   },
+
+  // ── Pair 13: 上司の方針不一致 vs パワハラ ────────────────────────────
+  {
+    id: 'disc_013',
+    type: 'discriminating',
+    pair: ['w_boss_values', 'w_boss_power'],
+    text: '上司との関係で、今一番消耗しているのはどちらですか？',
+    discriminates: ['w_boss_values', 'w_boss_power'],
+    choices: [
+      {
+        id: 'disc_013_a',
+        label: 'やり方や方向性が合わない。「なぜこうするのか」が腑に落ちない',
+        situationScores: { w_boss_values: 3, w_boss_power: -2 },
+        reasonText: '方針への違和感——これは「人が怖い」ではなく「この組織の向かう先を信じられない」という問題と見ました。',
+      },
+      {
+        id: 'disc_013_b',
+        label: 'その人の言動そのものが精神的に重い。存在が圧力になっている',
+        situationScores: { w_boss_power: 3, w_boss_values: -2 },
+        reasonText: '人そのものの問題——方針より先に、その人との関係が消耗の中心にある。',
+      },
+      {
+        id: 'disc_013_c',
+        label: '方針も合わないし、その人自体も重い。両方来ている',
+        situationScores: { w_boss_values: 1, w_boss_power: 1 },
+        reasonText: null,
+      },
+    ],
+  },
+
+  // ── Pair 14: 職場での孤立 vs 同僚との摩擦 ───────────────────────────
+  {
+    id: 'disc_014',
+    type: 'discriminating',
+    pair: ['w_col_isolation', 'w_col_rivalry'],
+    text: '職場の人間関係でつらいのは、どちらに近いですか？',
+    discriminates: ['w_col_isolation', 'w_col_rivalry'],
+    choices: [
+      {
+        id: 'disc_014_a',
+        label: '誰ともつながれていない。輪の外にいる感覚がある',
+        situationScores: { w_col_isolation: 3, w_col_rivalry: -2 },
+        reasonText: '孤立——関係がないことが問題。距離があって、入れない。',
+      },
+      {
+        id: 'disc_014_b',
+        label: 'ぶつかる・張り合う・敵意を感じる相手がいる',
+        situationScores: { w_col_rivalry: 3, w_col_isolation: -2 },
+        reasonText: '摩擦——関係はある。でもその関係が消耗する方向に働いている。',
+      },
+      {
+        id: 'disc_014_c',
+        label: '孤立もしているし、特定の相手との摩擦もある',
+        situationScores: { w_col_isolation: 1, w_col_rivalry: 1 },
+        reasonText: null,
+      },
+    ],
+  },
+
+  // ── Pair 15: 消耗する人間関係 vs 友人関係での孤立 ────────────────────
+  {
+    id: 'disc_015',
+    type: 'discriminating',
+    pair: ['r_friend_toxic', 'r_friend_isolation'],
+    text: 'プライベートの人間関係で今感じていることに近いのはどちらですか？',
+    discriminates: ['r_friend_toxic', 'r_friend_isolation'],
+    choices: [
+      {
+        id: 'disc_015_a',
+        label: '関係はある。でも会うと疲れる。エネルギーが取られる',
+        situationScores: { r_friend_toxic: 3, r_friend_isolation: -2 },
+        reasonText: '消耗する関係——孤独ではない。ただその関係が、プラスではなくマイナスに働いている。',
+      },
+      {
+        id: 'disc_015_b',
+        label: 'そもそも話せる人がいない。つながりが薄い、または少ない',
+        situationScores: { r_friend_isolation: 3, r_friend_toxic: -2 },
+        reasonText: '孤立——関係の質より先に、関係そのものが足りていない。',
+      },
+      {
+        id: 'disc_015_c',
+        label: '消耗する関係もあるし、全体的につながりも薄い',
+        situationScores: { r_friend_toxic: 1, r_friend_isolation: 1 },
+        reasonText: null,
+      },
+    ],
+  },
+
+  // ── Pair 16: 方向性が見えない vs 人生の転換点 ───────────────────────
+  {
+    id: 'disc_016',
+    type: 'discriminating',
+    pair: ['s_no_direction', 'f_life_change'],
+    text: '今の「迷い」の感触に近いのはどちらですか？',
+    discriminates: ['s_no_direction', 'f_life_change'],
+    choices: [
+      {
+        id: 'disc_016_a',
+        label: '何がしたいのか、何に向かえばいいのか、自分の中でわからない',
+        situationScores: { s_no_direction: 3, f_life_change: -1 },
+        reasonText: '内なる問い——外側に何かが起きているのではなく、自分の中の方向感覚が見えなくなっている。',
+      },
+      {
+        id: 'disc_016_b',
+        label: '今の生活・状況そのものが、変わり目に来ている感覚がある',
+        situationScores: { f_life_change: 3, s_no_direction: -1 },
+        reasonText: '転換点——何をしたいかより先に、今のフェーズ自体が終わりに来ている感覚と見ました。',
+      },
+      {
+        id: 'disc_016_c',
+        label: '方向もわからないし、状況も変化している。両方重なっている',
+        situationScores: { s_no_direction: 1, f_life_change: 2 },
+        reasonText: null,
+      },
+    ],
+  },
+
+  // ── Pair 17: 自立への迷い vs 仕事・キャリアの決断 ────────────────────
+  {
+    id: 'disc_017',
+    type: 'discriminating',
+    pair: ['f_independence', 'f_job_decision'],
+    text: '将来について、今一番引っかかっているのはどちらですか？',
+    discriminates: ['f_independence', 'f_job_decision'],
+    choices: [
+      {
+        id: 'disc_017_a',
+        label: '「自分だけでやっていけるか」という不安が根っこにある',
+        situationScores: { f_independence: 3, f_job_decision: -2 },
+        reasonText: '自立への問い——選択肢の前に、「自分はそれをやれるのか」という自己への疑問が来ている。',
+      },
+      {
+        id: 'disc_017_b',
+        label: '転職・独立・留まるなど、具体的な選択肢があって決められない',
+        situationScores: { f_job_decision: 3, f_independence: -2 },
+        reasonText: '決断の問い——自信の問題より先に、「何を選ぶか」という判断が問題になっている。',
+      },
+      {
+        id: 'disc_017_c',
+        label: '自信のなさもあるし、選択肢の迷いもある。両方ある',
+        situationScores: { f_independence: 1, f_job_decision: 1 },
+        reasonText: null,
+      },
+    ],
+  },
+
+  // ── Pair 18: 転職・キャリアの転換 vs 昇進・成長の頭打ち ──────────────
+  {
+    id: 'disc_018',
+    type: 'discriminating',
+    pair: ['w_career_change', 'w_career_stuck'],
+    text: '今の仕事・キャリアについて、一番近い感覚はどちらですか？',
+    discriminates: ['w_career_change', 'w_career_stuck'],
+    choices: [
+      {
+        id: 'disc_018_a',
+        label: '今いる場所を出て、違う環境・業種・働き方に移りたい',
+        situationScores: { w_career_change: 3, w_career_stuck: -2 },
+        reasonText: '環境を変えたい——成長できるかどうかより先に、「ここではない」という感覚が来ている。',
+      },
+      {
+        id: 'disc_018_b',
+        label: '今の場所で頑張っているが、上に行けない。天井が見えている',
+        situationScores: { w_career_stuck: 3, w_career_change: -2 },
+        reasonText: '詰まっている——まだここで戦いたい意志はある。ただその場所が、自分を活かせていない。',
+      },
+      {
+        id: 'disc_018_c',
+        label: '場所を変えたいし、今の場所でも詰まっている。両方来ている',
+        situationScores: { w_career_change: 1, w_career_stuck: 1 },
+        reasonText: null,
+      },
+    ],
+  },
 ];
