@@ -41,12 +41,23 @@ export function Result({ result, onRetry }) {
     .map(key => biasInfo[key])
     .filter(Boolean);
 
-  const keyAnswers = (result.keyAnswers ?? []).slice(0, 3);
+  const keyAnswers  = (result.keyAnswers  ?? []).slice(0, 3);
+  const evidenceLog = (result.evidenceLog ?? []);
 
   return (
     <div className="result-screen">
 
-      {/* ① あなたはこう答えました（読み返し）*/}
+      {/* ① 私はこう読みました（推論ログ：切り分け質問から生成）*/}
+      {evidenceLog.length > 0 && (
+        <div className="result-evidence">
+          <p className="result-evidence-label">私はこう読みました。</p>
+          {evidenceLog.map((text, i) => (
+            <p key={i} className="result-evidence-item">{text}</p>
+          ))}
+        </div>
+      )}
+
+      {/* ② あなたはこう答えました（読み返し）*/}
       {keyAnswers.length > 0 && (
         <div className="result-readings">
           <p className="result-readings-label">あなたはこう答えました。</p>

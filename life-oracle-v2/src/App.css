@@ -543,7 +543,15 @@ button {
   padding-left: 14px;
 }
 
-/* ===== Quiz オラクルメッセージ ===== */
+/* ===== Quiz オラクルメッセージ + 確信度ドット ===== */
+.quiz-oracle-header {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
 .quiz-oracle-message {
   font-family: var(--serif);
   font-size: 14px;
@@ -556,6 +564,52 @@ button {
   border-radius: 20px;
   letter-spacing: 0.02em;
   align-self: stretch;
+}
+
+.quiz-confidence-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.quiz-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.4s ease;
+}
+
+.quiz-dot--filled {
+  background: var(--accent);
+}
+
+/* ===== Result：私はこう読みました（推論ログ）===== */
+.result-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(45,35,24,0.04), rgba(45,35,24,0.02));
+  border: 1px solid rgba(45, 35, 24, 0.12);
+  border-left: 3px solid var(--accent-dark);
+  border-radius: var(--radius);
+}
+
+.result-evidence-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.result-evidence-item {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.8;
+  font-style: italic;
 }
 
 /* ===== Result：あなたはこう答えました ===== */

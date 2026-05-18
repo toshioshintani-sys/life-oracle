@@ -3,6 +3,8 @@
 // - demographicHints で年齢・職業を行動から推定（直接聞かない）
 // - keyAnswers で「あなたはこう答えました」を生成
 // - getSessionMessage で対話的な進行メッセージを返す
+// - discriminating questions で上位2候補を積極的に切り分ける
+// - evidenceLog で「私はこう読みました」の推論ログを生成
 
 export const ALL_SITUATIONS = [
   'w_boss_power', 'w_boss_unfair', 'w_boss_values',
@@ -50,6 +52,7 @@ export function createSession() {
     biasScores:       { B1: 0, B2: 0, B3: 0, B4: 0, B6: 0, B8: 0, B12: 0 },
     jungHints:        { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 },
     keyAnswers:       [],
+    evidenceLog:      [],
     tags:             [],
     answeredIds:      [],
     questionCount:    0,
@@ -82,6 +85,11 @@ export function recordAnswer(session, question, choice) {
     });
   }
   if (choice.tags) session.tags.push(...choice.tags);
+
+  // 推論ログ：切り分け質問の reasonText を保存
+  if (question.type === 'discriminating' && choice.reasonText) {
+    session.evidenceLog.push(choice.reasonText);
+  }
 
   // スコアが高い答えを「読み返し」用に保存
   const maxScore = choice.situationScores
@@ -134,6 +142,14 @@ export function getSessionMessage(session) {
   return 'あと数問だけ聞かせてください。';
 }
 
+// 確信度を 0〜1 で返す（UIの●ドット表示用）
+export function getSessionConfidence(session) {
+  if (session.questionCount === 0) return 0;
+  const sorted = Object.values(session.situationScores).sort((a, b) => b - a);
+  const gap = (sorted[0] ?? 0) - (sorted[1] ?? 0);
+  return Math.min(gap / 8, 0.95);
+}
+
 export function getNextQuestion(session, allQuestions) {
   const asked = new Set(session.answeredIds);
   const available = allQuestions.filter(q => !asked.has(q.id));
@@ -144,10 +160,32 @@ export function getNextQuestion(session, allQuestions) {
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
   if (universalRemaining.length > 0) return universalRemaining[0];
 
-  // フェーズ2：アキネーター（universal・demographic は除外）
+  // フェーズ2a：上位2候補が接近していたら切り分け質問を優先
+  const sorted = Object.entries(session.situationScores).sort(([,a],[,b]) => b - a);
+  const top1Score = sorted[0]?.[1] ?? 0;
+  const top2Score = sorted[1]?.[1] ?? 0;
+  const currentGap = top1Score - top2Score;
+
+  if (currentGap < 3 && top1Score > 0) {
+    const top2Situations = [sorted[0][0], sorted[1][0]];
+    const discriminatingCandidate = available.find(q =>
+      q.type === 'discriminating' &&
+      Array.isArray(q.pair) &&
+      q.pair.length === 2 &&
+      q.pair.every(p => top2Situations.includes(p))
+    );
+    if (discriminatingCandidate) return discriminatingCandidate;
+  }
+
+  // フェーズ2b：アキネーター（universal・demographic・discriminating 以外）
   const top3 = getTopSituations(session.situationScores, 3);
   const candidates = available
-    .filter(q => q.type !== 'universal' && q.type !== 'demographic_age' && q.type !== 'demographic_job')
+    .filter(q =>
+      q.type !== 'universal' &&
+      q.type !== 'demographic_age' &&
+      q.type !== 'demographic_job' &&
+      q.type !== 'discriminating'
+    )
     .map(q => ({
       q,
       power: (q.discriminates ?? []).filter(d => top3.includes(d)).length,
@@ -156,7 +194,10 @@ export function getNextQuestion(session, allQuestions) {
     .sort((a, b) => b.power - a.power);
 
   return candidates[0]?.q ?? available.find(
-    q => q.type !== 'universal' && q.type !== 'demographic_age' && q.type !== 'demographic_job'
+    q => q.type !== 'universal' &&
+         q.type !== 'demographic_age' &&
+         q.type !== 'demographic_job' &&
+         q.type !== 'discriminating'
   );
 }
 
@@ -185,6 +226,7 @@ export function buildResult(session) {
     topBiases,
     topJung,
     keyAnswers:     [...session.keyAnswers],
+    evidenceLog:    [...session.evidenceLog],
     tags:           session.tags,
     scores:         session.situationScores,
   };

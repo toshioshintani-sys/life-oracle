@@ -8,6 +8,7 @@ import {
   shouldFinish,
   getNextQuestion,
   getSessionMessage,
+  getSessionConfidence,
   buildResult,
 } from './engine_v2/situationEngine.js';
 import { ALL_QUESTIONS } from './data_v2/questions/index.js';
@@ -17,8 +18,9 @@ export default function App() {
   const [screen, setScreen]                   = useState('entry');
   const [session, setSession]                 = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [sessionMessage, setSessionMessage]   = useState(null);
-  const [result, setResult]                   = useState(null);
+  const [sessionMessage, setSessionMessage]     = useState(null);
+  const [sessionConfidence, setSessionConfidence] = useState(0);
+  const [result, setResult]                     = useState(null);
 
   const handleStart = useCallback(() => {
     const sess = createSession();
@@ -33,6 +35,7 @@ export default function App() {
     if (!session) return;
     recordAnswer(session, question, choice);
     setSessionMessage(getSessionMessage(session));
+    setSessionConfidence(getSessionConfidence(session));
 
     if (shouldFinish(session)) {
       setResult(buildResult(session));
@@ -54,6 +57,7 @@ export default function App() {
     setSession(null);
     setCurrentQuestion(null);
     setSessionMessage(null);
+    setSessionConfidence(0);
     setResult(null);
     setScreen('entry');
   }, []);
@@ -63,6 +67,7 @@ export default function App() {
     <Quiz
       question={currentQuestion}
       sessionMessage={sessionMessage}
+      sessionConfidence={sessionConfidence}
       onAnswer={handleAnswer}
     />
   );
