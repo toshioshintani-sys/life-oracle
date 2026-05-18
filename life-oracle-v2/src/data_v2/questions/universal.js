@@ -134,7 +134,7 @@ export const UNIVERSAL_QUESTIONS = [
         situationScores: { s_burnout: 2, s_no_direction: 1 },
         biasHints: { B2: 1 },
         jungHints: { Si: 1 },
-        demographicHints: { age_40s: 1, age_50s: 1 },
+        demographicHints: { age_40s: 1, age_50s: 1, age_60s: 1 },
         tags: ['quit_unrelated'],
       },
     ],
@@ -171,7 +171,7 @@ export const UNIVERSAL_QUESTIONS = [
         situationScores: { s_burnout: 1, s_self_esteem: 1 },
         biasHints: { B6: 1 },
         jungHints: { Fi: 1 },
-        demographicHints: { age_40s: 2, age_50s: 1 },
+        demographicHints: { age_40s: 2, age_50s: 1, age_60s: 2 },
         tags: ['gen_stopped'],
       },
       {
@@ -208,7 +208,7 @@ export const UNIVERSAL_QUESTIONS = [
         situationScores: { s_burnout: 2, w_work_overload: 1 },
         biasHints: { B6: 1 },
         jungHints: { Si: 1 },
-        demographicHints: { age_30s: 1, age_40s: 1 },
+        demographicHints: { age_30s: 1, age_40s: 1, age_50s: 1, age_60s: 1 },
         tags: ['state_tired'],
       },
       {
