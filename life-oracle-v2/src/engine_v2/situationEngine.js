@@ -137,8 +137,8 @@ export function recordAnswer(session, question, choice) {
   return true;
 }
 
-export function shouldFinish(session) {
-  if (session.questionCount < 12) return false;
+export function shouldFinish(session, minQuestions = 12) {
+  if (session.questionCount < minQuestions) return false;
   if (session.questionCount >= 22) return true;
 
   const entries = getNormalizedEntries(session);

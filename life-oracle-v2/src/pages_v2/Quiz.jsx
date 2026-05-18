@@ -1,37 +1,41 @@
-const DOTS = 5;
-
-export function Quiz({ question, sessionMessage, sessionConfidence, onAnswer }) {
+export function Quiz({ question, mode, questionNum, estimatedTotal, onAnswer }) {
   if (!question) return null;
 
-  const filledDots = Math.round((sessionConfidence ?? 0) * DOTS);
+  const pct = estimatedTotal > 0 ? Math.min((questionNum / estimatedTotal) * 100, 100) : 0;
 
   return (
     <div className="quiz-screen">
-      {sessionMessage && (
-        <div className="quiz-oracle-header">
-          <p className="quiz-oracle-message">{sessionMessage}</p>
-          <div className="quiz-confidence-dots" aria-hidden="true">
-            {Array.from({ length: DOTS }, (_, i) => (
-              <span
-                key={i}
-                className={`quiz-dot ${i < filledDots ? 'quiz-dot--filled' : ''}`}
-              />
-            ))}
-          </div>
+
+      <div className="quiz-progress">
+        <div className="quiz-progress-bar-track">
+          <div className="quiz-progress-bar" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="quiz-progress-label">{questionNum} 問目 / 約 {estimatedTotal} 問</p>
+      </div>
+
+      <p className="quiz-stem">
+        {mode === 'mbti' ? question.stem : question.text}
+      </p>
+
+      {mode === 'mbti' ? (
+        <div className="quiz-choices quiz-choices--mbti">
+          <button className="quiz-choice choice-yes" onClick={() => onAnswer(question, 1)}>そう</button>
+          <button className="quiz-choice choice-dk"  onClick={() => onAnswer(question, 0)}>わからない</button>
+          <button className="quiz-choice choice-no"  onClick={() => onAnswer(question, -1)}>ちがう</button>
+        </div>
+      ) : (
+        <div className="quiz-choices">
+          {question.choices.map(choice => (
+            <button
+              key={choice.id}
+              className="quiz-choice"
+              onClick={() => onAnswer(question, choice)}
+            >
+              {choice.label}
+            </button>
+          ))}
         </div>
       )}
-      <p className="quiz-stem">{question.text}</p>
-      <div className="quiz-choices">
-        {question.choices.map((choice) => (
-          <button
-            key={choice.id}
-            className="quiz-choice"
-            onClick={() => onAnswer(question, choice)}
-          >
-            {choice.label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

@@ -3,17 +3,19 @@ export function Entry({ onStart }) {
     <div className="entry-screen">
       <div className="entry-header">
         <h1 className="entry-title">ライフオラクル</h1>
-        <p className="entry-subtitle">
-          いくつかの場面を聞かせてください。<br />
-          答えが積み重なったとき、見えてくるものがあります。
-        </p>
+        <p className="entry-tagline">あなたのことを、静かに読み取ります。</p>
       </div>
 
-      <button className="start-button" onClick={onStart}>
-        始める
-      </button>
-
-      <p className="entry-note">所要時間：約3〜5分</p>
+      <div className="entry-choices">
+        <button className="entry-choice-button" onClick={() => onStart('mbti')}>
+          <span className="choice-title">自分のことを知りたい</span>
+          <span className="choice-desc">思考・行動のパターンを読み解く<br />約12問</span>
+        </button>
+        <button className="entry-choice-button" onClick={() => onStart('situation')}>
+          <span className="choice-title">今の状況を整理したい</span>
+          <span className="choice-desc">今感じていることを言語化する<br />約8問</span>
+        </button>
+      </div>
     </div>
   );
 }

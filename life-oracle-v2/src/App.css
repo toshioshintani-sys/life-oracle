@@ -774,3 +774,312 @@ button {
   font-weight: 700;
   color: var(--text);
 }
+
+/* ===== Entry 画面：2択ボタン ===== */
+.entry-tagline {
+  font-size: 15px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+.entry-choices {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.entry-choice-button {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+
+.entry-choice-button:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  background: var(--accent-bg);
+}
+
+.choice-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.choice-desc {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.55;
+}
+
+/* ===== TopicSelect 画面 ===== */
+.topic-screen {
+  width: 100%;
+  max-width: 480px;
+  padding: 48px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.back-button {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sub);
+  padding: 6px 0;
+  align-self: flex-start;
+}
+
+.back-button:hover { color: var(--accent); }
+
+.topic-lead {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.topic-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topic-button {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+
+.topic-button:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  background: var(--accent-bg);
+}
+
+.topic-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.topic-desc {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+/* ===== Quiz：プログレスバー ===== */
+.quiz-progress {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quiz-progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.quiz-progress-bar {
+  height: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.quiz-progress-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ===== MBTI Quiz：3択レイアウト ===== */
+.quiz-choices--mbti {
+  gap: 12px;
+}
+
+.quiz-choices--mbti .quiz-choice {
+  font-size: 17px;
+  font-weight: 700;
+  padding: 18px;
+  text-align: center;
+}
+
+/* ===== MBTI 結果画面 ===== */
+.mbti-result-screen {
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mbti-result-type-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, var(--accent-bg), rgba(184,131,63,0.04));
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.mbti-result-type-code {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.12em;
+}
+
+.mbti-result-light-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mbti-result-desc {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.8;
+  margin-top: 4px;
+}
+
+.mbti-result-famous {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+
+.mbti-result-famous-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.10em;
+  margin-bottom: 6px;
+}
+
+.mbti-result-famous-names {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mbti-result-shadow {
+  padding: 14px 20px;
+  background: rgba(160, 80, 80, 0.06);
+  border-left: 3px solid var(--shadow-cl);
+  border-radius: var(--radius);
+}
+
+.mbti-result-shadow-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--shadow-cl);
+  letter-spacing: 0.10em;
+  margin-bottom: 4px;
+}
+
+.mbti-result-shadow-name {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mbti-result-biases {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.mbti-result-biases-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.10em;
+  margin-bottom: 2px;
+}
+
+.mbti-result-bias-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mbti-bias-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mbti-bias-short {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.mbti-result-action {
+  padding: 18px 20px;
+  background: rgba(61, 122, 90, 0.08);
+  border-left: 3px solid var(--light);
+  border-radius: var(--radius);
+}
+
+.mbti-result-action-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3d7a5a;
+  letter-spacing: 0.10em;
+  margin-bottom: 8px;
+}
+
+.mbti-result-action-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.mbti-result-retry {
+  align-self: center;
+  margin-top: 8px;
+  padding: 14px 36px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 40px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: background 0.18s;
+}
+
+.mbti-result-retry:hover { background: var(--accent-dark); }
