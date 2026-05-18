@@ -247,7 +247,7 @@ export const RELATION_QUESTIONS = [
   {
     id: 'r_parent_care_001',
     type: 'probe',
-    text: '親の世話や対応に、時間や体力を使っていますか？',
+    text: '親や家族（配偶者・兄弟姉妹など）の世話に、時間や体力を使っていますか？',
     discriminates: ['r_parent_care'],
     choices: [
       {
@@ -278,6 +278,44 @@ export const RELATION_QUESTIONS = [
         label: 'ない',
         situationScores: { r_parent_care: -2 },
         tags: [],
+      },
+    ],
+  },
+
+  {
+    id: 'r_care_who_001',
+    type: 'probe',
+    text: '世話をしている（または一番心配している）相手は誰ですか？',
+    discriminates: ['r_parent_care'],
+    choices: [
+      {
+        id: 'parent',
+        label: '親（実父母・義父母）',
+        situationScores: { r_parent_care: 2 },
+        demographicHints: { age_40s: 1, age_50s: 2, age_60s: 1 },
+        tags: ['care_parent'],
+      },
+      {
+        id: 'spouse',
+        label: '配偶者・パートナー',
+        situationScores: { r_parent_care: 3, r_partner_drift: 1 },
+        demographicHints: { age_50s: 1, age_60s: 3 },
+        tags: ['care_spouse'],
+      },
+      {
+        id: 'sibling_other',
+        label: '兄弟姉妹・その他の家族',
+        situationScores: { r_parent_care: 2 },
+        demographicHints: { age_40s: 1, age_50s: 1, age_60s: 1 },
+        tags: ['care_other_family'],
+      },
+      {
+        id: 'multiple',
+        label: '複数が重なっている',
+        situationScores: { r_parent_care: 3 },
+        biasHints: { B8: 1 },
+        demographicHints: { age_50s: 2, age_60s: 2 },
+        tags: ['care_multiple'],
       },
     ],
   },

@@ -17,7 +17,7 @@ const SITUATION_LABELS = {
   r_partner_drift:    'パートナーとの距離感',
   r_partner_divorce:  '別れ・離婚への迷い',
   r_parent_pressure:  '親からのプレッシャー',
-  r_parent_care:      '親の介護',
+  r_parent_care:      '家族の介護・ケア',
   r_friend_isolation: '友人関係での孤立',
   r_friend_toxic:     '消耗する人間関係',
   // 自己理解
