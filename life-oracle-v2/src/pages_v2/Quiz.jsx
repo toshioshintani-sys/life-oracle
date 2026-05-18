@@ -1,4 +1,4 @@
-export function Quiz({ question, mode, questionNum, estimatedTotal, onAnswer }) {
+export function Quiz({ question, mode, questionNum, estimatedTotal, oracleMessage, onAnswer }) {
   if (!question) return null;
 
   const pct = estimatedTotal > 0 ? Math.min((questionNum / estimatedTotal) * 100, 100) : 0;
@@ -12,6 +12,10 @@ export function Quiz({ question, mode, questionNum, estimatedTotal, onAnswer }) 
         </div>
         <p className="quiz-progress-label">{questionNum} 問目 / 約 {estimatedTotal} 問</p>
       </div>
+
+      {oracleMessage && (
+        <p className="quiz-oracle-reading">{oracleMessage}</p>
+      )}
 
       <p className="quiz-stem">
         {mode === 'mbti' ? question.stem : question.text}

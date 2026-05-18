@@ -4,6 +4,7 @@ export function Entry({ onStart }) {
       <div className="entry-header">
         <h1 className="entry-title">ライフオラクル</h1>
         <p className="entry-tagline">あなたのことを、静かに読み取ります。</p>
+        <p className="entry-barnum">何かが少しずつ動き始めている、そんな時期に来る人が多いです。</p>
       </div>
 
       <div className="entry-choices">

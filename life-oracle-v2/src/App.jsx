@@ -16,6 +16,7 @@ import {
   recordAnswer,
   shouldFinish,
   getNextQuestion,
+  getSessionMessage,
   buildResult as buildSituResult,
 } from './engine_v2/situationEngine.js';
 
@@ -32,8 +33,46 @@ const MBTI_ESTIMATED_TOTAL = 12;
 const SITU_ESTIMATED_TOTAL = 8;
 const SITU_MIN_QUESTIONS   = 4;
 
+// コールドリーディング：θの傾きから「読み」メッセージを生成
+const MBTI_READINGS = {
+  EI: {
+    pos: '外で見せる顔と、一人の時の自分は少し違う人ですね。',
+    neg: '一人の時間が、あなたを回復させるんですね。',
+  },
+  SN: {
+    pos: '今あるものを確認してから動く。そういう着実さがありますね。',
+    neg: '話の途中でふと、全然違う連想が頭をよぎることがありますね。',
+  },
+  TF: {
+    pos: '感情より先に、「どうすれば解決するか」が浮かびますね。',
+    neg: '頭より少し先に、胸のあたりで判断していることがありますね。',
+  },
+  JP: {
+    pos: '決まっていない状態が続くと、落ち着かない感じがありますね。',
+    neg: '決めるのは最後でいい、と思っていることが多いですね。',
+  },
+};
+
+function getMbtiOracleMessage(session) {
+  if (!session || session.questionCount < 3) return null;
+
+  let bestAxis  = null;
+  let bestTheta = 0;
+  for (const [axis, theta] of Object.entries(session.thetas)) {
+    if (Math.abs(theta) > Math.abs(bestTheta)) {
+      bestAxis  = axis;
+      bestTheta = theta;
+    }
+  }
+
+  if (!bestAxis || Math.abs(bestTheta) < 0.8) return null;
+
+  const r = MBTI_READINGS[bestAxis];
+  return bestTheta > 0 ? r.pos : r.neg;
+}
+
 function topicQuestions(topicId) {
-  const prefix = topicId.charAt(0); // 'w' / 'r' / 's' / 'f'
+  const prefix = topicId.charAt(0);
   const domain = {
     work:     WORK_QUESTIONS,
     relation: RELATION_QUESTIONS,
@@ -47,15 +86,15 @@ function topicQuestions(topicId) {
 }
 
 export default function App() {
-  const [screen, setScreen]           = useState('entry');
-  const [flow, setFlow]               = useState(null);    // 'mbti' | 'situation'
-  const [topic, setTopic]             = useState(null);
-  const [mbtiSession, setMbtiSession] = useState(null);
-  const [situSession, setSituSession] = useState(null);
+  const [screen, setScreen]               = useState('entry');
+  const [flow, setFlow]                   = useState(null);
+  const [mbtiSession, setMbtiSession]     = useState(null);
+  const [situSession, setSituSession]     = useState(null);
   const [situQuestions, setSituQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [mbtiResult, setMbtiResult]   = useState(null);
-  const [situResult, setSituResult]   = useState(null);
+  const [oracleMessage, setOracleMessage] = useState(null);
+  const [mbtiResult, setMbtiResult]       = useState(null);
+  const [situResult, setSituResult]       = useState(null);
   const [transitionMsg, setTransitionMsg] = useState(null);
   const timerRef = useRef(null);
 
@@ -66,6 +105,7 @@ export default function App() {
     const q    = nextQuestion(sess);
     setMbtiSession(sess);
     setCurrentQuestion(q);
+    setOracleMessage(null);
     setFlow('mbti');
     setScreen('quiz');
   }, []);
@@ -89,6 +129,7 @@ export default function App() {
 
     setMbtiSession({ ...mbtiSession });
     setCurrentQuestion(next);
+    setOracleMessage(getMbtiOracleMessage(mbtiSession));
   }, [mbtiSession]);
 
   // ── Situation flow ──────────────────────────────────────────────────────
@@ -99,8 +140,8 @@ export default function App() {
     const q    = getNextQuestion(sess, qs);
     setSituSession(sess);
     setSituQuestions(qs);
-    setTopic(topicId);
     setCurrentQuestion(q);
+    setOracleMessage(null);
     setFlow('situation');
     setScreen('quiz');
   }, []);
@@ -124,6 +165,7 @@ export default function App() {
 
     setSituSession({ ...situSession });
     setCurrentQuestion(next);
+    setOracleMessage(getSessionMessage(situSession));
   }, [situSession, situQuestions]);
 
   // ── Entry dispatch ──────────────────────────────────────────────────────
@@ -143,11 +185,11 @@ export default function App() {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
     setScreen('entry');
     setFlow(null);
-    setTopic(null);
     setMbtiSession(null);
     setSituSession(null);
     setSituQuestions([]);
     setCurrentQuestion(null);
+    setOracleMessage(null);
     setMbtiResult(null);
     setSituResult(null);
     setTransitionMsg(null);
@@ -194,6 +236,7 @@ export default function App() {
         mode={flow}
         questionNum={questionNum}
         estimatedTotal={estimatedTotal}
+        oracleMessage={oracleMessage}
         onAnswer={handleAnswer}
       />
     );

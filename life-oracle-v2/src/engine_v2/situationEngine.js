@@ -150,25 +150,49 @@ export function shouldFinish(session, minQuestions = 12) {
   return rawTop >= 4 && gap >= 0.25;
 }
 
+const SITUATION_READINGS = {
+  w_boss_power:      '職場に、苦手な人がいますね。',
+  w_boss_unfair:     '頑張りが正当に評価されていない感覚がありますね。',
+  w_boss_values:     '職場の方針と、自分の感覚がずれている感じがありますね。',
+  w_col_isolation:   '職場で、少し浮いている感覚がありますね。',
+  w_col_rivalry:     '職場に、気を遣わせる人間関係がありますね。',
+  w_work_empty:      '仕事の中に、意味を見失っている感覚がありますね。',
+  w_work_overload:   '消耗している。仕事量のことですね。',
+  w_career_change:   '今の場所から、動くことを考えていますね。',
+  w_career_indep:    '自分の力で立つことを、考えているんですね。',
+  w_career_stuck:    '頑張っているのに、前に進めていない感覚がありますね。',
+  r_partner_drift:   '近しい誰かとの距離感が、気になっているんですね。',
+  r_partner_divorce: 'パートナーとの関係で、大きな迷いがありますね。',
+  r_parent_pressure: '親や家族のことで、重たいものを抱えていますね。',
+  r_parent_care:     '家族のことで、あなたが引き受けているものがありますね。',
+  r_friend_isolation:'人とのつながりが、少し薄くなっている感覚がありますね。',
+  r_friend_toxic:    '関わっていて消耗する人が、近くにいるんですね。',
+  s_self_esteem:     '自分のことを、責めてしまうことがありますね。',
+  s_emotion_control: '感情が先に動いてしまうことが、あるんですね。',
+  s_no_direction:    '何のために動けばいいか、見えなくなっている感覚がありますね。',
+  s_burnout:         'エネルギーが、底をついている感じがしますね。',
+  f_job_decision:    '選択肢はある。でも決められない。そういう状況ですね。',
+  f_independence:    '今の場所を出て、自分で立つことを考えているんですね。',
+  f_life_change:     '何かが変わりそうな予感が、あるんですね。',
+};
+
 export function getSessionMessage(session) {
   const q = session.questionCount;
   if (q === 0) return null;
-
-  if (q - session.lastPivotAt <= 1 && session.lastPivotAt > 0) {
-    return '少し別の角度から確認させてください。';
-  }
+  if (q < 3)   return null;
 
   const entries = getNormalizedEntries(session);
-  const top  = entries[0]?.[1] ?? 0;
-  const sec  = entries[1]?.[1] ?? 0;
-  const gap  = top > 0 ? (top - sec) / top : 0;
+  const top1Key  = entries[0]?.[0];
+  const top1Norm = entries[0]?.[1] ?? 0;
+  const top2Norm = entries[1]?.[1] ?? 0;
+  const gap      = top1Norm > 0 ? (top1Norm - top2Norm) / top1Norm : 0;
 
-  if (q <= 3)    return 'あなたのことを、静かに読んでいます。';
-  if (q <= 5)    return '輪郭が見えてきました。';
+  if (gap >= 0.2 && top1Key && SITUATION_READINGS[top1Key]) {
+    return SITUATION_READINGS[top1Key];
+  }
+
   if (gap < 0.1) return 'もう少しだけ聞かせてください。';
-  if (gap < 0.2) return 'だいぶ絞れてきました。';
-  if (q >= 18)   return 'もうすぐです。';
-  return 'あと数問だけ聞かせてください。';
+  return null;
 }
 
 export function getSessionConfidence(session) {

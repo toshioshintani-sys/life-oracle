@@ -20,13 +20,34 @@ const TYPE_DESC = {
   ISFP: '感受性豊かで、独自の美的センスを持つ。自分のペースで、深く誠実に生きる。',
 };
 
+// 結果冒頭の「私はこう読みました」—— タイプ別コールドリーディング
+const TYPE_READING = {
+  ENTJ: 'あなたの答えを見ていると、一つのことが見えました。あなたは「決める」ことで、周囲が動き出すのを知っている人です。',
+  INTJ: 'あなたの答えには一貫した線があります。遠くを見ながら、静かに動いている人です。',
+  ENTP: '答えのパターンから分かります。あなたは「まだ誰も気づいていないこと」を見つけるのが好きな人です。',
+  INTP: 'あなたが選んだ答えは、細部まで正確であろうとしています。自分の中に体系を持っている人です。',
+  ENFJ: 'あなたの答えを読むと、人のことを自分のことのように考えている人だと分かります。',
+  INFJ: '答えの奥に、何か大きなものを守ろうとしている意志が見えます。静かですが、強い人です。',
+  ENFP: 'あなたの答えは、可能性に向かって開いています。人に希望を与えることが、あなたの自然な在り方です。',
+  INFP: '答えのひとつひとつに、あなた自身の価値観が滲んでいます。自分に正直に生きている人です。',
+  ESTJ: 'あなたの答えには、責任を引き受ける姿勢があります。頼まれると断れない人でもありますね。',
+  ISTJ: '答えに揺らぎがない。約束を守ることを、当たり前だと思っている人です。',
+  ESTP: 'あなたの答えは速く、今この瞬間に向いています。考えるより先に動ける人です。',
+  ISTP: '答えのパターンから、あなたは静かに観察してから動く人だと分かります。無駄がない。',
+  ESFJ: 'あなたの答えには、周囲への気遣いが自然に入っています。場の空気を読むのが得意な人です。',
+  ISFJ: '答えを見ていると、あなたが大切にしているものが伝わってきます。気づかれないところで支えている人です。',
+  ESFP: 'あなたの答えには、今この場を楽しもうとするエネルギーがあります。一緒にいると明るくなる人です。',
+  ISFP: '答えのひとつひとつが、あなた自身のペースで選ばれています。感じたことに正直な人です。',
+};
+
 export function MbtiResult({ result, onRetry }) {
   if (!result) return null;
 
   const { mbtiType, biasScores } = result;
-  const typeInfo   = cognitiveFunctionMap[mbtiType] ?? {};
-  const famous     = famousPeople[mbtiType]?.people ?? [];
-  const desc       = TYPE_DESC[mbtiType] ?? '';
+  const typeInfo = cognitiveFunctionMap[mbtiType] ?? {};
+  const famous   = famousPeople[mbtiType]?.people ?? [];
+  const desc     = TYPE_DESC[mbtiType] ?? '';
+  const reading  = TYPE_READING[mbtiType] ?? null;
 
   const topBiases = Object.entries(biasScores ?? {})
     .sort(([, a], [, b]) => b - a)
@@ -36,6 +57,13 @@ export function MbtiResult({ result, onRetry }) {
 
   return (
     <div className="mbti-result-screen">
+
+      {reading && (
+        <div className="mbti-result-reading-intro">
+          <p className="mbti-result-reading-label">私はこう読みました。</p>
+          <p className="mbti-result-reading-text">{reading}</p>
+        </div>
+      )}
 
       <div className="mbti-result-type-block">
         <p className="mbti-result-type-code">{mbtiType}</p>
