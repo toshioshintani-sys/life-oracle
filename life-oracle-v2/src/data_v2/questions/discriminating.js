@@ -294,4 +294,62 @@ export const DISCRIMINATING_QUESTIONS = [
       },
     ],
   },
+
+  // ── Pair 11: キャリアの決断 vs 人生の転換点 ─────────────────────────
+  {
+    id: 'disc_011',
+    type: 'discriminating',
+    pair: ['f_job_decision', 'f_life_change'],
+    text: '今の「迷い」に近いのはどちらですか？',
+    discriminates: ['f_job_decision', 'f_life_change'],
+    choices: [
+      {
+        id: 'disc_011_a',
+        label: '転職・独立など、仕事上の具体的な選択肢があって決められない',
+        situationScores: { f_job_decision: 3, f_life_change: -2 },
+        reasonText: '選択肢は具体的にある——これは「何を選ぶか」の問いであって、人生全体の問いではない。',
+      },
+      {
+        id: 'disc_011_b',
+        label: '仕事というより、もっと大きく「このままでいいのか」という感覚',
+        situationScores: { f_life_change: 3, f_job_decision: -2 },
+        reasonText: '転換点——これは仕事の問題だけではなく、人生のフェーズが変わろうとしているサインと見ました。',
+      },
+      {
+        id: 'disc_011_c',
+        label: '仕事の選択肢も、人生全体への疑問も、両方ある',
+        situationScores: { f_job_decision: 1, f_life_change: 2 },
+        reasonText: null,
+      },
+    ],
+  },
+
+  // ── Pair 12: 自立への迷い vs 人生の転換点 ───────────────────────────
+  {
+    id: 'disc_012',
+    type: 'discriminating',
+    pair: ['f_independence', 'f_life_change'],
+    text: '今の状態に近いのはどちらですか？',
+    discriminates: ['f_independence', 'f_life_change'],
+    choices: [
+      {
+        id: 'disc_012_a',
+        label: '「自分だけでやっていけるか」という不安が先にある',
+        situationScores: { f_independence: 3, f_life_change: -2 },
+        reasonText: '能力への問い——転換への感覚より先に、「一人でやれるか」という自己への疑問が来ている。',
+      },
+      {
+        id: 'disc_012_b',
+        label: '「このままでいいのか」という感覚が先にある',
+        situationScores: { f_life_change: 3, f_independence: -2 },
+        reasonText: '転換点——自立の不安より先に、今の状態への疑問が来ている。人生のフェーズの問いと見ました。',
+      },
+      {
+        id: 'disc_012_c',
+        label: '自立の不安も、人生全体への問いも、両方ある',
+        situationScores: { f_independence: 2, f_life_change: 1 },
+        reasonText: null,
+      },
+    ],
+  },
 ];
