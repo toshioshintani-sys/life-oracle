@@ -54,6 +54,7 @@ export function createSession() {
     situationScores,
     maxPossibleScores,
     demographicScores,
+    ageEvidenceCount: 0,
     biasScores:       { B1: 0, B2: 0, B3: 0, B4: 0, B6: 0, B8: 0, B12: 0 },
     jungHints:        { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 },
     keyAnswers:       [],
@@ -99,22 +100,16 @@ export function recordAnswer(session, question, choice) {
     });
   }
   if (choice.demographicHints) {
+    const hasAgeSignal = Object.keys(choice.demographicHints).some(k => k.startsWith('age_'));
+    if (hasAgeSignal) session.ageEvidenceCount++;
     Object.entries(choice.demographicHints).forEach(([k, score]) => {
       if (session.demographicScores[k] !== undefined) session.demographicScores[k] += score;
     });
   }
   if (choice.tags) session.tags.push(...choice.tags);
 
-  // 推論ログ：切り分け質問で「AではなくBを選んだ」比較形式で生成
-  if (question.type === 'discriminating') {
-    const otherChoice = question.choices.find(c => c.id !== choice.id);
-    if (otherChoice && choice.reasonText) {
-      session.evidenceLog.push(
-        `「${otherChoice.label}」より「${choice.label}」に近い状況と読みました。`
-      );
-    } else if (choice.reasonText) {
-      session.evidenceLog.push(choice.reasonText);
-    }
+  if (question.type === 'discriminating' && choice.reasonText) {
+    session.evidenceLog.push(choice.reasonText);
   }
 
   // スコアが高い答えを「読み返し」用に保存（最大4件）
@@ -255,7 +250,7 @@ export function buildResult(session) {
   const showThird = top3Norm > 0 && top1Norm > 0 && (top1Norm - top3Norm) / top1Norm < 0.10;
 
   const { ageLabel, confidence: ageConfidence, useAgeText } =
-    inferAgeGroupWithConfidence(session.demographicScores);
+    inferAgeGroupWithConfidence(session.demographicScores, session.ageEvidenceCount);
 
   const inferredJobKey = inferJobFromScores(session.demographicScores);
   const jobLabel = inferredJobKey ? JOB_KEY_TO_LABEL[inferredJobKey] : null;
@@ -294,7 +289,7 @@ function getNormalizedEntries(session) {
     .sort(([,a], [,b]) => b - a);
 }
 
-function inferAgeGroupWithConfidence(demographicScores) {
+function inferAgeGroupWithConfidence(demographicScores, ageEvidenceCount) {
   const AGE_KEYS = ['age_early20s', 'age_late20s', 'age_30s', 'age_40s', 'age_50s', 'age_60s'];
   const ageEntries = AGE_KEYS
     .map(k => ({ key: k, score: demographicScores[k] || 0 }))
@@ -302,13 +297,12 @@ function inferAgeGroupWithConfidence(demographicScores) {
 
   const topScore    = ageEntries[0].score;
   const secondScore = ageEntries[1].score;
-  const totalEvidence = ageEntries.reduce((s, { score }) => s + score, 0);
 
   if (topScore === 0) return { ageLabel: null, confidence: 0, useAgeText: false };
 
   const confidence = (topScore - secondScore) / Math.max(topScore, 1);
-  // 3条件：比率差 + 合計証拠量 + トップスコア単体
-  const useAgeText = confidence >= 0.25 && totalEvidence >= 3 && topScore >= 2;
+  // 3条件：比率差（0.35以上）+ 年齢シグナルを持つ質問数（2問以上）+ トップスコア（3点以上）
+  const useAgeText = confidence >= 0.35 && ageEvidenceCount >= 2 && topScore >= 3;
 
   return {
     ageLabel: AGE_KEY_TO_LABEL[ageEntries[0].key] ?? null,
