@@ -67,10 +67,15 @@ export function createSession() {
 }
 
 export function recordAnswer(session, question, choice) {
+  // Strict Mode 二重実行ガード（同一質問への重複記録を防ぐ）
+  if (session.answeredIds.includes(question.id)) return;
+
   // normalizedScore 用：この質問で各状況が取り得た最大点を累積
+  // Math.max(0, ...) で空配列スプレッド時の -Infinity を防止
   if (question.choices) {
     ALL_SITUATIONS.forEach(sit => {
       const maxForThisQ = Math.max(
+        0,
         ...question.choices.map(c => c.situationScores?.[sit] ?? 0)
       );
       session.maxPossibleScores[sit] += maxForThisQ;
@@ -145,7 +150,7 @@ export function shouldFinish(session) {
   const topNorm   = entries[0]?.[1] ?? 0;
   const secNorm   = entries[1]?.[1] ?? 0;
   const gap       = topNorm > 0 ? (topNorm - secNorm) / topNorm : 0;
-  const rawTop    = session.situationScores[entries[0]?.[0]] ?? 0;
+  const rawTop    = Math.max(...Object.values(session.situationScores));
 
   return rawTop >= 6 && gap >= 0.25;
 }
@@ -247,7 +252,7 @@ export function buildResult(session) {
   const thirdSituation = entries[2]?.[0] ?? null;
   const top3Norm       = entries[2]?.[1] ?? 0;
   // 3位は top の 80% 以上のスコアがある場合のみ「隣接テーマ」として表示
-  const showThird = top3Norm > 0 && top1Norm > 0 && (top1Norm - top3Norm) / top1Norm < 0.20;
+  const showThird = top3Norm > 0 && top1Norm > 0 && (top1Norm - top3Norm) / top1Norm < 0.10;
 
   const { ageLabel, confidence: ageConfidence, useAgeText } =
     inferAgeGroupWithConfidence(session.demographicScores);

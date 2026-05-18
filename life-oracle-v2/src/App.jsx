@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Entry }  from './pages_v2/Entry.jsx';
 import { Quiz }   from './pages_v2/Quiz.jsx';
 import { Result } from './pages_v2/Result.jsx';
@@ -55,6 +55,7 @@ export default function App() {
   const [result, setResult]                       = useState(null);
   const [transitionMsg, setTransitionMsg]         = useState(null);
   const [prevQuestion, setPrevQuestion]           = useState(null);
+  const timerRef                                  = useRef(null);
 
   const handleStart = useCallback(() => {
     const sess  = createSession();
@@ -93,10 +94,10 @@ export default function App() {
     setSession({ ...session });
 
     if (msg) {
+      if (timerRef.current) clearTimeout(timerRef.current);
       setTransitionMsg(msg);
       setScreen('transition');
-      // 1.6s 後に quiz へ（同ドメイン継続は setScreen('transition') に入らない）
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setTransitionMsg(null);
         setScreen('quiz');
       }, 1600);
@@ -104,6 +105,10 @@ export default function App() {
   }, [session]);
 
   const handleRetry = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     setSession(null);
     setCurrentQuestion(null);
     setPrevQuestion(null);
