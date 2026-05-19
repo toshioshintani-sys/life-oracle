@@ -883,6 +883,22 @@ button {
   color: var(--text-sub);
 }
 
+.target-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.target-group-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border);
+}
+
 /* ===== Quiz：プログレスバー ===== */
 .quiz-progress {
   width: 100%;
@@ -1419,4 +1435,152 @@ button {
   line-height: 1.85;
   color: var(--text);
   margin: 0;
+}
+
+/* ===== Oracle Wall（掲示板） ===== */
+.oracle-wall {
+  width: 100%;
+  max-width: 480px;
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.oracle-wall-header {
+  border-top: 1px solid var(--border);
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.oracle-wall-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.oracle-wall-subtitle {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.oracle-wall-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.oracle-wall-poster {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.oracle-wall-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text);
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.7;
+}
+
+.oracle-wall-textarea::placeholder { color: var(--text-sub); opacity: 0.6; }
+
+.oracle-wall-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.oracle-wall-count {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.oracle-wall-submit {
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 8px 20px;
+  transition: opacity 0.18s;
+}
+
+.oracle-wall-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.oracle-wall-submit:not(:disabled):hover { opacity: 0.85; }
+
+.oracle-wall-error {
+  font-size: 12px;
+  color: #a05050;
+}
+
+.oracle-wall-thanks {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-sub);
+  padding: 12px 0;
+}
+
+.oracle-wall-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.oracle-wall-loading,
+.oracle-wall-empty {
+  font-size: 13px;
+  color: var(--text-sub);
+  text-align: center;
+  padding: 16px 0;
+}
+
+.oracle-wall-post {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.oracle-wall-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.oracle-wall-post-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  flex: 1;
+}
+
+.oracle-wall-post-date {
+  font-size: 11px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.oracle-wall-post-message {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.75;
 }

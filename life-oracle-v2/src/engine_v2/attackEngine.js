@@ -130,8 +130,17 @@ export function getAttackSessionMessage(session) {
 }
 
 export function buildAttackResult(session) {
-  const entries = getNormalizedEntries(session);
-  const topId   = entries[0]?.[0];
+  let entries = getNormalizedEntries(session);
+  const topNormCheck = entries[0]?.[1] ?? 0;
+
+  // Fallback: when no attackTypeHints were scored, use matchSignals dot product
+  if (topNormCheck === 0 && session.candidateIds.length > 0) {
+    entries = session.candidateIds
+      .map(id => [id, matchSignalsScore(JIN_TYPES_BY_ID[id], session)])
+      .sort(([, a], [, b]) => b - a);
+  }
+
+  const topId = entries[0]?.[0];
   if (!topId) return null;
 
   const topType = JIN_TYPES_BY_ID[topId];
@@ -161,6 +170,16 @@ export function buildAttackResult(session) {
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────
+
+function matchSignalsScore(type, session) {
+  if (!type?.matchSignals) return 0;
+  let score = 0;
+  const bw = type.matchSignals.biasWeights ?? {};
+  const jw = type.matchSignals.jungShadowWeights ?? {};
+  Object.entries(bw).forEach(([b, w]) => { score += (session.biasScores[b] ?? 0) * w; });
+  Object.entries(jw).forEach(([j, w]) => { score += (session.jungShadowScores[j] ?? 0) * w; });
+  return score;
+}
 
 function getNormalizedEntries(session) {
   return session.candidateIds

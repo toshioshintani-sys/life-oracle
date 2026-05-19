@@ -7,6 +7,7 @@ import { PostQuiz }     from './pages_v2/PostQuiz.jsx';
 import { MbtiResult }   from './pages_v2/MbtiResult.jsx';
 import { Result }       from './pages_v2/Result.jsx';
 import { AttackResult } from './pages_v2/AttackResult.jsx';
+import { OracleWall }   from './pages_v2/OracleWall.jsx';
 
 // MBTI engine
 import { createSession as createMbtiSession } from './engine_v2/session.js';
@@ -39,14 +40,26 @@ import { RELATION_QUESTIONS } from './data_v2/questions/relation.js';
 import { SELF_QUESTIONS }     from './data_v2/questions/self.js';
 import { FUTURE_QUESTIONS }   from './data_v2/questions/future.js';
 import { DISCRIMINATING_QUESTIONS }     from './data_v2/questions/discriminating.js';
-import { ATTACK_BOSS_QUESTIONS }        from './data_v2/questions/attack_boss.js';
-import { ATTACK_COLLEAGUE_QUESTIONS }   from './data_v2/questions/attack_colleague.js';
-import { ATTACK_SUBORDINATE_QUESTIONS } from './data_v2/questions/attack_subordinate.js';
+import { ATTACK_BOSS_QUESTIONS }           from './data_v2/questions/attack_boss.js';
+import { ATTACK_COLLEAGUE_QUESTIONS }      from './data_v2/questions/attack_colleague.js';
+import { ATTACK_SUBORDINATE_QUESTIONS }    from './data_v2/questions/attack_subordinate.js';
+import { ATTACK_PARENT_QUESTIONS }         from './data_v2/questions/attack_parent.js';
+import { ATTACK_CHILD_QUESTIONS }          from './data_v2/questions/attack_child.js';
+import { ATTACK_SIBLING_QUESTIONS }        from './data_v2/questions/attack_sibling.js';
+import { ATTACK_GRANDPARENT_QUESTIONS }    from './data_v2/questions/attack_grandparent.js';
+import { ATTACK_PARTNER_QUESTIONS }        from './data_v2/questions/attack_partner.js';
+import { ATTACK_ALMOST_PARTNER_QUESTIONS } from './data_v2/questions/attack_almost_partner.js';
 
 const ATTACK_QUESTIONS_BY_TARGET = {
-  boss:        ATTACK_BOSS_QUESTIONS,
-  colleague:   ATTACK_COLLEAGUE_QUESTIONS,
-  subordinate: ATTACK_SUBORDINATE_QUESTIONS,
+  boss:           ATTACK_BOSS_QUESTIONS,
+  colleague:      ATTACK_COLLEAGUE_QUESTIONS,
+  subordinate:    ATTACK_SUBORDINATE_QUESTIONS,
+  parent:         ATTACK_PARENT_QUESTIONS,
+  child:          ATTACK_CHILD_QUESTIONS,
+  sibling:        ATTACK_SIBLING_QUESTIONS,
+  grandparent:    ATTACK_GRANDPARENT_QUESTIONS,
+  partner:        ATTACK_PARTNER_QUESTIONS,
+  almost_partner: ATTACK_ALMOST_PARTNER_QUESTIONS,
 };
 
 import './App.css';
@@ -329,21 +342,34 @@ export default function App() {
 
   if (screen === 'result-mbti') {
     return (
-      <MbtiResult
-        result={mbtiResult}
-        occupation={mbtiOccupation}
-        generation={mbtiGeneration}
-        onRetry={handleRetry}
-      />
+      <>
+        <MbtiResult
+          result={mbtiResult}
+          occupation={mbtiOccupation}
+          generation={mbtiGeneration}
+          onRetry={handleRetry}
+        />
+        <OracleWall typeName={mbtiResult?.mbtiType} category="mbti" />
+      </>
     );
   }
 
   if (screen === 'result-situation') {
-    return <Result result={situResult} onRetry={handleRetry} />;
+    return (
+      <>
+        <Result result={situResult} onRetry={handleRetry} />
+        <OracleWall typeName={situResult?.topSituation} category="situation" />
+      </>
+    );
   }
 
   if (screen === 'result-attack') {
-    return <AttackResult result={attackResult} onRetry={handleRetry} />;
+    return (
+      <>
+        <AttackResult result={attackResult} onRetry={handleRetry} />
+        <OracleWall typeName={attackResult?.type?.psychologyOS?.mechanismShort} category="attack" />
+      </>
+    );
   }
 
   return null;
