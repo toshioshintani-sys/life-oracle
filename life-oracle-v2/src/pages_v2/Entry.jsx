@@ -16,6 +16,10 @@ export function Entry({ onStart }) {
           <span className="choice-title">今の状況を整理したい</span>
           <span className="choice-desc">今感じていることを言語化する<br />約8問</span>
         </button>
+        <button className="entry-choice-button" onClick={() => onStart('attack')}>
+          <span className="choice-title">誰かを攻略したい</span>
+          <span className="choice-desc">あの人がそう動く理由と通じ方<br />約6問</span>
+        </button>
       </div>
     </div>
   );

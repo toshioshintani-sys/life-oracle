@@ -1,10 +1,12 @@
 import { useState, useCallback, useRef } from 'react';
-import { Entry }       from './pages_v2/Entry.jsx';
-import { TopicSelect } from './pages_v2/TopicSelect.jsx';
-import { Quiz }        from './pages_v2/Quiz.jsx';
-import { PostQuiz }    from './pages_v2/PostQuiz.jsx';
-import { MbtiResult }  from './pages_v2/MbtiResult.jsx';
-import { Result }      from './pages_v2/Result.jsx';
+import { Entry }        from './pages_v2/Entry.jsx';
+import { TopicSelect }  from './pages_v2/TopicSelect.jsx';
+import { TargetSelect } from './pages_v2/TargetSelect.jsx';
+import { Quiz }         from './pages_v2/Quiz.jsx';
+import { PostQuiz }     from './pages_v2/PostQuiz.jsx';
+import { MbtiResult }   from './pages_v2/MbtiResult.jsx';
+import { Result }       from './pages_v2/Result.jsx';
+import { AttackResult } from './pages_v2/AttackResult.jsx';
 
 // MBTI engine
 import { createSession as createMbtiSession } from './engine_v2/session.js';
@@ -21,19 +23,32 @@ import {
   buildResult as buildSituResult,
 } from './engine_v2/situationEngine.js';
 
+// Attack engine
+import {
+  createAttackSession,
+  recordAttackAnswer,
+  shouldFinishAttack,
+  getNextAttackQuestion,
+  getAttackSessionMessage,
+  buildAttackResult,
+} from './engine_v2/attackEngine.js';
+
 // Question pools
 import { WORK_QUESTIONS }     from './data_v2/questions/work.js';
 import { RELATION_QUESTIONS } from './data_v2/questions/relation.js';
 import { SELF_QUESTIONS }     from './data_v2/questions/self.js';
 import { FUTURE_QUESTIONS }   from './data_v2/questions/future.js';
 import { DISCRIMINATING_QUESTIONS } from './data_v2/questions/discriminating.js';
+import { ATTACK_BOSS_QUESTIONS }    from './data_v2/questions/attack_boss.js';
 
 import './App.css';
 
-const MBTI_MAX_QUESTIONS   = 12;
-const MBTI_ESTIMATED_TOTAL = 12;
-const SITU_ESTIMATED_TOTAL = 8;
-const SITU_MIN_QUESTIONS   = 4;
+const MBTI_MAX_QUESTIONS    = 12;
+const MBTI_ESTIMATED_TOTAL  = 12;
+const SITU_ESTIMATED_TOTAL  = 8;
+const SITU_MIN_QUESTIONS    = 4;
+const ATTACK_ESTIMATED_TOTAL = 6;
+const ATTACK_MIN_QUESTIONS  = 4;
 
 // コールドリーディング：θの傾きから「読み」メッセージを生成
 const MBTI_READINGS = {
@@ -93,12 +108,14 @@ export default function App() {
   const [mbtiSession, setMbtiSession]     = useState(null);
   const [situSession, setSituSession]     = useState(null);
   const [situQuestions, setSituQuestions] = useState([]);
+  const [attackSession, setAttackSession] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [oracleMessage, setOracleMessage] = useState(null);
   const [mbtiResult, setMbtiResult]       = useState(null);
   const [mbtiOccupation, setMbtiOccupation] = useState(null);
   const [mbtiGeneration, setMbtiGeneration] = useState(null);
   const [situResult, setSituResult]       = useState(null);
+  const [attackResult, setAttackResult]   = useState(null);
   const timerRef = useRef(null);
 
   // ── MBTI flow ───────────────────────────────────────────────────────────
@@ -178,11 +195,49 @@ export default function App() {
     setOracleMessage(getSessionMessage(situSession));
   }, [situSession, situQuestions]);
 
+  // ── Attack flow ─────────────────────────────────────────────────────────
+
+  const handleTargetSelect = useCallback((targetId) => {
+    const sess = createAttackSession(targetId);
+    const qs   = ATTACK_BOSS_QUESTIONS; // MVP: bossのみ
+    const q    = getNextAttackQuestion(sess, qs);
+    setAttackSession(sess);
+    setCurrentQuestion(q);
+    setOracleMessage(null);
+    setFlow('attack');
+    setScreen('quiz');
+  }, []);
+
+  const handleAttackAnswer = useCallback((question, choice) => {
+    if (!attackSession) return;
+    if (!recordAttackAnswer(attackSession, question, choice)) return;
+
+    if (shouldFinishAttack(attackSession, ATTACK_MIN_QUESTIONS)) {
+      setAttackResult(buildAttackResult(attackSession));
+      setScreen('result-attack');
+      return;
+    }
+
+    const next = getNextAttackQuestion(attackSession, ATTACK_BOSS_QUESTIONS);
+    if (!next) {
+      setAttackResult(buildAttackResult(attackSession));
+      setScreen('result-attack');
+      return;
+    }
+
+    setAttackSession({ ...attackSession });
+    setCurrentQuestion(next);
+    setOracleMessage(getAttackSessionMessage(attackSession));
+  }, [attackSession]);
+
   // ── Entry dispatch ──────────────────────────────────────────────────────
 
   const handleStart = useCallback((mode) => {
     if (mode === 'mbti') {
       startMbti();
+    } else if (mode === 'attack') {
+      setFlow('attack');
+      setScreen('target-select');
     } else {
       setFlow('situation');
       setScreen('topic-select');
@@ -198,12 +253,14 @@ export default function App() {
     setMbtiSession(null);
     setSituSession(null);
     setSituQuestions([]);
+    setAttackSession(null);
     setCurrentQuestion(null);
     setOracleMessage(null);
     setMbtiResult(null);
     setMbtiOccupation(null);
     setMbtiGeneration(null);
     setSituResult(null);
+    setAttackResult(null);
   }, []);
 
   // ── Answer dispatcher ───────────────────────────────────────────────────
@@ -211,18 +268,24 @@ export default function App() {
   const handleAnswer = useCallback((question, responseOrChoice) => {
     if (flow === 'mbti') {
       handleMbtiAnswer(question, responseOrChoice);
+    } else if (flow === 'attack') {
+      handleAttackAnswer(question, responseOrChoice);
     } else {
       handleSituAnswer(question, responseOrChoice);
     }
-  }, [flow, handleMbtiAnswer, handleSituAnswer]);
+  }, [flow, handleMbtiAnswer, handleSituAnswer, handleAttackAnswer]);
 
   // ── Render ──────────────────────────────────────────────────────────────
 
-  const questionNum = flow === 'mbti'
-    ? (mbtiSession?.questionCount ?? 0) + 1
-    : (situSession?.questionCount ?? 0) + 1;
+  const questionNum =
+    flow === 'mbti'   ? (mbtiSession?.questionCount   ?? 0) + 1 :
+    flow === 'attack' ? (attackSession?.questionCount ?? 0) + 1 :
+                        (situSession?.questionCount   ?? 0) + 1;
 
-  const estimatedTotal = flow === 'mbti' ? MBTI_ESTIMATED_TOTAL : SITU_ESTIMATED_TOTAL;
+  const estimatedTotal =
+    flow === 'mbti'   ? MBTI_ESTIMATED_TOTAL :
+    flow === 'attack' ? ATTACK_ESTIMATED_TOTAL :
+                        SITU_ESTIMATED_TOTAL;
 
   if (screen === 'entry') {
     return <Entry onStart={handleStart} />;
@@ -230,6 +293,10 @@ export default function App() {
 
   if (screen === 'topic-select') {
     return <TopicSelect onSelect={handleTopicSelect} onBack={handleRetry} />;
+  }
+
+  if (screen === 'target-select') {
+    return <TargetSelect onSelect={handleTargetSelect} onBack={handleRetry} />;
   }
 
   if (screen === 'quiz') {
@@ -262,6 +329,10 @@ export default function App() {
 
   if (screen === 'result-situation') {
     return <Result result={situResult} onRetry={handleRetry} />;
+  }
+
+  if (screen === 'result-attack') {
+    return <AttackResult result={attackResult} onRetry={handleRetry} />;
   }
 
   return null;
