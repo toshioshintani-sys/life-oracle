@@ -2,13 +2,13 @@
   "version": 3,
   "lastUpdated": "2026-05-19",
   "scope": "all-50-types",
-  "schemaNote": "internalLabel はUIに出さない内部キー。biases は biasInfo.js の B1-B12 に揃える。matchSignals.situationTags は situationEngine.js の ALL_SITUATIONS（上司は w_boss_*、同僚は w_col_*、部下は w_subordinate を使う）から選ぶ。jungShadowWeights のキーは cognitiveFunctions.js の8機能(Te,Ti,Fe,Fi,Se,Si,Ne,Ni)。noteUrl は scripts/jin_set_membership.py の JIN_NOTE_KEY_MAP から導出（https://note.com/lifeoraclejp/n/{key}）。jin_01 と jin_02 は手動投稿のため key 未記録（要 note.com で手動確認）。",
+  "schemaNote": "internalLabel はUIに出さない内部キー。biases は biasInfo.js の B1-B12 に揃える。matchSignals.situationTags は situationEngine.js の ALL_SITUATIONS（上司は w_boss_*、同僚は w_col_*、部下は w_subordinate を使う）から選ぶ。jungShadowWeights のキーは cognitiveFunctions.js の8機能(Te,Ti,Fe,Fi,Se,Si,Ne,Ni)。noteUrl は scripts/jin_set_membership.py の JIN_NOTE_KEY_MAP から導出（https://note.com/lifeoraclejp/n/{key}）。jin_01・jin_02 は手動投稿のためユーザーから直接提供された key を使用。",
   "types": [
     {
       "id": "jin_01",
       "internalLabel": "決めつけ上司",
       "target": "boss",
-      "noteUrl": null,
+      "noteUrl": "https://note.com/lifeoraclejp/n/n47a7bb299ed5",
       "noteUrlSlug": "決めつけ上司のトリセツ",
       "observableBehaviors": [
         "一度貼ったあなたへの評価を更新しない",
@@ -1061,7 +1061,7 @@
       "id": "jin_02",
       "internalLabel": "マウント同僚",
       "target": "colleague",
-      "noteUrl": null,
+      "noteUrl": "https://note.com/lifeoraclejp/n/n80c994ae9575",
       "noteUrlSlug": "マウント同僚のトリセツ",
       "observableBehaviors": [
         "会議で『前職ではこれの10倍の規模をやっていた』と割り込んでくる",
