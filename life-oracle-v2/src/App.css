@@ -1316,6 +1316,62 @@ button {
   color: var(--text-sub);
 }
 
+/* なぜそれが起きるか（mechanism overlay） */
+.mbti-result-mechanism {
+  background: var(--card-bg);
+  border: 1px solid rgba(184, 131, 63, 0.22);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mbti-result-mechanism-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-dark, var(--accent));
+  margin-bottom: 6px;
+}
+
+.mbti-result-mechanism-text {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text);
+}
+
+/* 明日のミクロアクション */
+.mbti-result-micro-interventions {
+  background: var(--accent-bg);
+  border: 1px solid rgba(184, 131, 63, 0.22);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mbti-result-micro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mbti-result-micro-action {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.mbti-result-micro-why {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-sub);
+  opacity: 0.9;
+}
+
 .mbti-bias-card {
   background: var(--card-bg);
   border: 1px solid var(--border);

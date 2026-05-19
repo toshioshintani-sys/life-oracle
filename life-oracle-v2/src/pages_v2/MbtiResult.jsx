@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { cognitiveFunctionMap, famousPeople } from '../data_v2/meta/cognitiveFunctions.js';
 import { biasInfo } from '../data_v2/meta/biasInfo.js';
+import mechanismsJson from '../data_v2/meta/prescriptions_mechanism.json';
+
+const MECHANISMS = mechanismsJson.mechanisms;
 
 const MBTI_TO_JUNG = {
   ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
@@ -61,6 +64,10 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
     ? `${occupation}_${jungTypeId}_${generation}` : '';
   const prescriptionText = prescriptions?.[prescriptionKey]?.text ?? null;
 
+  // 機構オーバーレイ（既存処方箋を無傷のまま、上下に解読層を差し込む）
+  const mechanism = MECHANISMS[jungTypeId] ?? null;
+  const isShadow  = jungTypeId?.endsWith('-影');
+
   const top2 = Object.entries(biasScores ?? {})
     .sort(([, a], [, b]) => b - a)
     .slice(0, 2)
@@ -95,7 +102,40 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
         </div>
       </div>
 
-      {/* 処方箋 */}
+      {/* なぜそれが起きるか（mechanism overlay・新規） */}
+      {mechanism && (
+        <div className="mbti-result-mechanism">
+          <p className="mbti-result-section-label">なぜそれが起きるか</p>
+          <p className="mbti-result-mechanism-name">{mechanism.mechanismName}</p>
+          <p className="mbti-result-mechanism-text">{mechanism.whyItEmerges}</p>
+          {isShadow && mechanism.whyItPersists && (
+            <p className="mbti-result-mechanism-text" style={{ marginTop: 10 }}>
+              {mechanism.whyItPersists}
+            </p>
+          )}
+          {isShadow && mechanism.interventionPoint && (
+            <p className="mbti-result-mechanism-text" style={{ marginTop: 10, opacity: 0.85 }}>
+              <strong>介入のポイント：</strong>{mechanism.interventionPoint}
+            </p>
+          )}
+          {!isShadow && (mechanism.shortBenefit || mechanism.whenItHurts) && (
+            <>
+              {mechanism.shortBenefit && (
+                <p className="mbti-result-mechanism-text" style={{ marginTop: 10 }}>
+                  <strong>効く場面：</strong>{mechanism.shortBenefit}
+                </p>
+              )}
+              {mechanism.whenItHurts && (
+                <p className="mbti-result-mechanism-text" style={{ marginTop: 6, opacity: 0.85 }}>
+                  <strong>裏返るとき：</strong>{mechanism.whenItHurts}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* 処方箋（既存・無傷） */}
       {loading ? (
         <div className="mbti-result-loading">処方箋を読み込んでいます...</div>
       ) : (
@@ -111,6 +151,21 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
             ? <p className="mbti-result-prescription-text">{prescriptionText}</p>
             : <p className="mbti-result-prescription-empty">該当する処方箋のデータがありません。</p>
           }
+        </div>
+      )}
+
+      {/* 明日のミクロアクション（mechanism.microInterventions・新規） */}
+      {mechanism && isShadow && mechanism.microInterventions?.length > 0 && (
+        <div className="mbti-result-micro-interventions">
+          <p className="mbti-result-section-label">明日のミクロアクション</p>
+          {mechanism.microInterventions.map((mi, i) => (
+            <div key={i} className="mbti-result-micro-item">
+              <p className="mbti-result-micro-action">{mi.action}</p>
+              <p className="mbti-result-micro-why">
+                効くメカニズム：{mi.whyItWorks}
+              </p>
+            </div>
+          ))}
         </div>
       )}
 
