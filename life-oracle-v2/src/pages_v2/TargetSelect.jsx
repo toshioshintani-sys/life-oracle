@@ -1,7 +1,7 @@
 const TARGETS = [
-  { id: 'boss',        label: '上司',          desc: 'こちらの動きが届かない・噛み合わない上司', enabled: true  },
-  { id: 'colleague',   label: '同僚',          desc: 'なぜか消耗する同僚との関係',               enabled: false },
-  { id: 'subordinate', label: '部下',          desc: '指示が通らない・動かない部下',             enabled: false },
+  { id: 'boss',        label: '上司', desc: 'こちらの動きが届かない・噛み合わない上司', enabled: true },
+  { id: 'colleague',   label: '同僚', desc: 'なぜか消耗する同僚との関係',               enabled: true },
+  { id: 'subordinate', label: '部下', desc: '指示が通らない・動かない部下',             enabled: true },
 ];
 
 export function TargetSelect({ onSelect, onBack }) {

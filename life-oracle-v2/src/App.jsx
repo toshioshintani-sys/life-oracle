@@ -38,8 +38,16 @@ import { WORK_QUESTIONS }     from './data_v2/questions/work.js';
 import { RELATION_QUESTIONS } from './data_v2/questions/relation.js';
 import { SELF_QUESTIONS }     from './data_v2/questions/self.js';
 import { FUTURE_QUESTIONS }   from './data_v2/questions/future.js';
-import { DISCRIMINATING_QUESTIONS } from './data_v2/questions/discriminating.js';
-import { ATTACK_BOSS_QUESTIONS }    from './data_v2/questions/attack_boss.js';
+import { DISCRIMINATING_QUESTIONS }     from './data_v2/questions/discriminating.js';
+import { ATTACK_BOSS_QUESTIONS }        from './data_v2/questions/attack_boss.js';
+import { ATTACK_COLLEAGUE_QUESTIONS }   from './data_v2/questions/attack_colleague.js';
+import { ATTACK_SUBORDINATE_QUESTIONS } from './data_v2/questions/attack_subordinate.js';
+
+const ATTACK_QUESTIONS_BY_TARGET = {
+  boss:        ATTACK_BOSS_QUESTIONS,
+  colleague:   ATTACK_COLLEAGUE_QUESTIONS,
+  subordinate: ATTACK_SUBORDINATE_QUESTIONS,
+};
 
 import './App.css';
 
@@ -108,7 +116,8 @@ export default function App() {
   const [mbtiSession, setMbtiSession]     = useState(null);
   const [situSession, setSituSession]     = useState(null);
   const [situQuestions, setSituQuestions] = useState([]);
-  const [attackSession, setAttackSession] = useState(null);
+  const [attackSession, setAttackSession]     = useState(null);
+  const [attackQuestions, setAttackQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [oracleMessage, setOracleMessage] = useState(null);
   const [mbtiResult, setMbtiResult]       = useState(null);
@@ -199,9 +208,10 @@ export default function App() {
 
   const handleTargetSelect = useCallback((targetId) => {
     const sess = createAttackSession(targetId);
-    const qs   = ATTACK_BOSS_QUESTIONS; // MVP: bossのみ
+    const qs   = ATTACK_QUESTIONS_BY_TARGET[targetId] ?? ATTACK_BOSS_QUESTIONS;
     const q    = getNextAttackQuestion(sess, qs);
     setAttackSession(sess);
+    setAttackQuestions(qs);
     setCurrentQuestion(q);
     setOracleMessage(null);
     setFlow('attack');
@@ -218,7 +228,7 @@ export default function App() {
       return;
     }
 
-    const next = getNextAttackQuestion(attackSession, ATTACK_BOSS_QUESTIONS);
+    const next = getNextAttackQuestion(attackSession, attackQuestions);
     if (!next) {
       setAttackResult(buildAttackResult(attackSession));
       setScreen('result-attack');
@@ -228,7 +238,7 @@ export default function App() {
     setAttackSession({ ...attackSession });
     setCurrentQuestion(next);
     setOracleMessage(getAttackSessionMessage(attackSession));
-  }, [attackSession]);
+  }, [attackSession, attackQuestions]);
 
   // ── Entry dispatch ──────────────────────────────────────────────────────
 
@@ -254,6 +264,7 @@ export default function App() {
     setSituSession(null);
     setSituQuestions([]);
     setAttackSession(null);
+    setAttackQuestions([]);
     setCurrentQuestion(null);
     setOracleMessage(null);
     setMbtiResult(null);
