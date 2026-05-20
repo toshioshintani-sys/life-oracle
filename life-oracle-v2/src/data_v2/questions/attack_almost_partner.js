@@ -1,4 +1,5 @@
-// 攻略型・恋人未満友達以上カテゴリ（観察視点）
+// 攻略型・恋人未満友達以上カテゴリ（観察視点）12問
+// 対象タイプ：jin_113〜jin_120（8タイプ）
 // この微妙な関係特有の観察ポイントに絞る
 
 export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
@@ -15,6 +16,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '夜・休日・暇そうなとき',
         biasHints: { B2: 3, B8: 1 },
         jungShadowHints: { Se: 2, Fe: 1 },
+        attackTypeHints: { jin_113: 3 },
         tags: ['lonely_contact'],
       },
       {
@@ -22,6 +24,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '何か面白いことがあったとき・すぐ共有したいとき',
         biasHints: { B2: 2, B8: 1 },
         jungShadowHints: { Ne: 2, Se: 1 },
+        attackTypeHints: { jin_113: 2, jin_116: 1 },
         tags: ['share_moment'],
       },
       {
@@ -29,6 +32,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '困ったとき・相談したいとき',
         biasHints: { B1: 2, B4: 1 },
         jungShadowHints: { Fe: 2, Ni: 1 },
+        attackTypeHints: { jin_117: 2, jin_120: 1 },
         tags: ['need_advice'],
       },
       {
@@ -36,6 +40,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '毎日のルーティンとして連絡がある',
         biasHints: { B6: 2, B4: 1 },
         jungShadowHints: { Si: 3, Fe: 1 },
+        attackTypeHints: { jin_119: 3 },
         tags: ['routine'],
       },
     ],
@@ -53,6 +58,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '明らかに態度が変わる・質問が増える',
         biasHints: { B9: 2, B8: 2 },
         jungShadowHints: { Fi: 2, Se: 1 },
+        attackTypeHints: { jin_115: 3, jin_116: 2 },
         tags: ['obvious_jealous'],
       },
       {
@@ -60,6 +66,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '特に反応が変わらない',
         biasHints: {},
         jungShadowHints: { Ti: 2, Se: 1 },
+        attackTypeHints: { jin_114: 2, jin_118: 2 },
         tags: ['neutral'],
       },
       {
@@ -67,6 +74,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '表面上は普通だが、さりげなく詳細を聞いてくる',
         biasHints: { B3: 2, B9: 1 },
         jungShadowHints: { Ni: 2, Fi: 1 },
+        attackTypeHints: { jin_115: 2, jin_118: 2 },
         tags: ['cool_probe'],
       },
       {
@@ -74,6 +82,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: 'すぐ自分の話に切り替える',
         biasHints: { B5: 2 },
         jungShadowHints: { Te: 1, Se: 1 },
+        attackTypeHints: { jin_113: 2, jin_117: 1 },
         tags: ['deflect_topic'],
       },
     ],
@@ -90,6 +99,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '友達には普通しないことをしてくれる（送り迎え・手伝いなど）',
         biasHints: { B8: 2, B11: 1 },
         jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_117: 3 },
         tags: ['over_service'],
       },
       {
@@ -97,6 +107,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '友達以上にはっきりラインを引いている感じがする',
         biasHints: { B6: 2, B9: 1 },
         jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_118: 2, jin_114: 2 },
         tags: ['clear_distance'],
       },
       {
@@ -104,6 +115,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '近づいたかと思えば引く、を繰り返す',
         biasHints: { B12: 3, B9: 1 },
         jungShadowHints: { Fi: 2, Ni: 1 },
+        attackTypeHints: { jin_116: 3, jin_115: 2 },
         tags: ['hot_cold'],
       },
       {
@@ -111,6 +123,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '他の友人と扱いが変わらない',
         biasHints: {},
         jungShadowHints: { Fe: 1, Se: 1 },
+        attackTypeHints: { jin_119: 2, jin_114: 1 },
         tags: ['normal_friend'],
       },
     ],
@@ -127,6 +140,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '思ったことをすぐ言葉にする',
         biasHints: { B8: 1, B2: 1 },
         jungShadowHints: { Se: 2, Fe: 2 },
+        attackTypeHints: { jin_117: 2, jin_113: 1 },
         tags: ['verbal'],
       },
       {
@@ -134,6 +148,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '言葉より行動で示す',
         biasHints: {},
         jungShadowHints: { Se: 1, Te: 1, Si: 1 },
+        attackTypeHints: { jin_119: 2, jin_113: 1 },
         tags: ['action_over_words'],
       },
       {
@@ -141,6 +156,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: 'どちらも少ない・伝え方が不明瞭',
         biasHints: { B9: 2, B12: 1 },
         jungShadowHints: { Fi: 3, Ti: 1 },
+        attackTypeHints: { jin_118: 3, jin_116: 2, jin_115: 1 },
         tags: ['unclear'],
       },
     ],
@@ -157,6 +173,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: 'そういう話になると曖昧にしてかわす',
         biasHints: { B6: 2, B2: 2 },
         jungShadowHints: { Se: 2, Ne: 1 },
+        attackTypeHints: { jin_113: 3, jin_114: 2 },
         tags: ['avoid_commitment'],
       },
       {
@@ -164,6 +181,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '将来を一緒に話すシーンを作ろうとする',
         biasHints: { B8: 1 },
         jungShadowHints: { Ni: 2, Fe: 1 },
+        attackTypeHints: { jin_117: 2, jin_119: 1 },
         tags: ['future_signal'],
       },
       {
@@ -171,8 +189,297 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
         label: '「まだ早い」「ちゃんと考えたい」と慎重',
         biasHints: { B1: 2, B6: 1 },
         jungShadowHints: { Si: 2, Ni: 1, Ti: 1 },
+        attackTypeHints: { jin_120: 3, jin_114: 2, jin_118: 1 },
         tags: ['cautious'],
       },
     ],
   },
+
+  {
+    id: 'atk_ap_006',
+    type: 'probe',
+    text: 'その人はグループでの活動と1対1でのどちらを多く誘ってきますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'group_only',
+        label: 'グループばかり・二人きりの機会を避けている感じがする',
+        biasHints: { B4: 2, B11: 1 },
+        jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_117: 3 },
+        tags: ['group_only'],
+      },
+      {
+        id: 'sometimes_one_on_one',
+        label: '普段はグループが多いが、時々二人の機会もある',
+        biasHints: {},
+        jungShadowHints: { Se: 1, Fe: 1 },
+        attackTypeHints: { jin_119: 2, jin_113: 2 },
+        tags: ['mix'],
+      },
+      {
+        id: 'often_one_on_one',
+        label: '二人での時間が多い・グループより二人を好む',
+        biasHints: { B8: 1, B2: 1 },
+        jungShadowHints: { Fi: 2, Se: 1 },
+        attackTypeHints: { jin_115: 2, jin_116: 1 },
+        tags: ['one_on_one'],
+      },
+      {
+        id: 'unpredictable',
+        label: '気分次第・パターンがない',
+        biasHints: { B12: 2, B2: 1 },
+        jungShadowHints: { Se: 2, Ne: 1 },
+        attackTypeHints: { jin_116: 3, jin_113: 1 },
+        tags: ['random'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_ap_007',
+    type: 'probe',
+    text: 'その人は「告白する・されること」についてどんなスタンスですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'fears_rejection',
+        label: 'フラれることを極端に怖がっている感じがする',
+        biasHints: { B1: 2, B6: 1 },
+        jungShadowHints: { Ni: 2, Si: 1 },
+        attackTypeHints: { jin_120: 3, jin_114: 2 },
+        tags: ['fear_rejection'],
+      },
+      {
+        id: 'waits_for_other',
+        label: '相手から動いてくれるまで待つ構え',
+        biasHints: { B6: 2, B1: 1 },
+        jungShadowHints: { Si: 2, Fe: 1 },
+        attackTypeHints: { jin_119: 3, jin_120: 2 },
+        tags: ['waits'],
+      },
+      {
+        id: 'avoids_topic',
+        label: 'その話自体を避けようとする',
+        biasHints: { B9: 2, B6: 1 },
+        jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_118: 3, jin_114: 2 },
+        tags: ['avoids'],
+      },
+      {
+        id: 'would_act_if_sure',
+        label: '確信が持てたら動くつもりがある',
+        biasHints: { B1: 1, B9: 1 },
+        jungShadowHints: { Fi: 2, Ni: 1 },
+        attackTypeHints: { jin_115: 2, jin_117: 1 },
+        tags: ['conditional'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_ap_008',
+    type: 'probe',
+    text: 'その人はあなたと会った後、連絡を送ってきますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'often',
+        label: 'たいてい「楽しかった」など連絡してくる',
+        biasHints: { B8: 1, B4: 1 },
+        jungShadowHints: { Fe: 2, Se: 1 },
+        attackTypeHints: { jin_117: 2, jin_115: 1 },
+        tags: ['after_message'],
+      },
+      {
+        id: 'sometimes',
+        label: '気分によってある日もあれば来ない日もある',
+        biasHints: { B12: 1, B2: 1 },
+        jungShadowHints: { Se: 1, Ne: 1 },
+        attackTypeHints: { jin_119: 2, jin_113: 1 },
+        tags: ['sometimes'],
+      },
+      {
+        id: 'rarely',
+        label: 'あまりこない・あなたから送ることが多い',
+        biasHints: { B9: 2, B6: 1 },
+        jungShadowHints: { Ti: 2, Si: 1 },
+        attackTypeHints: { jin_118: 3, jin_114: 2 },
+        tags: ['rarely'],
+      },
+      {
+        id: 'hot_cold_pattern',
+        label: '次のデートを積極的に打診してくる日もあれば急に冷める日もある',
+        biasHints: { B12: 3, B9: 1 },
+        jungShadowHints: { Fi: 2, Ne: 1 },
+        attackTypeHints: { jin_116: 3 },
+        tags: ['hot_cold'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_ap_009',
+    type: 'probe',
+    text: 'その人はあなたとの関係を、共通の友人にどう見せていますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'just_friends',
+        label: '「ただの友達」という立場を保っている',
+        biasHints: { B4: 1, B11: 1 },
+        jungShadowHints: { Fe: 1, Si: 1 },
+        attackTypeHints: { jin_117: 3, jin_119: 2 },
+        tags: ['friends_only'],
+      },
+      {
+        id: 'hints_at_more',
+        label: '会話の端々に二人の関係を匂わせることがある',
+        biasHints: { B8: 1, B12: 1 },
+        jungShadowHints: { Ne: 1, Fi: 1 },
+        attackTypeHints: { jin_116: 2, jin_115: 1 },
+        tags: ['hints'],
+      },
+      {
+        id: 'keeps_private',
+        label: '人には話さない・二人の関係を秘密にしたがる',
+        biasHints: { B9: 2 },
+        jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_120: 2, jin_113: 1 },
+        tags: ['private'],
+      },
+      {
+        id: 'unclear_to_others',
+        label: '友人たちも関係がよくわかっていない',
+        biasHints: { B12: 2 },
+        jungShadowHints: { Fi: 2, Ne: 1 },
+        attackTypeHints: { jin_118: 2, jin_114: 2 },
+        tags: ['ambiguous'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_ap_010',
+    type: 'probe',
+    text: 'その人があなたに「頼りにしている」と言うのはどんな状況ですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'often_always',
+        label: 'よく言う・あなたへの依存が強い感じがする',
+        biasHints: { B11: 2, B1: 1 },
+        jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_117: 3 },
+        tags: ['dependent'],
+      },
+      {
+        id: 'when_troubles',
+        label: '何か困ったときや感情的なときに言う',
+        biasHints: { B8: 1, B1: 1 },
+        jungShadowHints: { Fe: 2, Fi: 1 },
+        attackTypeHints: { jin_115: 2, jin_116: 1 },
+        tags: ['troubles'],
+      },
+      {
+        id: 'specific_decisions',
+        label: '大事な決断や選択のタイミングに言う',
+        biasHints: { B1: 2, B6: 1 },
+        jungShadowHints: { Ni: 2, Si: 1 },
+        attackTypeHints: { jin_120: 2, jin_114: 1 },
+        tags: ['decisions'],
+      },
+      {
+        id: 'rarely',
+        label: 'あまり言わない・感情を出さない',
+        biasHints: { B9: 1 },
+        jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_118: 3, jin_119: 2 },
+        tags: ['rarely'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_ap_011',
+    type: 'probe',
+    text: 'デートの計画はどちらが立てることが多いですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'you_always',
+        label: 'いつもあなたが決めている・その人は待つ側',
+        biasHints: { B6: 2, B1: 1 },
+        jungShadowHints: { Si: 2, Fi: 1 },
+        attackTypeHints: { jin_114: 3, jin_119: 3 },
+        tags: ['you_plan'],
+      },
+      {
+        id: 'they_sometimes',
+        label: '誘ってくることはあるが不定期',
+        biasHints: { B12: 1, B2: 1 },
+        jungShadowHints: { Se: 1, Ne: 1 },
+        attackTypeHints: { jin_113: 2, jin_116: 1 },
+        tags: ['occasional'],
+      },
+      {
+        id: 'vague_leaves_open',
+        label: '「また遊ぼう」と言うが具体的に決めようとしない',
+        biasHints: { B6: 2, B2: 2 },
+        jungShadowHints: { Se: 2, Ne: 1 },
+        attackTypeHints: { jin_113: 3, jin_118: 2 },
+        tags: ['vague'],
+      },
+      {
+        id: 'balanced',
+        label: 'お互いが提案し合って決める',
+        biasHints: {},
+        jungShadowHints: { Fe: 1, Te: 1 },
+        attackTypeHints: { jin_117: 2 },
+        tags: ['balanced'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_ap_012',
+    type: 'probe',
+    text: '「距離が縮まったかな」と感じた後、その人はどうなりますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'gets_closer',
+        label: 'さらに近づいてくる・次の動きを見せる',
+        biasHints: { B8: 1, B2: 1 },
+        jungShadowHints: { Fe: 2, Se: 1 },
+        attackTypeHints: { jin_115: 2, jin_116: 1 },
+        tags: ['gets_closer'],
+      },
+      {
+        id: 'pulls_back',
+        label: '急に引く・連絡頻度が落ちる',
+        biasHints: { B12: 3, B1: 1 },
+        jungShadowHints: { Fi: 2, Ni: 2 },
+        attackTypeHints: { jin_116: 3, jin_120: 2 },
+        tags: ['pulls_back'],
+      },
+      {
+        id: 'stays_same',
+        label: '変わらない・一定の距離を保つ',
+        biasHints: { B6: 2 },
+        jungShadowHints: { Si: 2, Ti: 1 },
+        attackTypeHints: { jin_119: 3, jin_118: 2 },
+        tags: ['stable'],
+      },
+      {
+        id: 'inconsistent',
+        label: '気分によって近くなったり遠くなったりを繰り返す',
+        biasHints: { B12: 2, B9: 1 },
+        jungShadowHints: { Fi: 3, Ne: 1 },
+        attackTypeHints: { jin_116: 3, jin_115: 1 },
+        tags: ['inconsistent'],
+      },
+    ],
+  },
+
 ];

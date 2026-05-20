@@ -1,4 +1,5 @@
-// 攻略型・祖父母カテゴリ（観察視点）
+// 攻略型・祖父母カテゴリ（観察視点）10問
+// 対象タイプ：jin_92〜jin_97（6タイプ）
 
 export const ATTACK_GRANDPARENT_QUESTIONS = [
 
@@ -14,6 +15,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '「昔はそんな選択肢はなかった」と時代の話をする',
         biasHints: { B7: 3, B6: 2 },
         jungShadowHints: { Si: 3 },
+        attackTypeHints: { jin_93: 3, jin_92: 2 },
         tags: ['era_compare'],
       },
       {
@@ -21,6 +23,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '体への影響・健康面の心配をする',
         biasHints: { B1: 3, B6: 1 },
         jungShadowHints: { Si: 2, Fe: 1 },
+        attackTypeHints: { jin_94: 3 },
         tags: ['health_worry'],
       },
       {
@@ -28,6 +31,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '何をしていても誇らしそうに聞いてくれる',
         biasHints: {},
         jungShadowHints: { Fe: 2, Fi: 1 },
+        attackTypeHints: { jin_97: 3 },
         tags: ['proud_support'],
       },
       {
@@ -35,6 +39,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '「結婚は？」「家族はいつ？」と伝統的な順番を確認する',
         biasHints: { B6: 3, B4: 2 },
         jungShadowHints: { Si: 3, Fe: 1 },
+        attackTypeHints: { jin_92: 3, jin_93: 1 },
         tags: ['traditional_order'],
       },
     ],
@@ -52,6 +57,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '食べ物を出す・「食べたか？」から始まる',
         biasHints: { B8: 1, B4: 2 },
         jungShadowHints: { Fe: 3, Si: 1 },
+        attackTypeHints: { jin_97: 2, jin_95: 2 },
         tags: ['nurture'],
       },
       {
@@ -59,6 +65,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '顔色や体型をチェックして健康を確認する',
         biasHints: { B1: 2, B6: 1 },
         jungShadowHints: { Si: 2, Te: 1 },
+        attackTypeHints: { jin_94: 3 },
         tags: ['health_check'],
       },
       {
@@ -66,6 +73,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: 'すぐ昔話や最近の出来事を話し始める',
         biasHints: { B7: 2, B5: 1 },
         jungShadowHints: { Si: 2, Se: 1 },
+        attackTypeHints: { jin_93: 3, jin_96: 2 },
         tags: ['story_telling'],
       },
       {
@@ -73,6 +81,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '「何か困ってることある？」と実用的なことを聞く',
         biasHints: {},
         jungShadowHints: { Te: 2, Ti: 1 },
+        attackTypeHints: { jin_97: 1 },
         tags: ['practical'],
       },
     ],
@@ -89,6 +98,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '昔話を交えた長い説教',
         biasHints: { B7: 3, B5: 1 },
         jungShadowHints: { Si: 3, Te: 1 },
+        attackTypeHints: { jin_93: 3, jin_92: 2, jin_96: 2 },
         tags: ['lecture'],
       },
       {
@@ -96,6 +106,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '無言になって距離を置く',
         biasHints: { B9: 2, B11: 1 },
         jungShadowHints: { Fi: 2, Fe: 1 },
+        attackTypeHints: { jin_97: 2 },
         tags: ['silent_cold'],
       },
       {
@@ -103,6 +114,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '怒りより「心配している」という形で出てくる',
         biasHints: { B1: 2, B8: 2 },
         jungShadowHints: { Fe: 3 },
+        attackTypeHints: { jin_94: 3 },
         tags: ['worry_anger'],
       },
       {
@@ -110,6 +122,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '短く直接「それはいかん」と言う',
         biasHints: { B6: 1 },
         jungShadowHints: { Te: 2, Se: 1 },
+        attackTypeHints: { jin_95: 2, jin_92: 1 },
         tags: ['direct'],
       },
     ],
@@ -126,6 +139,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '近所づきあい・人との結びつきが薄くなったこと',
         biasHints: { B4: 3, B8: 1 },
         jungShadowHints: { Fe: 3, Si: 1 },
+        attackTypeHints: { jin_92: 2, jin_94: 1 },
         tags: ['community'],
       },
       {
@@ -133,6 +147,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '礼儀・敬意・価値観が変わってきたこと',
         biasHints: { B6: 3, B3: 2 },
         jungShadowHints: { Si: 3, Fi: 1 },
+        attackTypeHints: { jin_92: 3 },
         tags: ['values'],
       },
       {
@@ -140,8 +155,256 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         label: '物が少なくても豊かだった時代のこと',
         biasHints: { B7: 2, B6: 1 },
         jungShadowHints: { Si: 2, Fi: 1 },
+        attackTypeHints: { jin_93: 2, jin_96: 1 },
         tags: ['simple_life'],
       },
     ],
   },
+
+  {
+    id: 'atk_gp_005',
+    type: 'probe',
+    text: 'その祖父母はあなたに「こうすべきだ」という話をよくしますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'yes_often',
+        label: 'よくする・価値観を押し付けてくることがある',
+        biasHints: { B6: 3, B3: 2 },
+        jungShadowHints: { Si: 3, Te: 1 },
+        attackTypeHints: { jin_92: 3, jin_93: 2 },
+        tags: ['prescriptive'],
+      },
+      {
+        id: 'via_stories',
+        label: '直接ではなく昔話・体験談として伝えてくる',
+        biasHints: { B7: 2, B5: 1 },
+        jungShadowHints: { Si: 2 },
+        attackTypeHints: { jin_96: 2, jin_93: 1 },
+        tags: ['via_stories'],
+      },
+      {
+        id: 'health_only',
+        label: '健康に関することだけは口うるさい',
+        biasHints: { B1: 2, B6: 1 },
+        jungShadowHints: { Si: 2 },
+        attackTypeHints: { jin_94: 3 },
+        tags: ['health_only'],
+      },
+      {
+        id: 'rarely',
+        label: 'あなたの選択を尊重してくれる',
+        biasHints: {},
+        jungShadowHints: { Fi: 2 },
+        attackTypeHints: { jin_97: 3 },
+        tags: ['respects'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_gp_006',
+    type: 'probe',
+    text: 'その祖父母はお金や物を贈ることで愛情を表現しますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'yes_gifts',
+        label: '会うたびに何か持たせてくれる・よくお小遣いをくれる',
+        biasHints: { B8: 2, B7: 1 },
+        jungShadowHints: { Se: 2, Fe: 1 },
+        attackTypeHints: { jin_95: 3 },
+        tags: ['gifts_love'],
+      },
+      {
+        id: 'food_care',
+        label: '食事・食べ物で気にかけてくれる',
+        biasHints: { B4: 1, B8: 1 },
+        jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_97: 2, jin_94: 1 },
+        tags: ['food_care'],
+      },
+      {
+        id: 'words_presence',
+        label: '言葉や「そばにいること」で表す',
+        biasHints: {},
+        jungShadowHints: { Fi: 2, Fe: 1 },
+        attackTypeHints: { jin_97: 2 },
+        tags: ['words_presence'],
+      },
+      {
+        id: 'not_expressive',
+        label: '愛情をあまり表に出さない・行動もない',
+        biasHints: { B6: 1 },
+        jungShadowHints: { Ti: 2, Si: 1 },
+        attackTypeHints: { jin_92: 1, jin_93: 1 },
+        tags: ['not_expressive'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_gp_007',
+    type: 'probe',
+    text: 'その祖父母は「健康・食事・睡眠」についてあなたに何か言いますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'constantly',
+        label: '会うたびに必ず何か言う・心配が止まらない',
+        biasHints: { B1: 3, B6: 2 },
+        jungShadowHints: { Si: 3 },
+        attackTypeHints: { jin_94: 3 },
+        tags: ['constantly'],
+      },
+      {
+        id: 'sometimes',
+        label: 'たまに言う程度',
+        biasHints: { B1: 1 },
+        jungShadowHints: { Si: 1, Fe: 1 },
+        attackTypeHints: { jin_94: 2, jin_93: 1 },
+        tags: ['sometimes'],
+      },
+      {
+        id: 'food_push',
+        label: '食事面だけは特に気にして食べさせようとする',
+        biasHints: { B4: 1, B8: 1 },
+        jungShadowHints: { Fe: 2, Se: 1 },
+        attackTypeHints: { jin_95: 2, jin_97: 1 },
+        tags: ['food_push'],
+      },
+      {
+        id: 'not_particularly',
+        label: 'あまり言わない',
+        biasHints: {},
+        jungShadowHints: { Fi: 1 },
+        attackTypeHints: { jin_97: 2, jin_92: 1 },
+        tags: ['low_health_talk'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_gp_008',
+    type: 'probe',
+    text: 'その祖父母が自分の過去の苦労・成功を話すのは、どんな状況が多いですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'prompted_by_complaints',
+        label: 'あなたが愚痴や悩みを話すと始まる',
+        biasHints: { B7: 2, B5: 1 },
+        jungShadowHints: { Si: 2, Te: 1 },
+        attackTypeHints: { jin_96: 3, jin_93: 2 },
+        tags: ['prompted'],
+      },
+      {
+        id: 'unprompted',
+        label: 'きっかけがなくても話し始める',
+        biasHints: { B5: 3, B7: 2 },
+        jungShadowHints: { Si: 3 },
+        attackTypeHints: { jin_96: 3, jin_93: 2 },
+        tags: ['spontaneous'],
+      },
+      {
+        id: 'motivate',
+        label: '励ますために「私もこうして乗り越えた」と話す',
+        biasHints: { B7: 1, B5: 1 },
+        jungShadowHints: { Si: 2, Fe: 1 },
+        attackTypeHints: { jin_96: 2, jin_92: 1 },
+        tags: ['motivate'],
+      },
+      {
+        id: 'rarely_talks',
+        label: 'あまり自分の過去を話さない',
+        biasHints: {},
+        jungShadowHints: { Fi: 2 },
+        attackTypeHints: { jin_97: 3 },
+        tags: ['rarely'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_gp_009',
+    type: 'probe',
+    text: 'その祖父母はあなたの「パートナー・結婚・子供」についてどんなことを言いますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'traditional_pressure',
+        label: '「早く結婚しなさい」「子供はいつ？」と急かす',
+        biasHints: { B6: 3, B4: 2 },
+        jungShadowHints: { Si: 3, Fe: 1 },
+        attackTypeHints: { jin_92: 3 },
+        tags: ['traditional_pressure'],
+      },
+      {
+        id: 'health_family',
+        label: '「体は大丈夫か」「家族に頼れてるか」と気にする',
+        biasHints: { B1: 2, B4: 1 },
+        jungShadowHints: { Si: 2, Fe: 2 },
+        attackTypeHints: { jin_94: 2, jin_92: 1 },
+        tags: ['health_family'],
+      },
+      {
+        id: 'positive_support',
+        label: 'あなたの幸せを願っていて、急かさない',
+        biasHints: {},
+        jungShadowHints: { Fi: 2 },
+        attackTypeHints: { jin_97: 3 },
+        tags: ['supportive'],
+      },
+      {
+        id: 'own_stories',
+        label: '自分たちの結婚・子育ての話をよくする',
+        biasHints: { B7: 2, B5: 1 },
+        jungShadowHints: { Si: 2, Se: 1 },
+        attackTypeHints: { jin_93: 2, jin_96: 1 },
+        tags: ['own_stories'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_gp_010',
+    type: 'probe',
+    text: 'その祖父母は「時代の変化（スマホ・SNS・働き方）」についてどんな反応をしますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'resistant',
+        label: '「今の若者は」「昔は違った」と批判的',
+        biasHints: { B6: 3, B3: 2 },
+        jungShadowHints: { Si: 3 },
+        attackTypeHints: { jin_92: 3, jin_93: 2 },
+        tags: ['resistant'],
+      },
+      {
+        id: 'worried',
+        label: '「体に悪くないか」「危なくないか」と心配する',
+        biasHints: { B1: 2, B6: 1 },
+        jungShadowHints: { Si: 2 },
+        attackTypeHints: { jin_94: 2, jin_92: 1 },
+        tags: ['worried'],
+      },
+      {
+        id: 'curious',
+        label: '「どうやって使うの？」と興味津々で聞いてくる',
+        biasHints: {},
+        jungShadowHints: { Se: 1, Ne: 1 },
+        attackTypeHints: { jin_95: 1, jin_93: 1 },
+        tags: ['curious'],
+      },
+      {
+        id: 'accepting',
+        label: '「時代が変わったね」と受け入れている',
+        biasHints: {},
+        jungShadowHints: { Fi: 2 },
+        attackTypeHints: { jin_97: 3 },
+        tags: ['accepting'],
+      },
+    ],
+  },
+
 ];

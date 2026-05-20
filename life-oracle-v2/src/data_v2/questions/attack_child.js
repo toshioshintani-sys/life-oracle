@@ -1,5 +1,5 @@
-// 攻略型・子供カテゴリ（観察視点）
-// 「あなたのお子さんはどうしますか」という観察質問プール
+// 攻略型・子供カテゴリ（観察視点）14問
+// 対象タイプ：jin_74〜jin_83（10タイプ）
 
 export const ATTACK_CHILD_QUESTIONS = [
 
@@ -15,6 +15,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '返事をしない・聞こえていないふりをする',
         biasHints: { B6: 2, B9: 2 },
         jungShadowHints: { Fi: 2, Si: 1 },
+        attackTypeHints: { jin_75: 3, jin_79: 2 },
         tags: ['passive_ignore'],
       },
       {
@@ -22,6 +23,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'ちゃんと理由を説明して断る',
         biasHints: {},
         jungShadowHints: { Ti: 2, Te: 1 },
+        attackTypeHints: { jin_78: 3, jin_76: 2 },
         tags: ['logical_refusal'],
       },
       {
@@ -29,6 +31,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '泣いたり「いやだ」を繰り返す',
         biasHints: { B8: 3, B1: 1 },
         jungShadowHints: { Fe: 2, Se: 1 },
+        attackTypeHints: { jin_74: 3 },
         tags: ['emotional_protest'],
       },
       {
@@ -36,6 +39,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '別のことを提案して話をそらす',
         biasHints: { B2: 2, B6: 1 },
         jungShadowHints: { Ne: 2, Se: 1 },
+        attackTypeHints: { jin_77: 3 },
         tags: ['deflect'],
       },
     ],
@@ -53,6 +57,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'すぐ親や先生に報告する',
         biasHints: { B4: 2, B8: 1 },
         jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_80: 3, jin_82: 2 },
         tags: ['report_adult'],
       },
       {
@@ -60,6 +65,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '自分でなんとかしようとする（黙って耐える含む）',
         biasHints: { B6: 1, B9: 2 },
         jungShadowHints: { Fi: 2, Ti: 1 },
+        attackTypeHints: { jin_83: 2, jin_78: 1, jin_75: 2 },
         tags: ['self_solve'],
       },
       {
@@ -67,6 +73,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '感情的になって相手に直接ぶつかる',
         biasHints: { B8: 3, B2: 1 },
         jungShadowHints: { Se: 2, Te: 1 },
+        attackTypeHints: { jin_74: 3, jin_76: 2 },
         tags: ['direct_conflict'],
       },
       {
@@ -74,6 +81,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'その友達から距離を置く',
         biasHints: { B9: 2, B6: 1 },
         jungShadowHints: { Fi: 2, Ni: 1 },
+        attackTypeHints: { jin_75: 2, jin_83: 2 },
         tags: ['withdraw'],
       },
     ],
@@ -90,6 +98,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '目に見えてうれしそうになり、もっとやろうとする',
         biasHints: { B8: 1, B2: 2 },
         jungShadowHints: { Fe: 2, Se: 2 },
+        attackTypeHints: { jin_80: 3, jin_74: 2 },
         tags: ['validation_seeking'],
       },
       {
@@ -97,6 +106,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'はずかしがって「そんなことない」と否定する',
         biasHints: { B9: 2 },
         jungShadowHints: { Fi: 2, Si: 1 },
+        attackTypeHints: { jin_83: 2, jin_75: 2 },
         tags: ['downplay'],
       },
       {
@@ -104,6 +114,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '「なんで？どこが？」と聞き返す',
         biasHints: {},
         jungShadowHints: { Ti: 2, Ne: 1 },
+        attackTypeHints: { jin_78: 3, jin_81: 2 },
         tags: ['analytical'],
       },
       {
@@ -111,6 +122,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'すぐ「次はこれやる」と動く',
         biasHints: { B2: 2, B5: 1 },
         jungShadowHints: { Se: 2, Te: 1 },
+        attackTypeHints: { jin_76: 2, jin_74: 1 },
         tags: ['action_driven'],
       },
     ],
@@ -127,6 +139,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '怒って作業をやめてしまう',
         biasHints: { B8: 2, B2: 1 },
         jungShadowHints: { Fi: 2, Se: 2 },
+        attackTypeHints: { jin_74: 3, jin_76: 2 },
         tags: ['anger_stop'],
       },
       {
@@ -134,6 +147,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '気にせず続けられる',
         biasHints: {},
         jungShadowHints: { Ti: 2, Ni: 1 },
+        attackTypeHints: { jin_78: 3, jin_79: 2, jin_83: 2 },
         tags: ['focused'],
       },
       {
@@ -141,6 +155,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'しばらくすねる・機嫌が悪くなる',
         biasHints: { B9: 2, B11: 1 },
         jungShadowHints: { Fi: 2, Fe: 1 },
+        attackTypeHints: { jin_75: 3 },
         tags: ['sulk'],
       },
       {
@@ -148,6 +163,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'そのまま違うことへ興味が移る',
         biasHints: { B2: 2, B12: 1 },
         jungShadowHints: { Ne: 3, Se: 1 },
+        attackTypeHints: { jin_77: 3 },
         tags: ['distracted'],
       },
     ],
@@ -164,6 +180,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '答えるたびにまた「なんで？」が来る',
         biasHints: { B5: 1 },
         jungShadowHints: { Ne: 3, Ti: 1 },
+        attackTypeHints: { jin_81: 3, jin_77: 2 },
         tags: ['why_chain'],
       },
       {
@@ -171,6 +188,7 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: '一回聞いたら納得して終わる',
         biasHints: { B4: 1 },
         jungShadowHints: { Si: 2, Fe: 1 },
+        attackTypeHints: { jin_80: 2, jin_82: 1 },
         tags: ['single_why'],
       },
       {
@@ -178,8 +196,379 @@ export const ATTACK_CHILD_QUESTIONS = [
         label: 'あまり聞かない・自分で考える',
         biasHints: {},
         jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_83: 2, jin_79: 2, jin_78: 1 },
         tags: ['self_think'],
       },
     ],
   },
+
+  {
+    id: 'atk_c_006',
+    type: 'probe',
+    text: 'その子は「ルール・決まり」に対してどう反応しますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'accepts',
+        label: '特に疑問を持たず従う',
+        biasHints: { B6: 1, B4: 1 },
+        jungShadowHints: { Si: 2, Fe: 1 },
+        attackTypeHints: { jin_78: 2, jin_80: 1, jin_82: 1 },
+        tags: ['compliant'],
+      },
+      {
+        id: 'questions',
+        label: '「なんでそのルールがあるの？」と理由を聞く',
+        biasHints: { B5: 1 },
+        jungShadowHints: { Ne: 2, Ti: 2 },
+        attackTypeHints: { jin_81: 3, jin_76: 2 },
+        tags: ['questions_rule'],
+      },
+      {
+        id: 'ignores',
+        label: '黙って無視・その場だけ従ったふりをする',
+        biasHints: { B2: 2, B12: 1 },
+        jungShadowHints: { Se: 2, Ne: 1 },
+        attackTypeHints: { jin_74: 2, jin_77: 2 },
+        tags: ['ignore_rule'],
+      },
+      {
+        id: 'creates_own',
+        label: '「こっちのほうがいいルール」を自分で作ろうとする',
+        biasHints: { B5: 2 },
+        jungShadowHints: { Ti: 2, Te: 1 },
+        attackTypeHints: { jin_83: 2, jin_76: 1 },
+        tags: ['own_rule'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_007',
+    type: 'probe',
+    text: 'その子が「言うことを聞かない」とき、どんなパターンが多いですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'emotional_protest',
+        label: '泣く・怒る・声を荒げる',
+        biasHints: { B8: 3, B2: 1 },
+        jungShadowHints: { Se: 2, Fe: 1 },
+        attackTypeHints: { jin_74: 3, jin_76: 2 },
+        tags: ['emotional'],
+      },
+      {
+        id: 'silent_ignore',
+        label: '聞こえないふり・その場をやり過ごす',
+        biasHints: { B6: 2, B9: 1 },
+        jungShadowHints: { Fi: 2, Si: 1 },
+        attackTypeHints: { jin_75: 3, jin_79: 2 },
+        tags: ['passive'],
+      },
+      {
+        id: 'negotiate',
+        label: '「○○したらやる」と条件交渉してくる',
+        biasHints: {},
+        jungShadowHints: { Ti: 2, Ne: 1 },
+        attackTypeHints: { jin_81: 2, jin_78: 1 },
+        tags: ['negotiate'],
+      },
+      {
+        id: 'distract',
+        label: 'いつの間にか別のことをしている',
+        biasHints: { B2: 3, B12: 1 },
+        jungShadowHints: { Ne: 3, Se: 1 },
+        attackTypeHints: { jin_77: 3 },
+        tags: ['distract'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_008',
+    type: 'probe',
+    text: 'その子はどんなときに一番いきいきしていますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'with_friends',
+        label: '友達と一緒にいるとき',
+        biasHints: { B4: 1, B8: 1 },
+        jungShadowHints: { Fe: 2, Se: 1 },
+        attackTypeHints: { jin_80: 3, jin_82: 2 },
+        tags: ['social'],
+      },
+      {
+        id: 'creating_alone',
+        label: '一人で何かを作ったり考えたりしているとき',
+        biasHints: {},
+        jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_83: 2, jin_78: 2 },
+        tags: ['creative_alone'],
+      },
+      {
+        id: 'discovering',
+        label: '新しいことを発見・探索しているとき',
+        biasHints: { B2: 1, B5: 1 },
+        jungShadowHints: { Ne: 3 },
+        attackTypeHints: { jin_81: 3, jin_77: 2 },
+        tags: ['exploring'],
+      },
+      {
+        id: 'active_moving',
+        label: '体を動かして何かをしているとき',
+        biasHints: { B2: 2, B8: 1 },
+        jungShadowHints: { Se: 3 },
+        attackTypeHints: { jin_74: 3 },
+        tags: ['active'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_009',
+    type: 'probe',
+    text: 'その子は「先生・大人」に対してどんな態度をとりますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'obedient',
+        label: '素直に従う・先生が好き',
+        biasHints: { B4: 2, B6: 1 },
+        jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_78: 2, jin_82: 2, jin_80: 1 },
+        tags: ['obedient'],
+      },
+      {
+        id: 'questions_a_lot',
+        label: '質問が多い・「なんで？」が止まらない',
+        biasHints: { B5: 1 },
+        jungShadowHints: { Ne: 2, Ti: 1 },
+        attackTypeHints: { jin_81: 3 },
+        tags: ['questions'],
+      },
+      {
+        id: 'challenges',
+        label: '先生の言うことに反論・反抗することがある',
+        biasHints: { B5: 2, B12: 1 },
+        jungShadowHints: { Te: 2, Ne: 1 },
+        attackTypeHints: { jin_76: 3 },
+        tags: ['challenges'],
+      },
+      {
+        id: 'avoids',
+        label: 'なるべく関わりを避ける・目立たないようにする',
+        biasHints: { B9: 2, B6: 1 },
+        jungShadowHints: { Fi: 2, Ti: 1 },
+        attackTypeHints: { jin_79: 3, jin_75: 2 },
+        tags: ['avoids'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_010',
+    type: 'probe',
+    text: 'その子が一人でいるとき、何をしていることが多いですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'device_games',
+        label: 'スマホ・ゲーム・動画など画面を見ている',
+        biasHints: { B2: 2, B6: 1 },
+        jungShadowHints: { Se: 2, Ne: 1 },
+        attackTypeHints: { jin_75: 2, jin_77: 1 },
+        tags: ['screen'],
+      },
+      {
+        id: 'reading_creating',
+        label: '本を読む・何かを作る・書く',
+        biasHints: {},
+        jungShadowHints: { Ti: 2, Ni: 1 },
+        attackTypeHints: { jin_78: 3, jin_79: 2, jin_83: 2 },
+        tags: ['intellectual'],
+      },
+      {
+        id: 'waiting_friends',
+        label: 'すぐ誰かを呼ぶ・友達と連絡をとる',
+        biasHints: { B4: 2, B8: 1 },
+        jungShadowHints: { Fe: 3 },
+        attackTypeHints: { jin_80: 3, jin_82: 2 },
+        tags: ['social_seek'],
+      },
+      {
+        id: 'daydreaming',
+        label: 'ぼーっとする・空想にふける',
+        biasHints: { B12: 1 },
+        jungShadowHints: { Ne: 2, Ni: 1 },
+        attackTypeHints: { jin_77: 2, jin_83: 1 },
+        tags: ['daydream'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_011',
+    type: 'probe',
+    text: 'その子が「負けた」「うまくいかなかった」とき、どう立て直しますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'emotional_outburst',
+        label: '大泣き・怒り・物に当たることがある',
+        biasHints: { B8: 3, B2: 1 },
+        jungShadowHints: { Se: 2, Fe: 1 },
+        attackTypeHints: { jin_74: 3 },
+        tags: ['outburst'],
+      },
+      {
+        id: 'gives_up',
+        label: 'しばらく落ち込んでそのまま引く',
+        biasHints: { B9: 2, B6: 1 },
+        jungShadowHints: { Fi: 2, Si: 1 },
+        attackTypeHints: { jin_75: 2, jin_77: 1 },
+        tags: ['gives_up'],
+      },
+      {
+        id: 'analyzes',
+        label: '「なぜうまくいかなかったか」を静かに考える',
+        biasHints: {},
+        jungShadowHints: { Ti: 3, Ni: 1 },
+        attackTypeHints: { jin_78: 3, jin_81: 2 },
+        tags: ['analyzes'],
+      },
+      {
+        id: 'tries_again',
+        label: '悔しがりながらすぐもう一回やろうとする',
+        biasHints: { B2: 1, B5: 1 },
+        jungShadowHints: { Se: 1, Te: 1 },
+        attackTypeHints: { jin_76: 2, jin_82: 1 },
+        tags: ['tries_again'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_012',
+    type: 'probe',
+    text: 'その子は知らない人・初対面の場でどう振る舞いますか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'approaches',
+        label: 'すぐに話しかけて友達になろうとする',
+        biasHints: { B8: 1, B2: 1 },
+        jungShadowHints: { Fe: 2, Se: 2 },
+        attackTypeHints: { jin_80: 3, jin_82: 2, jin_74: 1 },
+        tags: ['approaches'],
+      },
+      {
+        id: 'curious_observe',
+        label: '近くで観察してから、慎重に近づく',
+        biasHints: {},
+        jungShadowHints: { Ne: 2, Si: 1 },
+        attackTypeHints: { jin_81: 2, jin_77: 1 },
+        tags: ['observe_then_approach'],
+      },
+      {
+        id: 'shy_avoids',
+        label: '緊張して固まる・大人の後ろに隠れる',
+        biasHints: { B9: 2, B6: 1 },
+        jungShadowHints: { Fi: 2, Si: 1 },
+        attackTypeHints: { jin_75: 2, jin_79: 2 },
+        tags: ['shy'],
+      },
+      {
+        id: 'watches_silent',
+        label: '端で静かに様子を見ている',
+        biasHints: {},
+        jungShadowHints: { Ti: 2, Fi: 1 },
+        attackTypeHints: { jin_83: 3, jin_78: 1 },
+        tags: ['observing'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_013',
+    type: 'probe',
+    text: 'その子は「一人で何かを決める」ことが得意ですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'yes_independent',
+        label: '自分でどんどん決める・意見がはっきりしている',
+        biasHints: { B5: 1 },
+        jungShadowHints: { Te: 1, Fi: 2 },
+        attackTypeHints: { jin_83: 3, jin_76: 2 },
+        tags: ['independent'],
+      },
+      {
+        id: 'needs_confirmation',
+        label: '決めた後でも「これでいい？」と確認したがる',
+        biasHints: { B4: 2, B9: 1 },
+        jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_80: 2, jin_82: 2 },
+        tags: ['needs_validation'],
+      },
+      {
+        id: 'decides_changes',
+        label: '決めてもすぐ変わる・気分に左右される',
+        biasHints: { B2: 3, B12: 1 },
+        jungShadowHints: { Ne: 3 },
+        attackTypeHints: { jin_77: 3 },
+        tags: ['indecisive'],
+      },
+      {
+        id: 'avoids_deciding',
+        label: 'なかなか決められない・誰かに決めてほしそう',
+        biasHints: { B6: 2, B9: 1 },
+        jungShadowHints: { Si: 2, Fi: 1 },
+        attackTypeHints: { jin_75: 2, jin_79: 2, jin_78: 1 },
+        tags: ['avoids_deciding'],
+      },
+    ],
+  },
+
+  {
+    id: 'atk_c_014',
+    type: 'probe',
+    text: 'その子はグループの中でどんな役回りになることが多いですか？',
+    discriminates: [],
+    choices: [
+      {
+        id: 'leader',
+        label: '引っ張る・「こうしよう」と率先して動く',
+        biasHints: { B5: 2 },
+        jungShadowHints: { Te: 2, Se: 1 },
+        attackTypeHints: { jin_76: 3, jin_74: 1 },
+        tags: ['leader'],
+      },
+      {
+        id: 'supporter',
+        label: '誰かを助ける・場の雰囲気を整える',
+        biasHints: { B4: 1, B8: 1 },
+        jungShadowHints: { Fe: 2, Si: 1 },
+        attackTypeHints: { jin_82: 3, jin_80: 2 },
+        tags: ['supporter'],
+      },
+      {
+        id: 'idea_person',
+        label: 'アイデアをたくさん出す・発想が面白い',
+        biasHints: { B2: 1 },
+        jungShadowHints: { Ne: 3, Se: 1 },
+        attackTypeHints: { jin_81: 3, jin_77: 2 },
+        tags: ['idea_person'],
+      },
+      {
+        id: 'background',
+        label: '端のほうで静かにしている・自分のペースを守る',
+        biasHints: {},
+        jungShadowHints: { Ti: 2, Fi: 2 },
+        attackTypeHints: { jin_83: 3, jin_79: 2, jin_78: 1 },
+        tags: ['background'],
+      },
+    ],
+  },
+
 ];
