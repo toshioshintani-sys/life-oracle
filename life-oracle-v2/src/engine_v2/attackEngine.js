@@ -87,7 +87,7 @@ export function shouldFinishAttack(session, minQuestions = 4) {
   const topNorm = entries[0]?.[1] ?? 0;
   const secNorm = entries[1]?.[1] ?? 0;
   const gap     = topNorm > 0 ? (topNorm - secNorm) / topNorm : 0;
-  const rawTop  = session.attackTypeScores[entries[0]?.[0]] ?? 0;
+  const rawTop  = Math.max(0, ...Object.values(session.attackTypeScores));
 
   return rawTop >= 3 && gap >= 0.25;
 }

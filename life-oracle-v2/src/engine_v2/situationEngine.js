@@ -145,7 +145,7 @@ export function shouldFinish(session, minQuestions = 12) {
   const topNorm   = entries[0]?.[1] ?? 0;
   const secNorm   = entries[1]?.[1] ?? 0;
   const gap       = topNorm > 0 ? (topNorm - secNorm) / topNorm : 0;
-  const rawTop    = session.situationScores[entries[0]?.[0]] ?? 0;
+  const rawTop    = Math.max(0, ...Object.values(session.situationScores));
 
   return rawTop >= 4 && gap >= 0.25;
 }
