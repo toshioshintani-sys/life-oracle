@@ -271,4 +271,248 @@ export const ATTACK_SUBORDINATE_QUESTIONS = [
     ],
   },
 
+  // ── メッセージ・連絡への応答 ──────────────────────────────
+  {
+    id: 'atk_s_007',
+    type: 'probe',
+    text: 'その部下にチャットや連絡をしたとき、どう反応しますか？',
+    discriminates: ['jin_13', 'jin_40', 'jin_50'],
+    choices: [
+      {
+        id: 'read_no_reply',
+        label: '既読になるが返信が来ない・来ても数時間後',
+        attackTypeHints: { jin_13: 3 },
+        biasHints: { B2: 2 },
+        jungShadowHints: { Si: 2 },
+        tags: ['ghost_read'],
+      },
+      {
+        id: 'claim_not_seen',
+        label: '後で『見ていませんでした』と言う',
+        attackTypeHints: { jin_40: 3 },
+        biasHints: { B3: 2, B12: 1 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['didnt_see'],
+      },
+      {
+        id: 'quick_confirm',
+        label: 'すぐに確認の返信と追加質問が来る',
+        attackTypeHints: { jin_50: 3 },
+        biasHints: { B1: 2 },
+        jungShadowHints: { Fe: 2 },
+        tags: ['over_consult'],
+      },
+      {
+        id: 'normal_reply',
+        label: '適切なタイミングで内容のある返信が来る',
+        attackTypeHints: { jin_23: 1 },
+        tags: ['normal_reply'],
+      },
+    ],
+  },
+
+  // ── 自力で判断できる範囲 ──────────────────────────────────
+  {
+    id: 'atk_s_008',
+    type: 'probe',
+    text: 'その部下は自分の裁量でどこまで判断して動けますか？',
+    discriminates: ['jin_50', 'jin_19', 'jin_27', 'jin_23'],
+    choices: [
+      {
+        id: 'always_ask',
+        label: '小さな判断でも必ず確認・許可を求めて来る',
+        attackTypeHints: { jin_50: 3 },
+        biasHints: { B1: 3 },
+        jungShadowHints: { Fe: 3 },
+        tags: ['needs_permission'],
+      },
+      {
+        id: 'freeze_without_map',
+        label: 'やり方が明示されないと立ち止まって動けない',
+        attackTypeHints: { jin_19: 3 },
+        biasHints: { B6: 2 },
+        jungShadowHints: { Si: 2 },
+        tags: ['no_start_path'],
+      },
+      {
+        id: 'excuse_when_wrong',
+        label: '自分で判断して失敗すると外部要因を並べる',
+        attackTypeHints: { jin_27: 3 },
+        biasHints: { B12: 3 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['external_blame'],
+      },
+      {
+        id: 'overreach',
+        label: '裁量以上の判断をして事後報告になる',
+        attackTypeHints: { jin_23: 3 },
+        biasHints: { B5: 3 },
+        jungShadowHints: { Ne: 2 },
+        tags: ['overreach'],
+      },
+    ],
+  },
+
+  // ── 締切・期日への意識 ────────────────────────────────────
+  {
+    id: 'atk_s_009',
+    type: 'probe',
+    text: '締切が近づいたとき、その部下はどう動きますか？',
+    discriminates: ['jin_45', 'jin_13', 'jin_27'],
+    choices: [
+      {
+        id: 'last_minute_panic',
+        label: '締切直前に『間に合いません』と突然報告してくる',
+        attackTypeHints: { jin_45: 3 },
+        biasHints: { B2: 3 },
+        jungShadowHints: { Ni: 2 },
+        tags: ['last_minute_bomb'],
+      },
+      {
+        id: 'silent_until_late',
+        label: '期日前も後も何も言わず、こちらから催促するまで動かない',
+        attackTypeHints: { jin_13: 3 },
+        biasHints: { B2: 2, B6: 1 },
+        jungShadowHints: { Si: 2 },
+        tags: ['silent_deadline'],
+      },
+      {
+        id: 'blame_complexity',
+        label: '「想定より複雑だった」「前提が変わった」と遅延を説明する',
+        attackTypeHints: { jin_27: 3 },
+        biasHints: { B12: 3 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['complexity_excuse'],
+      },
+      {
+        id: 'on_time',
+        label: '余裕を持って完了・または早めに報告して調整する',
+        attackTypeHints: { jin_41: 1 },
+        tags: ['on_time'],
+      },
+    ],
+  },
+
+  // ── 指示内容の解釈・実行のズレ ───────────────────────────
+  {
+    id: 'atk_s_010',
+    type: 'probe',
+    text: '指示した内容と実際の成果物・行動にズレがあるとき、その部下は？',
+    discriminates: ['jin_23', 'jin_40', 'jin_19'],
+    choices: [
+      {
+        id: 'my_interpretation',
+        label: '『自分なりに解釈してやりました』と独自路線を主張する',
+        attackTypeHints: { jin_23: 3 },
+        biasHints: { B5: 3 },
+        jungShadowHints: { Ne: 2 },
+        tags: ['self_interpretation'],
+      },
+      {
+        id: 'didnt_understand',
+        label: '『そういう意味だと思いませんでした』と言う',
+        attackTypeHints: { jin_40: 3 },
+        biasHints: { B3: 2 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['misread_direction'],
+      },
+      {
+        id: 'stuck_on_ambiguity',
+        label: '曖昧な点があると確認せず止まっていた',
+        attackTypeHints: { jin_19: 3 },
+        biasHints: { B6: 2 },
+        jungShadowHints: { Si: 2 },
+        tags: ['ambiguity_freeze'],
+      },
+      {
+        id: 'checked_carefully',
+        label: '事前に確認を入れてズレを防いでいた',
+        attackTypeHints: { jin_50: 1 },
+        tags: ['proactive_check'],
+      },
+    ],
+  },
+
+  // ── 相談・質問の密度 ─────────────────────────────────────
+  {
+    id: 'atk_s_011',
+    type: 'probe',
+    text: 'タスク中の相談や質問の頻度はどのくらいですか？',
+    discriminates: ['jin_50', 'jin_13', 'jin_45'],
+    choices: [
+      {
+        id: 'too_frequent',
+        label: '些細なことでも毎回確認が来てペースが乱れる',
+        attackTypeHints: { jin_50: 3 },
+        biasHints: { B1: 3 },
+        jungShadowHints: { Fe: 3 },
+        tags: ['over_consult'],
+      },
+      {
+        id: 'no_report',
+        label: '相談も報告も来ないので、いつ困っているかわからない',
+        attackTypeHints: { jin_13: 3 },
+        biasHints: { B2: 2 },
+        jungShadowHints: { Si: 2 },
+        tags: ['no_report'],
+      },
+      {
+        id: 'late_consult',
+        label: 'ギリギリになって「実は困っていました」と来る',
+        attackTypeHints: { jin_45: 3 },
+        biasHints: { B2: 2 },
+        jungShadowHints: { Ni: 1 },
+        tags: ['late_escalation'],
+      },
+      {
+        id: 'appropriate',
+        label: '必要なタイミングで要点を絞って相談してくる',
+        attackTypeHints: { jin_19: 1 },
+        tags: ['appropriate_consult'],
+      },
+    ],
+  },
+
+  // ── 成長意欲・フィードバックの受け取り方 ──────────────────
+  {
+    id: 'atk_s_012',
+    type: 'probe',
+    text: 'フィードバックや改善指摘をしたとき、その部下の反応は？',
+    discriminates: ['jin_23', 'jin_27', 'jin_40', 'jin_45'],
+    choices: [
+      {
+        id: 'argue_back',
+        label: '『でも自分としては正しいと思いました』と反論してくる',
+        attackTypeHints: { jin_23: 3 },
+        biasHints: { B5: 3 },
+        jungShadowHints: { Ne: 2, Fi: 1 },
+        tags: ['pushback'],
+      },
+      {
+        id: 'excuse_context',
+        label: '改善より先に状況説明・言い訳が始まる',
+        attackTypeHints: { jin_27: 3 },
+        biasHints: { B12: 3 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['excuse_first'],
+      },
+      {
+        id: 'i_didnt_know_that_rule',
+        label: '『そのルールは知りませんでした』と初めて聞いた顔をする',
+        attackTypeHints: { jin_40: 3 },
+        biasHints: { B3: 2 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['rule_unknown'],
+      },
+      {
+        id: 'nods_doesnt_change',
+        label: '『わかりました』と言うが同じことを繰り返す',
+        attackTypeHints: { jin_45: 3 },
+        biasHints: { B2: 2, B6: 1 },
+        jungShadowHints: { Ni: 1 },
+        tags: ['nod_no_change'],
+      },
+    ],
+  },
+
 ];

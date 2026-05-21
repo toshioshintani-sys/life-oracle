@@ -92,8 +92,8 @@ export function AttackResult({ result, onRetry }) {
         </div>
       )}
 
-      {/* ⑥ note への送客（URL未確定なら非表示） */}
-      {type.noteUrl && (
+      {/* ⑥ note への送客（notePublished=trueのみ表示） */}
+      {type.noteUrl && type.notePublished && (
         <div className="result-adjacent">
           <p className="result-adjacent-label">この動きをさらに深く読む</p>
           <a
