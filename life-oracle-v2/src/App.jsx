@@ -65,12 +65,12 @@ const ATTACK_QUESTIONS_BY_TARGET = {
 
 import './App.css';
 
-const MBTI_MAX_QUESTIONS    = 12;
-const MBTI_ESTIMATED_TOTAL  = 12;
-const SITU_ESTIMATED_TOTAL  = 8;
-const SITU_MIN_QUESTIONS    = 4;
-const ATTACK_ESTIMATED_TOTAL = 6;
-const ATTACK_MIN_QUESTIONS  = 4;
+const MBTI_MAX_QUESTIONS    = 20;
+const MBTI_ESTIMATED_TOTAL  = 20;
+const SITU_ESTIMATED_TOTAL  = 12;
+const SITU_MIN_QUESTIONS    = 10;
+const ATTACK_ESTIMATED_TOTAL = 12;
+const ATTACK_MIN_QUESTIONS  = 8;
 
 // コールドリーディング：θの傾きから「読み」メッセージを生成
 const MBTI_READINGS = {

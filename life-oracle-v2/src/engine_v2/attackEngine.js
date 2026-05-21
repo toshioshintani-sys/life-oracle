@@ -81,7 +81,7 @@ export function recordAttackAnswer(session, question, choice) {
 
 export function shouldFinishAttack(session, minQuestions = 4) {
   if (session.questionCount < minQuestions) return false;
-  if (session.questionCount >= 8) return true;
+  if (session.questionCount >= 12) return true;
 
   const entries = getNormalizedEntries(session);
   const topNorm = entries[0]?.[1] ?? 0;

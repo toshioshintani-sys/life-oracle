@@ -55,10 +55,12 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
 
   const { mbtiType, biasScores, fromDirectSelection } = result;
   const jungTypeId  = MBTI_TO_JUNG[mbtiType] ?? mbtiType;
+  const isShadow    = jungTypeId?.endsWith('-影');
   const cf          = cognitiveFunctionMap[mbtiType] ?? {};
   const famous      = famousPeople[mbtiType]?.people ?? [];
   const reading     = TYPE_READING[mbtiType] ?? null;
   const typeProfile = typeProfiles?.[jungTypeId] ?? null;
+  const typeName    = isShadow ? cf.shadowName : cf.lightName;
 
   const prescriptionKey  = occupation && jungTypeId && generation
     ? `${occupation}_${jungTypeId}_${generation}` : '';
@@ -66,7 +68,6 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
 
   // 機構オーバーレイ（既存処方箋を無傷のまま、上下に解読層を差し込む）
   const mechanism = MECHANISMS[jungTypeId] ?? null;
-  const isShadow  = jungTypeId?.endsWith('-影');
 
   const top2 = Object.entries(biasScores ?? {})
     .sort(([, a], [, b]) => b - a)
@@ -91,10 +92,10 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
 
       {/* タイプ発表 */}
       <div className="mbti-result-type-block">
-        <p className="mbti-result-type-code">{mbtiType}</p>
-        <p className="mbti-result-light-name">{cf.lightName}</p>
+        <p className="mbti-result-light-name">{typeName}</p>
+        <p className="mbti-result-jung-id">{jungTypeId}</p>
         {famous.length > 0 && (
-          <p className="mbti-result-famous-inline">{famous.join(' · ')} と同じタイプ</p>
+          <p className="mbti-result-famous-inline">{famous.join(' · ')} と同じパターン</p>
         )}
         <div className="mbti-result-poles">
           <span className="mbti-result-pole mbti-result-pole--light">光：{cf.lightName}</span>

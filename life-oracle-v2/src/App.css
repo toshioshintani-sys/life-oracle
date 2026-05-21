@@ -859,22 +859,38 @@ button {
 }
 
 .mbti-type-button {
-  padding: 14px 4px;
-  font-size: 15px;
-  font-weight: 700;
-  font-family: var(--sans);
-  color: var(--text);
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
   background: var(--card-bg);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  letter-spacing: 0.04em;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mbti-type-button--shadow {
+  border-color: #d4b8b8;
+  background: #fdf7f7;
 }
 
 .mbti-type-button:hover {
   border-color: var(--accent);
   background: var(--accent-bg);
-  color: var(--accent-dark);
+}
+
+.mbti-type-btn-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.mbti-type-btn-jung {
+  font-size: 10px;
+  color: var(--text-sub);
+  letter-spacing: 0.04em;
 }
 
 /* ===== TopicSelect 画面 ===== */
@@ -1030,9 +1046,17 @@ button {
 
 .mbti-result-light-name {
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--text);
+}
+
+.mbti-result-jung-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-top: 4px;
 }
 
 .mbti-result-desc {

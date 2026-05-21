@@ -10,7 +10,7 @@ export function Entry({ onStart }) {
       <div className="entry-choices">
         <button className="entry-choice-button" onClick={() => onStart('mbti')}>
           <span className="choice-title">自分のことを知りたい</span>
-          <span className="choice-desc">思考・行動のパターンを読み解く<br />約12問</span>
+          <span className="choice-desc">思考・行動のパターンを読み解く<br />約20問</span>
         </button>
         <button className="entry-choice-button" onClick={() => onStart('situation')}>
           <span className="choice-title">今の状況を整理したい</span>
