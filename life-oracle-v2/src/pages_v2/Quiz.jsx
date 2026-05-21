@@ -1,6 +1,7 @@
 export function Quiz({ question, mode, questionNum, estimatedTotal, oracleMessage, onAnswer }) {
   if (!question) return null;
 
+  const isExtended = estimatedTotal > 0 && questionNum > estimatedTotal;
   const pct = estimatedTotal > 0 ? Math.min((questionNum / estimatedTotal) * 100, 100) : 0;
 
   return (
@@ -10,8 +11,18 @@ export function Quiz({ question, mode, questionNum, estimatedTotal, oracleMessag
         <div className="quiz-progress-bar-track">
           <div className="quiz-progress-bar" style={{ width: `${pct}%` }} />
         </div>
-        <p className="quiz-progress-label">{questionNum} 問目 / 約 {estimatedTotal} 問</p>
+        {isExtended ? (
+          <p className="quiz-progress-label">{questionNum} 問目</p>
+        ) : (
+          <p className="quiz-progress-label">{questionNum} 問目 / 約 {estimatedTotal} 問</p>
+        )}
       </div>
+
+      {isExtended && (
+        <div className="quiz-extension-notice">
+          もう少しだけ教えてください。答えを絞り込んでいます。
+        </div>
+      )}
 
       {oracleMessage && (
         <p className="quiz-oracle-reading">{oracleMessage}</p>
