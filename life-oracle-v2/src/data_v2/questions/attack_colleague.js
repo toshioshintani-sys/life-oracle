@@ -313,4 +313,205 @@ export const ATTACK_COLLEAGUE_QUESTIONS = [
     ],
   },
 
+
+  // ── 反論・否定のパターン ─────────────────────────────
+  {
+    id: 'atk_c_008',
+    type: 'probe',
+    text: '議論や意見交換でその同僚はどう反応しますか？',
+    discriminates: ['jin_09', 'jin_35', 'jin_38'],
+    choices: [
+      {
+        id: 'but_reflex',
+        label: '反射的に「でも」「だけど」「ただ」が出て肯定が来ない',
+        attackTypeHints: { jin_09: 3 },
+        biasHints: { B9: 3, B3: 1 },
+        jungShadowHints: { Ti: 2, Fi: 1 },
+        tags: ['but_reflex'],
+      },
+      {
+        id: 'no_admit_wrong',
+        label: '自分のミスや誤りを認めず言い方を変えて押し通す',
+        attackTypeHints: { jin_35: 3 },
+        biasHints: { B12: 3, B5: 1 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['never_admit_error'],
+      },
+      {
+        id: 'rose_tinted',
+        label: '根拠なく「なんとかなる」「うまくいく」と楽観する',
+        attackTypeHints: { jin_38: 3 },
+        biasHints: { B5: 3, B2: 1 },
+        jungShadowHints: { Se: 1 },
+        tags: ['groundless_optimism'],
+      },
+      {
+        id: 'asks_evidence',
+        label: 'データや根拠を求めてくる・建設的に議論できる',
+        attackTypeHints: { jin_28: 1 },
+        tags: ['evidence_based'],
+      },
+    ],
+  },
+
+  // ── 謝罪・修復行動 ───────────────────────────────────
+  {
+    id: 'atk_c_009',
+    type: 'probe',
+    text: 'その同僚がトラブルを起こした後の行動は？',
+    discriminates: ['jin_35', 'jin_38', 'jin_55'],
+    choices: [
+      {
+        id: 'no_apology_detail',
+        label: '謝罪の言葉がなく「対策します」だけで終わる',
+        attackTypeHints: { jin_35: 3 },
+        biasHints: { B12: 3 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['no_apology'],
+      },
+      {
+        id: 'optimistic_reframe',
+        label: '「結果的によかった」「まあ大丈夫でしょ」と再フレーミング',
+        attackTypeHints: { jin_38: 3 },
+        biasHints: { B5: 2, B12: 1 },
+        jungShadowHints: { Si: 1 },
+        tags: ['reframe_avoid'],
+      },
+      {
+        id: 'give_up_mode',
+        label: '「どうせ何を言っても変わらない」と投げやりになる',
+        attackTypeHints: { jin_55: 3 },
+        biasHints: { B3: 3, B6: 2 },
+        jungShadowHints: { Ni: 2 },
+        tags: ['learned_helplessness'],
+      },
+      {
+        id: 'genuine_repair',
+        label: '謝罪して改善行動を取り関係を修復しようとする',
+        attackTypeHints: { jin_09: 1 },
+        tags: ['genuine_repair'],
+      },
+    ],
+  },
+
+  // ── 楽観・悲観のバランス ─────────────────────────────
+  {
+    id: 'atk_c_010',
+    type: 'probe',
+    text: 'プロジェクトのリスクを話し合うとき、その同僚は？',
+    discriminates: ['jin_38', 'jin_55', 'jin_09'],
+    choices: [
+      {
+        id: 'dismiss_risk',
+        label: 'リスクを指摘すると「考えすぎ」「なんとかなる」と流す',
+        attackTypeHints: { jin_38: 3 },
+        biasHints: { B5: 3 },
+        jungShadowHints: { Se: 1 },
+        tags: ['risk_dismiss'],
+      },
+      {
+        id: 'douhse_block',
+        label: '「どうせうまくいかない」と試みる前から否定する',
+        attackTypeHints: { jin_55: 3 },
+        biasHints: { B3: 3, B6: 2 },
+        jungShadowHints: { Ni: 2, Si: 1 },
+        tags: ['pessimism_block'],
+      },
+      {
+        id: 'but_what_about',
+        label: '対策案を出すたびに別の懸念点を持ち出す',
+        attackTypeHints: { jin_09: 3 },
+        biasHints: { B9: 2 },
+        jungShadowHints: { Ti: 2 },
+        tags: ['endless_buts'],
+      },
+      {
+        id: 'balanced_view',
+        label: 'リスクも機会も両面から冷静に検討する',
+        attackTypeHints: { jin_30: 1 },
+        tags: ['balanced_risk'],
+      },
+    ],
+  },
+
+  // ── 諦め・無力感のパターン ───────────────────────────
+  {
+    id: 'atk_c_011',
+    type: 'probe',
+    text: 'その同僚はチームの改善提案にどう関わりますか？',
+    discriminates: ['jin_55', 'jin_09', 'jin_35'],
+    choices: [
+      {
+        id: 'wont_change',
+        label: '「どうせ上は聞かない」「前もやって変わらなかった」と動かない',
+        attackTypeHints: { jin_55: 3 },
+        biasHints: { B3: 3, B6: 3 },
+        jungShadowHints: { Ni: 2 },
+        tags: ['systemic_helplessness'],
+      },
+      {
+        id: 'counter_each_point',
+        label: '提案の欠点を探し続けて前に進めない',
+        attackTypeHints: { jin_09: 3 },
+        biasHints: { B9: 2, B3: 1 },
+        jungShadowHints: { Ti: 2 },
+        tags: ['endless_critique'],
+      },
+      {
+        id: 'deflect_accountability',
+        label: '「それは私の担当外」「私には権限がない」と逃げる',
+        attackTypeHints: { jin_35: 2, jin_42: 1 },
+        biasHints: { B1: 2 },
+        jungShadowHints: { Fi: 1 },
+        tags: ['accountability_deflect'],
+      },
+      {
+        id: 'takes_initiative',
+        label: '積極的に関わって動こうとする',
+        attackTypeHints: { jin_23: 1 },
+        tags: ['initiative'],
+      },
+    ],
+  },
+
+  // ── 自己主張・マウンティング ─────────────────────────
+  {
+    id: 'atk_c_012',
+    type: 'probe',
+    text: '新しく入ってきた同僚・後輩の扱い方は？',
+    discriminates: ['jin_23', 'jin_07', 'jin_02'],
+    choices: [
+      {
+        id: 'orero_newcomer',
+        label: '入って間もないのに「自分の経験では」と主導しようとする',
+        attackTypeHints: { jin_23: 3 },
+        biasHints: { B5: 3 },
+        jungShadowHints: { Ne: 2 },
+        tags: ['overconfident_newcomer'],
+      },
+      {
+        id: 'victim_comparison',
+        label: '「自分のほうが苦労した」と辛さを比べてくる',
+        attackTypeHints: { jin_07: 3 },
+        biasHints: { B3: 2 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['victim_senior'],
+      },
+      {
+        id: 'undercut_newcomer',
+        label: '新入りの発言をさりげなく否定・過小評価する',
+        attackTypeHints: { jin_02: 3, jin_18: 1 },
+        biasHints: { B3: 2 },
+        jungShadowHints: { Te: 1 },
+        tags: ['undercut_newcomer'],
+      },
+      {
+        id: 'mentor_mode',
+        label: '積極的にフォローしようとする・助けようとする',
+        attackTypeHints: { jin_24: 1 },
+        tags: ['mentor_mode'],
+      },
+    ],
+  },
+
 ];
