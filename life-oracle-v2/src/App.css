@@ -820,6 +820,63 @@ button {
   line-height: 1.55;
 }
 
+/* ===== MbtiEntry 画面（型を知っているか確認 + 型選択グリッド）===== */
+.mbti-entry-screen {
+  width: 100%;
+  max-width: 480px;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin: 0 auto;
+}
+
+.mbti-entry-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mbti-entry-heading {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.mbti-entry-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.55;
+}
+
+.mbti-type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.mbti-type-button {
+  padding: 14px 4px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.mbti-type-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent-dark);
+}
+
 /* ===== TopicSelect 画面 ===== */
 .topic-screen {
   width: 100%;

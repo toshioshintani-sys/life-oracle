@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Entry }        from './pages_v2/Entry.jsx';
+import { MbtiEntry }    from './pages_v2/MbtiEntry.jsx';
 import { TopicSelect }  from './pages_v2/TopicSelect.jsx';
 import { TargetSelect } from './pages_v2/TargetSelect.jsx';
 import { Quiz }         from './pages_v2/Quiz.jsx';
@@ -255,9 +256,23 @@ export default function App() {
 
   // ── Entry dispatch ──────────────────────────────────────────────────────
 
+  const handleMbtiDirectSelect = useCallback((mbtiType) => {
+    setMbtiResult({
+      mbtiType,
+      biasScores: {},
+      thetas: { EI: 0, SN: 0, TF: 0, JP: 0 },
+      confidences: {},
+      triggerScores: {},
+      accidentScores: {},
+      questionCount: 0,
+      fromDirectSelection: true,
+    });
+    setScreen('post-quiz');
+  }, []);
+
   const handleStart = useCallback((mode) => {
     if (mode === 'mbti') {
-      startMbti();
+      setScreen('mbti-entry');
     } else if (mode === 'attack') {
       setFlow('attack');
       setScreen('target-select');
@@ -313,6 +328,16 @@ export default function App() {
 
   if (screen === 'entry') {
     return <Entry onStart={handleStart} />;
+  }
+
+  if (screen === 'mbti-entry') {
+    return (
+      <MbtiEntry
+        onStartQuiz={startMbti}
+        onSelectType={handleMbtiDirectSelect}
+        onBack={handleRetry}
+      />
+    );
   }
 
   if (screen === 'topic-select') {

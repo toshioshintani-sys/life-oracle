@@ -53,7 +53,7 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
 
   if (!result) return null;
 
-  const { mbtiType, biasScores } = result;
+  const { mbtiType, biasScores, fromDirectSelection } = result;
   const jungTypeId  = MBTI_TO_JUNG[mbtiType] ?? mbtiType;
   const cf          = cognitiveFunctionMap[mbtiType] ?? {};
   const famous      = famousPeople[mbtiType]?.people ?? [];
@@ -81,8 +81,8 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
   return (
     <div className="mbti-result-screen">
 
-      {/* 私はこう読みました */}
-      {reading && (
+      {/* 私はこう読みました（診断経由のみ表示） */}
+      {reading && !fromDirectSelection && (
         <div className="mbti-result-reading-intro">
           <p className="mbti-result-reading-label">私はこう読みました。</p>
           <p className="mbti-result-reading-text">{reading}</p>
