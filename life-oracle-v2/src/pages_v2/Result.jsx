@@ -1,5 +1,8 @@
 import { getResultWithFallback } from '../data_v2/results/index.js';
 import { biasInfo }              from '../data_v2/meta/biasInfo.js';
+import ShareButtons               from '../components/ShareButtons.jsx';
+import ShareCard                  from '../components/ShareCard.jsx';
+import CrossFlowActions           from '../components/CrossFlowActions.jsx';
 
 const SITUATION_LABELS = {
   w_boss_power:       '上司との関係',
@@ -27,7 +30,7 @@ const SITUATION_LABELS = {
   f_life_change:      '人生の転換点',
 };
 
-export function Result({ result, onRetry }) {
+export function Result({ result, onRetry, onSwitchFlow }) {
   if (!result) return null;
 
   const text  = getResultWithFallback(result.situation, result.age);
@@ -141,12 +144,25 @@ export function Result({ result, onRetry }) {
         </div>
       )}
 
-      {/* ⑨ フッター */}
-      <div className="result-footer">
-        <button className="retry-button" onClick={onRetry}>
-          もう一度診断する
-        </button>
-      </div>
+      {/* ⑨ シェアカード */}
+      <ShareCard
+        headline="今直面しているのは"
+        mainText={label}
+        subText=""
+        tagline=""
+      />
+
+      {/* ⑩ シェアボタン */}
+      <ShareButtons
+        shareText={`ライフオラクルで今の状況を整理しました。\n直面しているのは〈${label}〉\n\n#ライフオラクル`}
+      />
+
+      {/* ⑪ クロスフロー導線 */}
+      <CrossFlowActions
+        currentFlow="situation"
+        onSwitchFlow={onSwitchFlow}
+        onRetry={onRetry}
+      />
 
     </div>
   );

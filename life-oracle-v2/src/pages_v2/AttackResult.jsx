@@ -3,6 +3,9 @@
 // 心理OSの機構説明・魔法のフレーズ・境界線サインだけを前面に出す。
 
 import { biasInfo } from '../data_v2/meta/biasInfo.js';
+import ShareButtons     from '../components/ShareButtons.jsx';
+import ShareCard        from '../components/ShareCard.jsx';
+import CrossFlowActions from '../components/CrossFlowActions.jsx';
 
 const CONFIDENCE_TEXT = {
   high:   null,
@@ -10,7 +13,7 @@ const CONFIDENCE_TEXT = {
   low:    '候補が複数あります。もう少し観察を続けると、輪郭がはっきりしてきます。',
 };
 
-export function AttackResult({ result, onRetry }) {
+export function AttackResult({ result, onRetry, onSwitchFlow }) {
   if (!result || !result.type) return null;
   const { type, confidence, keyAnswers, topBiases } = result;
   const confidenceNote = CONFIDENCE_TEXT[confidence];
@@ -107,11 +110,25 @@ export function AttackResult({ result, onRetry }) {
         </div>
       )}
 
-      <div className="result-footer">
-        <button className="retry-button" onClick={onRetry}>
-          もう一度診断する
-        </button>
-      </div>
+      {/* ⑦ シェアカード */}
+      <ShareCard
+        headline="あの人がそう動く理由"
+        mainText={type.psychologyOS.mechanismShort}
+        subText=""
+        tagline=""
+      />
+
+      {/* ⑧ シェアボタン */}
+      <ShareButtons
+        shareText={`ライフオラクルであの人の動く理由がわかりました。\n"${type.psychologyOS.mechanismShort}"\n\n#ライフオラクル`}
+      />
+
+      {/* ⑨ クロスフロー導線 */}
+      <CrossFlowActions
+        currentFlow="attack"
+        onSwitchFlow={onSwitchFlow}
+        onRetry={onRetry}
+      />
 
     </div>
   );

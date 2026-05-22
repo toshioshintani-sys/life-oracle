@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { cognitiveFunctionMap, famousPeople } from '../data_v2/meta/cognitiveFunctions.js';
 import { biasInfo } from '../data_v2/meta/biasInfo.js';
 import mechanismsJson from '../data_v2/meta/prescriptions_mechanism.json';
+import ShareButtons from '../components/ShareButtons.jsx';
+import ShareCard from '../components/ShareCard.jsx';
+import CrossFlowActions from '../components/CrossFlowActions.jsx';
 
 const MECHANISMS = mechanismsJson.mechanisms;
 
@@ -32,7 +35,7 @@ const TYPE_READING = {
   ISFP: '答えのひとつひとつが、あなた自身のペースで選ばれています。感じたことに正直な人です。',
 };
 
-export function MbtiResult({ result, occupation, generation, onRetry }) {
+export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFlow }) {
   const [typeProfiles, setTypeProfiles]   = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
   const [biasMessages, setBiasMessages]   = useState(null);
@@ -103,7 +106,15 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
         </div>
       </div>
 
-      {/* なぜそれが起きるか（mechanism overlay・新規） */}
+      {/* 今日のアクション（タイプ直後に上げる） */}
+      {cf.todayAction && (
+        <div className="mbti-result-action">
+          <p className="mbti-result-action-label">今日ひとつだけ試すなら</p>
+          <p className="mbti-result-action-text">{cf.todayAction}</p>
+        </div>
+      )}
+
+      {/* なぜそれが起きるか（mechanism overlay） */}
       {mechanism && (
         <div className="mbti-result-mechanism">
           <p className="mbti-result-section-label">なぜそれが起きるか</p>
@@ -136,26 +147,27 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
         </div>
       )}
 
-      {/* 処方箋（既存・無傷） */}
+      {/* 処方箋（アコーディオン化・デフォルト展開） */}
       {loading ? (
         <div className="mbti-result-loading">処方箋を読み込んでいます...</div>
       ) : (
-        <div className="mbti-result-prescription">
-          <p className="mbti-result-section-label">あなただけの処方箋</p>
-          <p className="mbti-result-prescription-meta">
-            {occupation} × {mbtiType} × {generation}
-          </p>
-          <p className="mbti-result-prescription-sub">
-            職種・タイプ・年代の組み合わせ2,016通りから、あなた専用の処方箋を導き出しました。
-          </p>
-          {prescriptionText
-            ? <p className="mbti-result-prescription-text">{prescriptionText}</p>
-            : <p className="mbti-result-prescription-empty">該当する処方箋のデータがありません。</p>
-          }
-        </div>
+        <details className="mbti-result-prescription-details" open>
+          <summary className="mbti-result-prescription-summary">
+            処方箋を読む（{occupation} × {mbtiType} × {generation}）
+          </summary>
+          <div className="mbti-result-prescription">
+            <p className="mbti-result-prescription-sub">
+              職種・タイプ・年代の組み合わせ2,016通りから、あなた専用の処方箋を導き出しました。
+            </p>
+            {prescriptionText
+              ? <p className="mbti-result-prescription-text">{prescriptionText}</p>
+              : <p className="mbti-result-prescription-empty">該当する処方箋のデータがありません。</p>
+            }
+          </div>
+        </details>
       )}
 
-      {/* 明日のミクロアクション（mechanism.microInterventions・新規） */}
+      {/* 明日のミクロアクション */}
       {mechanism && isShadow && mechanism.microInterventions?.length > 0 && (
         <div className="mbti-result-micro-interventions">
           <p className="mbti-result-section-label">明日のミクロアクション</p>
@@ -201,17 +213,25 @@ export function MbtiResult({ result, occupation, generation, onRetry }) {
         </div>
       )}
 
-      {/* 今日のアクション */}
-      {cf.todayAction && (
-        <div className="mbti-result-action">
-          <p className="mbti-result-action-label">今日ひとつだけ試すなら</p>
-          <p className="mbti-result-action-text">{cf.todayAction}</p>
-        </div>
-      )}
+      {/* シェアカード（スクショ用） */}
+      <ShareCard
+        headline="私の動き方は"
+        mainText={typeName}
+        subText={jungTypeId}
+        tagline={isShadow ? `光は${cf.lightName}` : `影は${cf.shadowName}`}
+      />
 
-      <button className="mbti-result-retry" onClick={onRetry}>
-        もう一度診断する
-      </button>
+      {/* シェアボタン */}
+      <ShareButtons
+        shareText={`ライフオラクルで自分の動き方を読み解きました。\n私は〈${typeName}〉(${jungTypeId})\n${isShadow ? `光は${cf.lightName}` : `影は${cf.shadowName}`}\n\nあなたの動き方は？ #ライフオラクル`}
+      />
+
+      {/* 次の動線（クロスフロー） */}
+      <CrossFlowActions
+        currentFlow="mbti"
+        onSwitchFlow={onSwitchFlow}
+        onRetry={onRetry}
+      />
     </div>
   );
 }
