@@ -5,6 +5,7 @@ import mechanismsJson from '../data_v2/meta/prescriptions_mechanism.json';
 import ShareButtons from '../components/ShareButtons.jsx';
 import ShareCard from '../components/ShareCard.jsx';
 import CrossFlowActions from '../components/CrossFlowActions.jsx';
+import { incrementOnce } from '../lib/stats.js';
 
 const MECHANISMS = mechanismsJson.mechanisms;
 
@@ -42,6 +43,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   const [loading, setLoading]             = useState(true);
 
   useEffect(() => {
+    incrementOnce('mbti');
     Promise.all([
       fetch('/data/type_profiles.json').then(r => r.json()),
       fetch('/data/prescriptions.json').then(r => r.json()),

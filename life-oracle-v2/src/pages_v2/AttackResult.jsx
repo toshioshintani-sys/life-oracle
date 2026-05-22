@@ -2,10 +2,12 @@
 // 重要：相手の internalLabel（"決めつけ上司"等）はUIに一切出さない。
 // 心理OSの機構説明・魔法のフレーズ・境界線サインだけを前面に出す。
 
+import { useEffect } from 'react';
 import { biasInfo } from '../data_v2/meta/biasInfo.js';
 import ShareButtons     from '../components/ShareButtons.jsx';
 import ShareCard        from '../components/ShareCard.jsx';
 import CrossFlowActions from '../components/CrossFlowActions.jsx';
+import { incrementOnce } from '../lib/stats.js';
 
 const CONFIDENCE_TEXT = {
   high:   null,
@@ -14,6 +16,8 @@ const CONFIDENCE_TEXT = {
 };
 
 export function AttackResult({ result, onRetry, onSwitchFlow }) {
+  useEffect(() => { if (result?.type) incrementOnce('attack'); }, [result]);
+
   if (!result || !result.type) return null;
   const { type, confidence, keyAnswers, topBiases } = result;
   const confidenceNote = CONFIDENCE_TEXT[confidence];

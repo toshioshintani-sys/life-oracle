@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { getResultWithFallback } from '../data_v2/results/index.js';
 import { biasInfo }              from '../data_v2/meta/biasInfo.js';
 import ShareButtons               from '../components/ShareButtons.jsx';
 import ShareCard                  from '../components/ShareCard.jsx';
 import CrossFlowActions           from '../components/CrossFlowActions.jsx';
+import { incrementOnce }          from '../lib/stats.js';
 
 const SITUATION_LABELS = {
   w_boss_power:       '上司との関係',
@@ -31,6 +33,8 @@ const SITUATION_LABELS = {
 };
 
 export function Result({ result, onRetry, onSwitchFlow }) {
+  useEffect(() => { if (result) incrementOnce('situation'); }, [result]);
+
   if (!result) return null;
 
   const text  = getResultWithFallback(result.situation, result.age);
