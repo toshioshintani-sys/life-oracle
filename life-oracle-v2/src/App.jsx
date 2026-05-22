@@ -302,6 +302,39 @@ export default function App() {
     setAttackResult(null);
   }, []);
 
+  // ── Cross-flow switch ───────────────────────────────────────────────────
+  // Reset all per-session state (like handleRetry) but land on the entry
+  // screen of the requested flow instead of the global landing page.
+  const handleSwitchFlow = useCallback((flowName) => {
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+    setMbtiSession(null);
+    setSituSession(null);
+    setSituQuestions([]);
+    setAttackSession(null);
+    setAttackQuestions([]);
+    setCurrentQuestion(null);
+    setOracleMessage(null);
+    setMbtiResult(null);
+    setMbtiOccupation(null);
+    setMbtiGeneration(null);
+    setSituResult(null);
+    setAttackResult(null);
+
+    if (flowName === 'mbti') {
+      setFlow('mbti');
+      setScreen('mbti-entry');
+    } else if (flowName === 'situation') {
+      setFlow('situation');
+      setScreen('topic-select');
+    } else if (flowName === 'attack') {
+      setFlow('attack');
+      setScreen('target-select');
+    } else {
+      setFlow(null);
+      setScreen('entry');
+    }
+  }, []);
+
   // ── Answer dispatcher ───────────────────────────────────────────────────
 
   const handleAnswer = useCallback((question, responseOrChoice) => {
@@ -373,6 +406,7 @@ export default function App() {
           occupation={mbtiOccupation}
           generation={mbtiGeneration}
           onRetry={handleRetry}
+          onSwitchFlow={handleSwitchFlow}
         />
         <OracleWall typeName={mbtiResult?.mbtiType} category="mbti" />
       </>
@@ -382,7 +416,7 @@ export default function App() {
   if (screen === 'result-situation') {
     return (
       <>
-        <Result result={situResult} onRetry={handleRetry} />
+        <Result result={situResult} onRetry={handleRetry} onSwitchFlow={handleSwitchFlow} />
         <OracleWall typeName={situResult?.topSituation} category="situation" />
       </>
     );
@@ -391,7 +425,7 @@ export default function App() {
   if (screen === 'result-attack') {
     return (
       <>
-        <AttackResult result={attackResult} onRetry={handleRetry} />
+        <AttackResult result={attackResult} onRetry={handleRetry} onSwitchFlow={handleSwitchFlow} />
         <OracleWall typeName={attackResult?.type?.psychologyOS?.mechanismShort} category="attack" />
       </>
     );
