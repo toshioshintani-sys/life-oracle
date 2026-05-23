@@ -1,0 +1,8 @@
+/* global reset — App.css のトークンが読み込まれた後に適用される */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}

@@ -3,6 +3,12 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# v2 プレビュー用コンテキスト（PR プレビューではv2アプリを表示）
+[context.deploy-preview]
+  base = "life-oracle-v2"
+  command = "npm install && npm run build"
+  publish = "dist"
+
 # get_metrics function に CSV を同梱（バンドル時にコピーされる）
 [functions."get_metrics"]
   included_files = ["cockpit-data/daily_metrics.csv"]
