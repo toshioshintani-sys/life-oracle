@@ -9,6 +9,7 @@ import { MbtiResult }   from './pages_v2/MbtiResult.jsx';
 import { Result }       from './pages_v2/Result.jsx';
 import { AttackResult } from './pages_v2/AttackResult.jsx';
 import { OracleWall }   from './pages_v2/OracleWall.jsx';
+import { NoteIndex }    from './pages_v2/NoteIndex.jsx';
 import { cognitiveFunctionMap } from './data_v2/meta/cognitiveFunctions.js';
 
 const MBTI_SHADOW_SET = new Set(['ENTJ','ENFJ','ESFP','ENFP','ISFJ','INTP','INFJ','INFP']);
@@ -383,7 +384,11 @@ export default function App() {
                         SITU_ESTIMATED_TOTAL;
 
   if (screen === 'entry') {
-    return <Entry onStart={handleStart} />;
+    return <Entry onStart={handleStart} onOpenNoteIndex={() => setScreen('note-index')} />;
+  }
+
+  if (screen === 'note-index') {
+    return <NoteIndex onBack={() => setScreen('entry')} />;
   }
 
   if (screen === 'mbti-entry') {

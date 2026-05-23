@@ -7,6 +7,7 @@ import { biasInfo } from '../data_v2/meta/biasInfo.js';
 import ShareButtons     from '../components/ShareButtons.jsx';
 import ShareCard        from '../components/ShareCard.jsx';
 import CrossFlowActions from '../components/CrossFlowActions.jsx';
+import { NotePromo }    from '../components/NotePromo.jsx';
 import { incrementOnce } from '../lib/stats.js';
 
 const CONFIDENCE_TEXT = {
@@ -114,7 +115,10 @@ export function AttackResult({ result, onRetry, onSwitchFlow }) {
         </div>
       )}
 
-      {/* ⑦ シェアカード */}
+      {/* ⑦ note プロモ */}
+      <NotePromo />
+
+      {/* ⑧ シェアカード */}
       <ShareCard
         headline="あの人がそう動く理由"
         mainText={type.psychologyOS.mechanismShort}

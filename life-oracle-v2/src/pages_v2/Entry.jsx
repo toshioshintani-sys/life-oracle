@@ -31,7 +31,7 @@ const CHOICES = [
   },
 ];
 
-export function Entry({ onStart }) {
+export function Entry({ onStart, onOpenNoteIndex }) {
   const [totalCount, setTotalCount] = useState(null);
 
   useEffect(() => {
@@ -69,6 +69,10 @@ export function Entry({ onStart }) {
           </button>
         ))}
       </div>
+
+      <button className="entry-note-link" onClick={onOpenNoteIndex}>
+        note 記事まとめを読む →
+      </button>
     </div>
   );
 }
