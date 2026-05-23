@@ -38,7 +38,7 @@ export function NoteIndex({ onBack }) {
       <div className="note-index-header">
         <button className="note-index-back" onClick={onBack}>← 戻る</button>
         <p className="note-index-title">note 記事まとめ</p>
-        <p className="note-index-sub">ライフオラクルの「読み方」を、記事で深堀りしています。</p>
+        <p className="note-index-sub">対人攻略シリーズ50本掲載中。職場・家族・恋愛別に読めます。</p>
       </div>
 
       <NotePromo />

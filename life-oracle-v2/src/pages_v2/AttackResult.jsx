@@ -112,6 +112,15 @@ export function AttackResult({ result, onRetry, onSwitchFlow }) {
           </a>
         )}
         <NotePromo />
+        <a
+          href="https://note.com/lifeoraclejp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="detail-note-link"
+          style={{ marginTop: 16, display: 'block' }}
+        >
+          全50本の記事一覧を見る →
+        </a>
       </ResultDetail>
     );
   }
