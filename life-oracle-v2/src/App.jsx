@@ -428,35 +428,22 @@ export default function App() {
 
   if (screen === 'result-mbti') {
     return (
-      <>
-        <MbtiResult
-          result={mbtiResult}
-          occupation={mbtiOccupation}
-          generation={mbtiGeneration}
-          onRetry={handleRetry}
-          onSwitchFlow={handleSwitchFlow}
-        />
-        <OracleWall typeName={getMbtiWallName(mbtiResult?.mbtiType)} category="mbti" />
-      </>
+      <MbtiResult
+        result={mbtiResult}
+        occupation={mbtiOccupation}
+        generation={mbtiGeneration}
+        onRetry={handleRetry}
+        onSwitchFlow={handleSwitchFlow}
+      />
     );
   }
 
   if (screen === 'result-situation') {
-    return (
-      <>
-        <Result result={situResult} onRetry={handleRetry} onSwitchFlow={handleSwitchFlow} />
-        <OracleWall typeName={SITU_WALL_LABELS[situResult?.situation] ?? situResult?.situation} category="situation" />
-      </>
-    );
+    return <Result result={situResult} onRetry={handleRetry} onSwitchFlow={handleSwitchFlow} />;
   }
 
   if (screen === 'result-attack') {
-    return (
-      <>
-        <AttackResult result={attackResult} onRetry={handleRetry} onSwitchFlow={handleSwitchFlow} />
-        <OracleWall typeName={attackResult?.type?.psychologyOS?.mechanismShort} category="attack" />
-      </>
-    );
+    return <AttackResult result={attackResult} onRetry={handleRetry} onSwitchFlow={handleSwitchFlow} />;
   }
 
   return null;
