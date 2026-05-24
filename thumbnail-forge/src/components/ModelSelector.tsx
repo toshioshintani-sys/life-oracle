@@ -8,7 +8,7 @@ interface Props {
 const MODELS: { id: ModelId; label: string; detail: string }[] = [
   { id: 'gemini', label: 'Gemini', detail: 'gemini-2.5-flash-image' },
   { id: 'openai', label: 'OpenAI', detail: 'gpt-image-1' },
-  { id: 'flux', label: 'FLUX', detail: 'flux-1.1-pro' },
+  // { id: 'flux', label: 'FLUX', detail: 'flux-1.1-pro' },
 ];
 
 export function ModelSelector({ selected, onChange }: Props) {

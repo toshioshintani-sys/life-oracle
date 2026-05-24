@@ -14,7 +14,7 @@ import { DEFAULT_STYLE_SETTINGS } from './lib/types';
 export default function App() {
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9');
-  const [selectedModels, setSelectedModels] = useState<ModelId[]>(['gemini', 'openai', 'flux']);
+  const [selectedModels, setSelectedModels] = useState<ModelId[]>(['gemini', 'openai']);
   const [history, setHistory] = useState<PromptHistoryItem[]>([]);
   const [todayTotal, setTodayTotal] = useState(0);
   const [styleSettings, setStyleSettings] = useState<StyleSettingsType>(DEFAULT_STYLE_SETTINGS);
@@ -53,7 +53,7 @@ export default function App() {
       <header className="border-b border-slate-700 px-6 py-4 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-xl font-bold text-indigo-400">Thumbnail Forge</h1>
-          <p className="text-xs text-slate-500 mt-0.5">マルチモデル画像生成 — Gemini / OpenAI / FLUX</p>
+          <p className="text-xs text-slate-500 mt-0.5">マルチモデル画像生成 — Gemini / OpenAI</p>
         </div>
         <div className="text-xs text-slate-500">
           今日: <span className="text-slate-300">{todayTotal}</span> / 100 生成

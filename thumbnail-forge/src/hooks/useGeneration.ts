@@ -13,7 +13,7 @@ interface LastRequest {
 const INITIAL_RESULTS: GenerationResult[] = [
   { modelId: 'gemini', status: 'idle' },
   { modelId: 'openai', status: 'idle' },
-  { modelId: 'flux', status: 'idle' },
+  // { modelId: 'flux', status: 'idle' },
 ];
 
 export function useGeneration() {
