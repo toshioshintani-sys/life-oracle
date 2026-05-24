@@ -31,8 +31,11 @@ const CHOICES = [
   },
 ];
 
+const NOTE_INDEX_START = new Date('2026-05-29T00:00:00+09:00');
+
 export function Entry({ onStart, onOpenNoteIndex }) {
   const [totalCount, setTotalCount] = useState(null);
+  const showNoteIndex = new Date() >= NOTE_INDEX_START;
 
   useEffect(() => {
     getDiagnosisStats().then(stats => {
@@ -70,9 +73,11 @@ export function Entry({ onStart, onOpenNoteIndex }) {
         ))}
       </div>
 
-      <button className="entry-note-link" onClick={onOpenNoteIndex}>
-        note 記事まとめを読む →
-      </button>
+      {showNoteIndex && (
+        <button className="entry-note-link" onClick={onOpenNoteIndex}>
+          note 記事まとめを読む →
+        </button>
+      )}
     </div>
   );
 }
