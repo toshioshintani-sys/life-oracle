@@ -1,9 +1,9 @@
 [build]
-  command = "npm run build"
+  base = "life-oracle-v2"
+  command = "npm install && npm run build"
   publish = "dist"
-  functions = "netlify/functions"
+  functions = "../netlify/functions"
 
-# v2 プレビュー用コンテキスト（PR プレビューではv2アプリを表示）
 [context.deploy-preview]
   base = "life-oracle-v2"
   command = "npm install && npm run build"
