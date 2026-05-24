@@ -32,7 +32,7 @@ export function OracleWall({ typeName, category = 'mbti' }) {
   const [deityName, setDeityName] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const displayName = typeName ? `${typeName} × ${deityName}` : deityName;
+  const displayName = typeName ? `${typeName}の${deityName}` : deityName;
 
   useEffect(() => {
     getClientIp().then(ip => setDeityName(getDeityName(ip)));
@@ -133,7 +133,7 @@ export function OracleWall({ typeName, category = 'mbti' }) {
           <div key={p.id} className="oracle-wall-post">
             <div className="oracle-wall-post-header">
               <span className="oracle-wall-post-name">
-                {p.type_name} × {p.deity_name}
+                {p.type_name}の{p.deity_name}
               </span>
               <span className="oracle-wall-post-date">
                 {formatDate(p.created_at)}
