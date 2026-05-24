@@ -27,21 +27,21 @@ const GROUPS = [
 
 export function TargetSelect({ onSelect, onBack }) {
   return (
-    <div className="topic-screen">
+    <div className="target-screen">
       <button className="back-button" onClick={onBack}>もどる</button>
       <p className="topic-lead">攻略したい相手は、どなたですか？</p>
       {GROUPS.map(group => (
         <div key={group.groupLabel} className="target-group">
           <p className="target-group-label">{group.groupLabel}</p>
-          <div className="topic-choices">
+          <div className="target-choices">
             {group.targets.map(t => (
               <button
                 key={t.id}
-                className="topic-button"
+                className="target-button"
                 onClick={() => onSelect(t.id)}
               >
-                <span className="topic-label">{t.label}</span>
-                <span className="topic-desc">{t.desc}</span>
+                <span className="target-label">{t.label}</span>
+                <span className="target-desc">{t.desc}</span>
               </button>
             ))}
           </div>
