@@ -23,7 +23,7 @@ Output ONLY the prompt text. No explanations, no quotes, no labels.`;
 
 async function callGemini(articleText: string): Promise<string> {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -105,7 +105,6 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    // 長すぎる記事はトークン節約のため先頭3000字に絞る
     const truncated = articleText.slice(0, 3000);
 
     const prompt = llm === 'openai'
