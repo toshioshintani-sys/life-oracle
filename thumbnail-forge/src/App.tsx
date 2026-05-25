@@ -6,10 +6,17 @@ import { ImageGrid } from './components/ImageGrid';
 import { PromptHistory } from './components/PromptHistory';
 import { ArticleUpload } from './components/ArticleUpload';
 import { StyleSettings } from './components/StyleSettings';
+import { TextOverlaySettings } from './components/TextOverlaySettings';
 import { useGeneration } from './hooks/useGeneration';
 import { getHistory, getTodayTotal, getStyleSettings, saveStyleSettings } from './lib/storage';
-import type { AspectRatio, ModelId, PromptHistoryItem, StyleSettings as StyleSettingsType } from './lib/types';
-import { DEFAULT_STYLE_SETTINGS } from './lib/types';
+import type {
+  AspectRatio,
+  ModelId,
+  PromptHistoryItem,
+  StyleSettings as StyleSettingsType,
+  TextOverlay,
+} from './lib/types';
+import { DEFAULT_STYLE_SETTINGS, DEFAULT_TEXT_OVERLAY } from './lib/types';
 
 export default function App() {
   const [prompt, setPrompt] = useState('');
@@ -18,6 +25,7 @@ export default function App() {
   const [history, setHistory] = useState<PromptHistoryItem[]>([]);
   const [todayTotal, setTodayTotal] = useState(0);
   const [styleSettings, setStyleSettings] = useState<StyleSettingsType>(DEFAULT_STYLE_SETTINGS);
+  const [textOverlay, setTextOverlay] = useState<TextOverlay>(DEFAULT_TEXT_OVERLAY);
 
   const { results, isGenerating, lastRequest, generate, regenerate } = useGeneration();
 
@@ -82,6 +90,9 @@ export default function App() {
           {/* 世界観設定 */}
           <StyleSettings settings={styleSettings} onChange={handleStyleChange} />
 
+          {/* テキスト合成 */}
+          <TextOverlaySettings settings={textOverlay} onChange={setTextOverlay} />
+
           {lastRequest && (
             <button
               type="button"
@@ -98,7 +109,7 @@ export default function App() {
         </aside>
 
         <main className="flex-1 p-4 overflow-y-auto min-h-0">
-          <ImageGrid results={results} />
+          <ImageGrid results={results} textOverlay={textOverlay} />
         </main>
       </div>
     </div>

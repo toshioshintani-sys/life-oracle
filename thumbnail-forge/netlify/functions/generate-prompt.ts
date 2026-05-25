@@ -7,23 +7,28 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-const SYSTEM_PROMPT = `You are an expert thumbnail prompt engineer specializing in note.jp, Substack, and Pinterest thumbnails.
+const SYSTEM_PROMPT = `You are an expert thumbnail prompt engineer specializing in note.jp and Japanese self-help blog thumbnails.
 
 Given an article, generate ONE highly effective image generation prompt in English.
 
+Style target: Japanese manga/anime illustration style — the same visual language used in popular note.jp self-help articles, business manga, and Japanese infographic content.
+
 Requirements:
-- Visually conveys the article's core theme or emotion
-- Optimized for AI image generators (photorealistic or illustrated style)
-- Suitable as a blog thumbnail (16:9 landscape orientation)
-- Include: main subject, scene/setting, lighting style, artistic style, mood, quality descriptors
-- NO text, letters, or words in the image
-- Length: 2-4 sentences or comma-separated descriptors
+- Art style: clean manga/anime illustration, flat bold colors, strong outlines, expressive character faces
+- Color palette: high-contrast vivid colors — yellows, reds, oranges, strong blacks; avoid muted or pastel tones
+- Composition: single dominant character (office worker, business person, or symbolic figure) with exaggerated emotional expression that conveys the article's core emotion
+- The character's expression and pose must immediately communicate the article's theme (e.g., frustration, confidence, relief, determination)
+- Background: simple, graphic, minimal — solid color with bold geometric shapes, speed lines, or simple icons; NOT photorealistic scenes
+- NO text, NO letters, NO words, NO speech bubbles anywhere in the image
+- Style reference: Japanese business manga panel, self-help book cover illustration, bold editorial cartoon
+- Aspect ratio: 16:9 landscape
+- Quality: sharp lines, professional illustration quality
 
 Output ONLY the prompt text. No explanations, no quotes, no labels.`;
 
 async function callGemini(articleText: string): Promise<string> {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,7 @@
 import type { StyleSettings } from './types';
 
 const KEYWORD_EN: Record<string, string> = {
+  'マンガ/アニメ': 'manga anime illustration style, flat bold colors, strong black outlines, exaggerated expressive character faces, Japanese self-help book cover art',
   'ミニマル': 'minimal clean design',
   '和風モダン': 'Japanese modern aesthetic, wabi-sabi',
   'サイバーパンク': 'cyberpunk, neon lights, futuristic',

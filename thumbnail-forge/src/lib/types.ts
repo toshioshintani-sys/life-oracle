@@ -42,3 +42,19 @@ export const DEFAULT_STYLE_SETTINGS: StyleSettings = {
   mood: '',
   freeText: '',
 };
+
+export interface TextOverlay {
+  enabled: boolean;
+  title: string;
+  subtitle: string;
+  titleColor: 'white' | 'yellow' | 'black';
+  position: 'top' | 'bottom';
+}
+
+export const DEFAULT_TEXT_OVERLAY: TextOverlay = {
+  enabled: false,
+  title: '',
+  subtitle: '',
+  titleColor: 'white',
+  position: 'bottom',
+};
