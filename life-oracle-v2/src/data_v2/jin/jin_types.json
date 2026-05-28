@@ -3916,7 +3916,7 @@
           "whyItWorks": "自律して動いていることを見せることで、この親の尊重スタンスをさらに引き出す"
         }
       ],
-      "boundarySignal": "特になし。",
+      "boundarySignal": null,
       "matchSignals": {
         "situationTags": [
           "parent_autonomous",
@@ -5231,7 +5231,7 @@
           "whyItWorks": "語ることの意味（伝承・記録）を認めることで、対話が双方向になる"
         }
       ],
-      "boundarySignal": "特になし。",
+      "boundarySignal": null,
       "matchSignals": {
         "situationTags": [
           "grandparent_glory",
@@ -5272,7 +5272,7 @@
           "whyItWorks": "関係の価値を言語化することで、この安心感のある関係をさらに大切にする"
         }
       ],
-      "boundarySignal": "特になし。",
+      "boundarySignal": null,
       "matchSignals": {
         "situationTags": [
           "grandparent_accepting",
