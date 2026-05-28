@@ -43,7 +43,10 @@ export function NoteIndex({ onBack }) {
         <button className="note-index-back" onClick={onBack}>← 戻る</button>
         <p className="note-index-title">note 記事まとめ</p>
         <p className="note-index-sub">
-          対人攻略50本を掲載
+          {(() => {
+            const jinCount = Object.values(byTarget).flat().length;
+            return jinCount > 0 ? `対人攻略${jinCount}本を掲載` : '対人攻略シリーズ連載中';
+          })()}
           {biasArticles.length > 0 ? `、バイアス解説${biasArticles.length}本も公開中` : ''}。
           note全体では100本以上のシリーズが走っています。
         </p>
