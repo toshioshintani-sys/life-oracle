@@ -5,6 +5,7 @@ import mechanismsJson        from '../data_v2/meta/prescriptions_mechanism.json'
 import ShareButtons          from '../components/ShareButtons.jsx';
 import ShareCard             from '../components/ShareCard.jsx';
 import CrossFlowActions      from '../components/CrossFlowActions.jsx';
+import { NotePromo }         from '../components/NotePromo.jsx';
 import { ResultDetail }      from '../components/ResultDetail.jsx';
 import { OracleWall }        from './OracleWall.jsx';
 import { incrementOnce }     from '../lib/stats.js';
@@ -189,7 +190,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
               </div>
               <p className="mbti-bias-short">{info?.short}</p>
               <p className="mbti-bias-msg">{msg ?? info?.description}</p>
-              {info?.noteUrl && (
+              {info?.noteUrl && new Date() >= new Date(info.noteScheduledAt ?? 0) && (
                 <a href={info.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link">
                   このバイアスを深掘りする →
                 </a>
@@ -238,6 +239,31 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     return (
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
         <OracleWall typeName={typeName} category="mbti" />
+      </ResultDetail>
+    );
+  }
+
+  if (section === 'note') {
+    const typeNoteUrl = cognitiveFunctionMap[mbtiType]?.noteUrl ?? null;
+    return (
+      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
+        <p className="detail-eyebrow">このタイプをもっと深く読む</p>
+        {typeNoteUrl && (
+          <a href={typeNoteUrl} target="_blank" rel="noopener noreferrer"
+             className="detail-note-link">
+            {typeName}の記事を読む →
+          </a>
+        )}
+        <NotePromo />
+        <a
+          href="https://note.com/lifeoraclejp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="detail-note-link"
+          style={{ marginTop: 16, display: 'block' }}
+        >
+          全記事一覧を見る →
+        </a>
       </ResultDetail>
     );
   }
@@ -293,6 +319,9 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             preview={typeProfile?.praiseText?.slice(0, 35) + '…'}
             onClick={() => setSection('profile')} />
         )}
+        <HubCard icon="📖" title="note で深く読む"
+          preview="記事・シリーズ・メンバーシップ"
+          onClick={() => setSection('note')} />
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じタイプの人たちのコメント"
           onClick={() => setSection('wall')} />

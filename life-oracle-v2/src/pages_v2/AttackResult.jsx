@@ -56,7 +56,7 @@ export function AttackResult({ result, onRetry, onSwitchFlow }) {
               <div key={i} className={`result-bias-mini bias-rank-${i + 1}`}>
                 <span className="bias-name-mini">{b.name}</span>
                 <span className="bias-short-mini">{b.short}</span>
-                {b.noteUrl && (
+                {b.noteUrl && new Date() >= new Date(b.noteScheduledAt ?? 0) && (
                   <a href={b.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link-mini">詳しく →</a>
                 )}
               </div>

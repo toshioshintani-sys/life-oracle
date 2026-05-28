@@ -4,6 +4,7 @@ import { biasInfo }              from '../data_v2/meta/biasInfo.js';
 import ShareButtons              from '../components/ShareButtons.jsx';
 import ShareCard                 from '../components/ShareCard.jsx';
 import CrossFlowActions          from '../components/CrossFlowActions.jsx';
+import { NotePromo }             from '../components/NotePromo.jsx';
 import { ResultDetail }          from '../components/ResultDetail.jsx';
 import { OracleWall }            from './OracleWall.jsx';
 import { incrementOnce }         from '../lib/stats.js';
@@ -102,7 +103,7 @@ export function Result({ result, onRetry, onSwitchFlow }) {
               <div key={i} className={`result-bias-mini bias-rank-${i + 1}`}>
                 <span className="bias-name-mini">{b.name}</span>
                 <span className="bias-short-mini">{b.short}</span>
-                {b.noteUrl && (
+                {b.noteUrl && new Date() >= new Date(b.noteScheduledAt ?? 0) && (
                   <a href={b.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link-mini">詳しく →</a>
                 )}
               </div>
@@ -149,6 +150,24 @@ export function Result({ result, onRetry, onSwitchFlow }) {
     );
   }
 
+  if (section === 'note') {
+    return (
+      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
+        <p className="detail-eyebrow">この状況をもっと深く読む</p>
+        <NotePromo />
+        <a
+          href="https://note.com/lifeoraclejp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="detail-note-link"
+          style={{ marginTop: 16, display: 'block' }}
+        >
+          全記事一覧を見る →
+        </a>
+      </ResultDetail>
+    );
+  }
+
   // ── ハブ画面 ────────────────────────────────
   return (
     <div className="result-hub">
@@ -187,6 +206,9 @@ export function Result({ result, onRetry, onSwitchFlow }) {
             preview={text.action.slice(0, 40) + '…'}
             onClick={() => setSection('action')} />
         )}
+        <HubCard icon="📖" title="note で深く読む"
+          preview="記事・シリーズ・メンバーシップ"
+          onClick={() => setSection('note')} />
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じ状況の人たちのコメント"
           onClick={() => setSection('wall')} />
