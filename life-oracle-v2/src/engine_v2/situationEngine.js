@@ -55,7 +55,7 @@ export function createSession() {
     maxPossibleScores,
     demographicScores,
     ageEvidenceCount: 0,
-    biasScores:       { B1: 0, B2: 0, B3: 0, B4: 0, B6: 0, B8: 0, B12: 0 },
+    biasScores:       { B1: 0, B2: 0, B3: 0, B4: 0, B5: 0, B6: 0, B7: 0, B8: 0, B12: 0 },
     jungHints:        { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 },
     keyAnswers:       [],
     evidenceLog:      [],
