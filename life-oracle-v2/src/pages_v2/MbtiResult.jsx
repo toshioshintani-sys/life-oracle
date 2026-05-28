@@ -189,6 +189,11 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
               </div>
               <p className="mbti-bias-short">{info?.short}</p>
               <p className="mbti-bias-msg">{msg ?? info?.description}</p>
+              {info?.noteUrl && (
+                <a href={info.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link">
+                  このバイアスを深掘りする →
+                </a>
+              )}
             </div>
           );
         })}

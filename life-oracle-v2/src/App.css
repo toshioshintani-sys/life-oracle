@@ -1648,6 +1648,25 @@ button {
   margin: 0;
 }
 
+.bias-note-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.bias-note-link:hover { text-decoration: underline; }
+
+.bias-note-link-mini {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.bias-note-link-mini:hover { text-decoration: underline; }
+
 /* ===== Oracle Wall（掲示板） ===== */
 .oracle-wall {
   width: 100%;
