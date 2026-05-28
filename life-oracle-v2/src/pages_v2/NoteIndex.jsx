@@ -13,14 +13,12 @@ const TARGET_LABELS = {
   grandparent:    '祖父母',
   partner:        '恋人',
   almost_partner: '恋人未満',
-  friend:         '友人',
 };
 
 const TARGET_GROUPS = [
   { label: '職場の人間関係',  keys: ['boss', 'colleague', 'subordinate'] },
   { label: '家族',            keys: ['parent', 'child', 'sibling', 'grandparent'] },
   { label: '恋愛・恋人未満', keys: ['partner', 'almost_partner'] },
-  { label: 'その他',          keys: ['friend'] },
 ];
 
 const allTypes = (types.types ?? []);

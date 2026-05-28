@@ -314,9 +314,9 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             preview={biasInfo[top2[0]]?.name + ' ほか'}
             onClick={() => setSection('biases')} />
         )}
-        {(typeProfile || !loading) && (
+        {typeProfile && (
           <HubCard icon="✨" title="あなたの強み・心の癖"
-            preview={typeProfile?.praiseText?.slice(0, 35) + '…'}
+            preview={typeProfile.praiseText.slice(0, 35) + '…'}
             onClick={() => setSection('profile')} />
         )}
         <HubCard icon="📖" title="note で深く読む"

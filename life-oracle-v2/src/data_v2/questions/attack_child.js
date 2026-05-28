@@ -4,7 +4,7 @@
 export const ATTACK_CHILD_QUESTIONS = [
 
   {
-    id: 'atk_c_001',
+    id: 'atk_ch_001',
     type: 'entry',
     order: 1,
     text: 'その子は「やりたくないこと」をどう断りますか？',
@@ -46,7 +46,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_002',
+    id: 'atk_ch_002',
     type: 'entry',
     order: 2,
     text: '友達との関係で困ったとき、その子はどうしますか？',
@@ -88,7 +88,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_003',
+    id: 'atk_ch_003',
     type: 'probe',
     text: 'その子はほめられたとき、どんな反応をしますか？',
     discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_78', 'jin_80', 'jin_81', 'jin_83'],
@@ -129,7 +129,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_004',
+    id: 'atk_ch_004',
     type: 'probe',
     text: 'その子が集中しているとき、邪魔されたらどうなりますか？',
     discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_77', 'jin_78', 'jin_79', 'jin_83'],
@@ -170,7 +170,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_005',
+    id: 'atk_ch_005',
     type: 'probe',
     text: 'その子は「なんで？」を何回くらい聞いてきますか？',
     discriminates: ['jin_77', 'jin_79', 'jin_80', 'jin_81', 'jin_83'],
@@ -203,7 +203,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_006',
+    id: 'atk_ch_006',
     type: 'probe',
     text: 'その子は「ルール・決まり」に対してどう反応しますか？',
     discriminates: ['jin_74', 'jin_76', 'jin_77', 'jin_78', 'jin_81', 'jin_83'],
@@ -244,7 +244,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_007',
+    id: 'atk_ch_007',
     type: 'probe',
     text: 'その子が「言うことを聞かない」とき、どんなパターンが多いですか？',
     discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_77', 'jin_79', 'jin_81'],
@@ -285,7 +285,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_008',
+    id: 'atk_ch_008',
     type: 'probe',
     text: 'その子はどんなときに一番いきいきしていますか？',
     discriminates: ['jin_74', 'jin_77', 'jin_78', 'jin_80', 'jin_81', 'jin_82', 'jin_83'],
@@ -326,7 +326,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_009',
+    id: 'atk_ch_009',
     type: 'probe',
     text: 'その子は「先生・大人」に対してどんな態度をとりますか？',
     discriminates: ['jin_75', 'jin_76', 'jin_78', 'jin_79', 'jin_81', 'jin_82'],
@@ -367,7 +367,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_010',
+    id: 'atk_ch_010',
     type: 'probe',
     text: 'その子が一人でいるとき、何をしていることが多いですか？',
     discriminates: ['jin_75', 'jin_77', 'jin_78', 'jin_79', 'jin_80', 'jin_82', 'jin_83'],
@@ -408,7 +408,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_011',
+    id: 'atk_ch_011',
     type: 'probe',
     text: 'その子が「負けた」「うまくいかなかった」とき、どう立て直しますか？',
     discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_78', 'jin_81'],
@@ -449,7 +449,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_012',
+    id: 'atk_ch_012',
     type: 'probe',
     text: 'その子は知らない人・初対面の場でどう振る舞いますか？',
     discriminates: ['jin_75', 'jin_79', 'jin_80', 'jin_81', 'jin_82', 'jin_83'],
@@ -490,7 +490,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_013',
+    id: 'atk_ch_013',
     type: 'probe',
     text: 'その子は「一人で何かを決める」ことが得意ですか？',
     discriminates: ['jin_75', 'jin_76', 'jin_77', 'jin_79', 'jin_80', 'jin_82', 'jin_83'],
@@ -531,7 +531,7 @@ export const ATTACK_CHILD_QUESTIONS = [
   },
 
   {
-    id: 'atk_c_014',
+    id: 'atk_ch_014',
     type: 'probe',
     text: 'その子はグループの中でどんな役回りになることが多いですか？',
     discriminates: ['jin_76', 'jin_77', 'jin_79', 'jin_80', 'jin_81', 'jin_82', 'jin_83'],
