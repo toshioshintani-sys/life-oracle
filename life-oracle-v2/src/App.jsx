@@ -8,31 +8,7 @@ import { PostQuiz }     from './pages_v2/PostQuiz.jsx';
 import { MbtiResult }   from './pages_v2/MbtiResult.jsx';
 import { Result }       from './pages_v2/Result.jsx';
 import { AttackResult } from './pages_v2/AttackResult.jsx';
-import { OracleWall }   from './pages_v2/OracleWall.jsx';
 import { NoteIndex }    from './pages_v2/NoteIndex.jsx';
-import { cognitiveFunctionMap } from './data_v2/meta/cognitiveFunctions.js';
-
-const MBTI_SHADOW_SET = new Set(['ENTJ','ENFJ','ESFP','ENFP','ISFJ','INTP','INFJ','INFP']);
-function getMbtiWallName(mbtiType) {
-  const cf = cognitiveFunctionMap[mbtiType];
-  if (!cf) return mbtiType;
-  return MBTI_SHADOW_SET.has(mbtiType) ? cf.shadowName : cf.lightName;
-}
-
-const SITU_WALL_LABELS = {
-  w_boss_power: '上司との関係', w_boss_unfair: '評価・不公平感',
-  w_boss_values: '方針の不一致', w_col_isolation: '職場での孤立',
-  w_col_rivalry: '同僚との摩擦', w_work_empty: 'やりがい',
-  w_work_overload: '消耗', w_career_change: '転職',
-  w_career_indep: '独立・起業', w_career_stuck: '成長の頭打ち',
-  r_partner_drift: 'パートナーとの距離', r_partner_divorce: '別れへの迷い',
-  r_parent_pressure: '親のプレッシャー', r_parent_care: '介護・ケア',
-  r_friend_isolation: '友人関係での孤立', r_friend_toxic: '消耗する人間関係',
-  s_self_esteem: '自己肯定感', s_emotion_control: '感情のコントロール',
-  s_no_direction: '方向性が見えない', s_burnout: '燃え尽き',
-  f_job_decision: '仕事の決断', f_independence: '自立への迷い',
-  f_life_change: '人生の転換点',
-};
 
 // MBTI engine
 import { createSession as createMbtiSession } from './engine_v2/session.js';
