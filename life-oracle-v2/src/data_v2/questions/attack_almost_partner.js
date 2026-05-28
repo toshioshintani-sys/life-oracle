@@ -9,7 +9,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     type: 'entry',
     order: 1,
     text: 'その人があなたに連絡してくるのは、どんなタイミングが多いですか？',
-    discriminates: [],
+    discriminates: ['jin_113', 'jin_117', 'jin_119'],
     choices: [
       {
         id: 'when_lonely',
@@ -51,7 +51,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     type: 'entry',
     order: 2,
     text: 'あなたが他の異性（友人）の話をしたとき、その人はどう反応しますか？',
-    discriminates: [],
+    discriminates: ['jin_113', 'jin_114', 'jin_115', 'jin_116', 'jin_118'],
     choices: [
       {
         id: 'obvious_jealous',
@@ -92,7 +92,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_003',
     type: 'probe',
     text: 'その人が「友達として」と言いながらとる行動は、どちらに近いですか？',
-    discriminates: [],
+    discriminates: ['jin_114', 'jin_115', 'jin_116', 'jin_117', 'jin_118', 'jin_119'],
     choices: [
       {
         id: 'over_service',
@@ -133,7 +133,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_004',
     type: 'probe',
     text: 'その人は「好き」「気になっている」を言語化する人ですか？',
-    discriminates: [],
+    discriminates: ['jin_116', 'jin_117', 'jin_118', 'jin_119'],
     choices: [
       {
         id: 'verbal',
@@ -166,7 +166,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_005',
     type: 'probe',
     text: 'その人は、将来的に「付き合う」ことについてどんなスタンスをとっていますか？',
-    discriminates: [],
+    discriminates: ['jin_113', 'jin_114', 'jin_117', 'jin_120'],
     choices: [
       {
         id: 'avoid_topic',
@@ -199,7 +199,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_006',
     type: 'probe',
     text: 'その人はグループでの活動と1対1でのどちらを多く誘ってきますか？',
-    discriminates: [],
+    discriminates: ['jin_113', 'jin_115', 'jin_116', 'jin_117', 'jin_119'],
     choices: [
       {
         id: 'group_only',
@@ -240,7 +240,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_007',
     type: 'probe',
     text: 'その人は「告白する・されること」についてどんなスタンスですか？',
-    discriminates: [],
+    discriminates: ['jin_114', 'jin_115', 'jin_118', 'jin_119', 'jin_120'],
     choices: [
       {
         id: 'fears_rejection',
@@ -281,7 +281,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_008',
     type: 'probe',
     text: 'その人はあなたと会った後、連絡を送ってきますか？',
-    discriminates: [],
+    discriminates: ['jin_114', 'jin_116', 'jin_117', 'jin_118', 'jin_119'],
     choices: [
       {
         id: 'often',
@@ -322,7 +322,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_009',
     type: 'probe',
     text: 'その人はあなたとの関係を、共通の友人にどう見せていますか？',
-    discriminates: [],
+    discriminates: ['jin_114', 'jin_116', 'jin_117', 'jin_118', 'jin_119', 'jin_120'],
     choices: [
       {
         id: 'just_friends',
@@ -363,7 +363,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_010',
     type: 'probe',
     text: 'その人があなたに「頼りにしている」と言うのはどんな状況ですか？',
-    discriminates: [],
+    discriminates: ['jin_115', 'jin_117', 'jin_118', 'jin_119', 'jin_120'],
     choices: [
       {
         id: 'often_always',
@@ -404,7 +404,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_011',
     type: 'probe',
     text: 'デートの計画はどちらが立てることが多いですか？',
-    discriminates: [],
+    discriminates: ['jin_113', 'jin_114', 'jin_117', 'jin_118', 'jin_119'],
     choices: [
       {
         id: 'you_always',
@@ -445,7 +445,7 @@ export const ATTACK_ALMOST_PARTNER_QUESTIONS = [
     id: 'atk_ap_012',
     type: 'probe',
     text: '「距離が縮まったかな」と感じた後、その人はどうなりますか？',
-    discriminates: [],
+    discriminates: ['jin_115', 'jin_116', 'jin_118', 'jin_119', 'jin_120'],
     choices: [
       {
         id: 'gets_closer',

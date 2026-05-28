@@ -8,7 +8,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     type: 'entry',
     order: 1,
     text: 'その子は「やりたくないこと」をどう断りますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_77', 'jin_78', 'jin_79'],
     choices: [
       {
         id: 'ignore',
@@ -50,7 +50,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     type: 'entry',
     order: 2,
     text: '友達との関係で困ったとき、その子はどうしますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_80', 'jin_82', 'jin_83'],
     choices: [
       {
         id: 'report',
@@ -91,7 +91,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_003',
     type: 'probe',
     text: 'その子はほめられたとき、どんな反応をしますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_78', 'jin_80', 'jin_81', 'jin_83'],
     choices: [
       {
         id: 'excited',
@@ -132,7 +132,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_004',
     type: 'probe',
     text: 'その子が集中しているとき、邪魔されたらどうなりますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_77', 'jin_78', 'jin_79', 'jin_83'],
     choices: [
       {
         id: 'strong_anger',
@@ -173,7 +173,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_005',
     type: 'probe',
     text: 'その子は「なんで？」を何回くらい聞いてきますか？',
-    discriminates: [],
+    discriminates: ['jin_77', 'jin_79', 'jin_80', 'jin_81', 'jin_83'],
     choices: [
       {
         id: 'many',
@@ -206,7 +206,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_006',
     type: 'probe',
     text: 'その子は「ルール・決まり」に対してどう反応しますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_76', 'jin_77', 'jin_78', 'jin_81', 'jin_83'],
     choices: [
       {
         id: 'accepts',
@@ -247,7 +247,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_007',
     type: 'probe',
     text: 'その子が「言うことを聞かない」とき、どんなパターンが多いですか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_77', 'jin_79', 'jin_81'],
     choices: [
       {
         id: 'emotional_protest',
@@ -288,7 +288,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_008',
     type: 'probe',
     text: 'その子はどんなときに一番いきいきしていますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_77', 'jin_78', 'jin_80', 'jin_81', 'jin_82', 'jin_83'],
     choices: [
       {
         id: 'with_friends',
@@ -329,7 +329,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_009',
     type: 'probe',
     text: 'その子は「先生・大人」に対してどんな態度をとりますか？',
-    discriminates: [],
+    discriminates: ['jin_75', 'jin_76', 'jin_78', 'jin_79', 'jin_81', 'jin_82'],
     choices: [
       {
         id: 'obedient',
@@ -370,7 +370,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_010',
     type: 'probe',
     text: 'その子が一人でいるとき、何をしていることが多いですか？',
-    discriminates: [],
+    discriminates: ['jin_75', 'jin_77', 'jin_78', 'jin_79', 'jin_80', 'jin_82', 'jin_83'],
     choices: [
       {
         id: 'device_games',
@@ -411,7 +411,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_011',
     type: 'probe',
     text: 'その子が「負けた」「うまくいかなかった」とき、どう立て直しますか？',
-    discriminates: [],
+    discriminates: ['jin_74', 'jin_75', 'jin_76', 'jin_78', 'jin_81'],
     choices: [
       {
         id: 'emotional_outburst',
@@ -452,7 +452,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_012',
     type: 'probe',
     text: 'その子は知らない人・初対面の場でどう振る舞いますか？',
-    discriminates: [],
+    discriminates: ['jin_75', 'jin_79', 'jin_80', 'jin_81', 'jin_82', 'jin_83'],
     choices: [
       {
         id: 'approaches',
@@ -493,7 +493,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_013',
     type: 'probe',
     text: 'その子は「一人で何かを決める」ことが得意ですか？',
-    discriminates: [],
+    discriminates: ['jin_75', 'jin_76', 'jin_77', 'jin_79', 'jin_80', 'jin_82', 'jin_83'],
     choices: [
       {
         id: 'yes_independent',
@@ -534,7 +534,7 @@ export const ATTACK_CHILD_QUESTIONS = [
     id: 'atk_c_014',
     type: 'probe',
     text: 'その子はグループの中でどんな役回りになることが多いですか？',
-    discriminates: [],
+    discriminates: ['jin_76', 'jin_77', 'jin_79', 'jin_80', 'jin_81', 'jin_82', 'jin_83'],
     choices: [
       {
         id: 'leader',

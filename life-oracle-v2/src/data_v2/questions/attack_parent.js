@@ -8,7 +8,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     type: 'entry',
     order: 1,
     text: 'あなたが自分で決めた選択を親に話したとき、最初の反応は？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_61', 'jin_64', 'jin_65', 'jin_68', 'jin_69', 'jin_70'],
     choices: [
       {
         id: 'override',
@@ -50,7 +50,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     type: 'entry',
     order: 2,
     text: '親が「心配している」と言うとき、その心配はどんな形で出てきますか？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_62', 'jin_63', 'jin_66', 'jin_69', 'jin_71', 'jin_73'],
     choices: [
       {
         id: 'control',
@@ -91,7 +91,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_003',
     type: 'probe',
     text: '親が「あなたのため」と言うとき、実際の動きはどちらに近いですか？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_60', 'jin_62', 'jin_64', 'jin_68', 'jin_70', 'jin_71'],
     choices: [
       {
         id: 'comparison',
@@ -132,7 +132,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_004',
     type: 'probe',
     text: 'あなたが親に「ノー」を伝えたとき、その場の反応は？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_61', 'jin_63', 'jin_67', 'jin_68', 'jin_70', 'jin_73'],
     choices: [
       {
         id: 'silent_cold',
@@ -173,7 +173,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_005',
     type: 'probe',
     text: '親が「昔はよかった」と言うとき、話の向かい先は？',
-    discriminates: [],
+    discriminates: ['jin_60', 'jin_62', 'jin_65'],
     choices: [
       {
         id: 'self_glory',
@@ -206,7 +206,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_006',
     type: 'probe',
     text: '親がストレスを感じているとき、その出し方は？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_63', 'jin_66', 'jin_67', 'jin_73'],
     choices: [
       {
         id: 'irritable',
@@ -247,7 +247,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_007',
     type: 'probe',
     text: 'その親はあなたに電話・メッセージを送る頻度はどのくらいですか？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_61', 'jin_69', 'jin_70'],
     choices: [
       {
         id: 'daily_check',
@@ -288,7 +288,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_008',
     type: 'probe',
     text: 'その親が「うれしそう」にしているのは、どんな場面が多いですか？',
-    discriminates: [],
+    discriminates: ['jin_60', 'jin_62', 'jin_63', 'jin_65', 'jin_68', 'jin_69', 'jin_70'],
     choices: [
       {
         id: 'public_success',
@@ -329,7 +329,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_009',
     type: 'probe',
     text: 'その親はあなたの友人・交際相手について、何か言ってきますか？',
-    discriminates: [],
+    discriminates: ['jin_60', 'jin_61', 'jin_65', 'jin_68', 'jin_69', 'jin_70'],
     choices: [
       {
         id: 'background_check',
@@ -370,7 +370,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_010',
     type: 'probe',
     text: 'その親の感情が急に変わることがありますか？',
-    discriminates: [],
+    discriminates: ['jin_63', 'jin_64', 'jin_66', 'jin_67', 'jin_68', 'jin_70', 'jin_72'],
     choices: [
       {
         id: 'mood_swings',
@@ -411,7 +411,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_011',
     type: 'probe',
     text: 'その親はあなたを他の人に紹介するとき、どんな言い方をしますか？',
-    discriminates: [],
+    discriminates: ['jin_60', 'jin_62', 'jin_65', 'jin_68', 'jin_69', 'jin_70'],
     choices: [
       {
         id: 'achievement_focus',
@@ -452,7 +452,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_012',
     type: 'probe',
     text: 'その親が体調を崩したり老いを感じたりしたとき、あなたへの伝え方は？',
-    discriminates: [],
+    discriminates: ['jin_61', 'jin_63', 'jin_66', 'jin_67', 'jin_73'],
     choices: [
       {
         id: 'subtle_guilt',
@@ -493,7 +493,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_013',
     type: 'probe',
     text: 'その親があなたの自立（一人暮らし・転職・結婚など）に対してとった反応は？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_61', 'jin_64', 'jin_68', 'jin_70'],
     choices: [
       {
         id: 'resist',
@@ -534,7 +534,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_014',
     type: 'probe',
     text: 'その親ともめた後、和解はどちらから切り出されることが多いですか？',
-    discriminates: [],
+    discriminates: ['jin_59', 'jin_63', 'jin_67', 'jin_72'],
     choices: [
       {
         id: 'parent_sudden_nice',
@@ -575,7 +575,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_015',
     type: 'probe',
     text: 'その親があなたと誰かを比べるとき、比較相手は誰が多いですか？',
-    discriminates: [],
+    discriminates: ['jin_60', 'jin_62', 'jin_65', 'jin_68', 'jin_70', 'jin_71'],
     choices: [
       {
         id: 'siblings',
@@ -616,7 +616,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_016',
     type: 'probe',
     text: 'その親は「自分が犠牲になっている」という話をすることがありますか？',
-    discriminates: [],
+    discriminates: ['jin_63', 'jin_67', 'jin_68', 'jin_70', 'jin_73'],
     choices: [
       {
         id: 'often_explicit',
@@ -657,7 +657,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_017',
     type: 'probe',
     text: 'その親があなたの「仕事・キャリア」について話すとき、一番の関心は何ですか？',
-    discriminates: [],
+    discriminates: ['jin_60', 'jin_61', 'jin_64', 'jin_65', 'jin_68', 'jin_70'],
     choices: [
       {
         id: 'income_stability',
@@ -698,7 +698,7 @@ export const ATTACK_PARENT_QUESTIONS = [
     id: 'atk_p_018',
     type: 'probe',
     text: 'その親はあなたが失敗したとき、どんな反応をしますか？',
-    discriminates: [],
+    discriminates: ['jin_61', 'jin_62', 'jin_64', 'jin_66', 'jin_67', 'jin_68', 'jin_70'],
     choices: [
       {
         id: 'told_you',

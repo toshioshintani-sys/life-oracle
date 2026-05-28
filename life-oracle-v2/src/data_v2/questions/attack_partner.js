@@ -8,7 +8,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     type: 'entry',
     order: 1,
     text: 'その人は、あなたが機嫌が悪いとき最初にどう動きますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_100', 'jin_102', 'jin_103', 'jin_109', 'jin_112'],
     choices: [
       {
         id: 'fix',
@@ -50,7 +50,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     type: 'entry',
     order: 2,
     text: 'その人は不満があるとき、どう伝えてきますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_99', 'jin_102', 'jin_104', 'jin_106', 'jin_109'],
     choices: [
       {
         id: 'direct_say',
@@ -91,7 +91,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_003',
     type: 'probe',
     text: 'その人は「将来の話」をするとき、どんな話し方をしますか？',
-    discriminates: [],
+    discriminates: ['jin_99', 'jin_103', 'jin_104', 'jin_108', 'jin_112'],
     choices: [
       {
         id: 'concrete_plan',
@@ -132,7 +132,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_004',
     type: 'probe',
     text: 'ケンカの後、その人は仲直りをどう切り出しますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_99', 'jin_102', 'jin_103', 'jin_104', 'jin_110'],
     choices: [
       {
         id: 'apologize',
@@ -173,7 +173,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_005',
     type: 'probe',
     text: 'その人があなたへの愛情を示すとき、一番多いパターンは？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_109'],
     choices: [
       {
         id: 'action',
@@ -214,7 +214,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_006',
     type: 'probe',
     text: 'その人が「もう無理」と感じたとき、どんな行動をしますか？',
-    discriminates: [],
+    discriminates: ['jin_99', 'jin_101', 'jin_102', 'jin_104', 'jin_106', 'jin_109'],
     choices: [
       {
         id: 'express',
@@ -255,7 +255,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_007',
     type: 'probe',
     text: 'その人はあなたが友人と出かけることについて、どんな反応をしますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_99', 'jin_100', 'jin_101', 'jin_111', 'jin_112'],
     choices: [
       {
         id: 'checks_details',
@@ -296,7 +296,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_008',
     type: 'probe',
     text: 'その人が「ふさぎこんでいる」とき、理由を言いますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_100', 'jin_101', 'jin_104', 'jin_112'],
     choices: [
       {
         id: 'says_after_time',
@@ -337,7 +337,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_009',
     type: 'probe',
     text: 'その人はあなたへの「期待」をどう表現しますか？',
-    discriminates: [],
+    discriminates: ['jin_103', 'jin_106', 'jin_107', 'jin_108', 'jin_112'],
     choices: [
       {
         id: 'explicit',
@@ -378,7 +378,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_010',
     type: 'probe',
     text: 'その人は「ケンカになりそうな話題」をどう扱いますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_100', 'jin_102', 'jin_103', 'jin_104', 'jin_109'],
     choices: [
       {
         id: 'addresses',
@@ -419,7 +419,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_011',
     type: 'probe',
     text: 'その人はSNSでのあなたの行動・投稿について何か言いますか？',
-    discriminates: [],
+    discriminates: ['jin_99', 'jin_100', 'jin_111', 'jin_112'],
     choices: [
       {
         id: 'monitors',
@@ -460,7 +460,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_012',
     type: 'probe',
     text: 'その人が「疲れた・しんどい」と言うのは、どんなとき多いですか？',
-    discriminates: [],
+    discriminates: ['jin_100', 'jin_101', 'jin_104', 'jin_108', 'jin_112'],
     choices: [
       {
         id: 'after_social',
@@ -501,7 +501,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_013',
     type: 'probe',
     text: 'その人はあなたとの「思い出・記念日」を大切にしますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_103', 'jin_105', 'jin_109'],
     choices: [
       {
         id: 'very_much',
@@ -542,7 +542,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_014',
     type: 'probe',
     text: 'その人は別れ話になったとき、どう動きますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_99', 'jin_101', 'jin_102', 'jin_104', 'jin_110'],
     choices: [
       {
         id: 'clings',
@@ -583,7 +583,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_015',
     type: 'probe',
     text: 'その人は「一人の時間」をどのくらい必要としていますか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_99', 'jin_100', 'jin_101', 'jin_112'],
     choices: [
       {
         id: 'lots',
@@ -624,7 +624,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_016',
     type: 'probe',
     text: 'その人があなたのことを「心配している」と感じるのはどんな形ですか？',
-    discriminates: [],
+    discriminates: ['jin_98', 'jin_99', 'jin_100', 'jin_102', 'jin_108', 'jin_112'],
     choices: [
       {
         id: 'over_checking',
@@ -665,7 +665,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_017',
     type: 'probe',
     text: 'その人はあなたの「過去の恋愛」についてどんな態度をとりますか？',
-    discriminates: [],
+    discriminates: ['jin_99', 'jin_100', 'jin_105', 'jin_107', 'jin_111', 'jin_112'],
     choices: [
       {
         id: 'jealous_asks',
@@ -706,7 +706,7 @@ export const ATTACK_PARTNER_QUESTIONS = [
     id: 'atk_pt_018',
     type: 'probe',
     text: 'その人は「2人のルール・約束」をどのくらい守ろうとしますか？',
-    discriminates: [],
+    discriminates: ['jin_99', 'jin_102', 'jin_103', 'jin_105', 'jin_109'],
     choices: [
       {
         id: 'strictly',
