@@ -1,0 +1,39 @@
+name: Jin Article Publish Check
+
+on:
+  # Runs weekly on Thursday at 12:00 JST (03:00 UTC) — shortly after the 11:30 JST publish window.
+  schedule:
+    - cron: '0 3 * * 4'
+  workflow_dispatch: {}   # Manual trigger for testing
+
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # needed to commit updated jin_types.json back to main
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run publish check
+        run: python scripts/update_jin_published.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add life-oracle-v2/src/data_v2/jin/jin_types.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: auto-publish jin articles based on schedule"
+            git push origin main
+          fi
