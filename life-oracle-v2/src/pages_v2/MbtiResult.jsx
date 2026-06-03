@@ -57,24 +57,47 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   const [prescriptions, setPrescriptions] = useState(null);
   const [biasMessages, setBiasMessages]   = useState(null);
   const [loading, setLoading]             = useState(true);
+  const [loadError, setLoadError]         = useState(false);
+  const [presLoading, setPresLoading]     = useState(false);
 
+  // 初期ロード: 表示に必要な2ファイルのみ（5.5MB のprescriptionsは除外）
   useEffect(() => {
     incrementOnce('mbti');
     Promise.all([
       fetch('/data/type_profiles.json').then(r => r.json()),
-      fetch('/data/prescriptions.json').then(r => r.json()),
       fetch('/data/bias_messages.json').then(r => r.json()),
-    ]).then(([tp, pr, bm]) => {
+    ]).then(([tp, bm]) => {
       setTypeProfiles(tp);
-      setPrescriptions(pr);
       setBiasMessages(bm);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => {
+      setLoading(false);
+      setLoadError(true);
+    });
   }, []);
+
+  // 処方箋は「処方箋」セクションを開いたときだけ遅延ロード
+  useEffect(() => {
+    if (section !== 'prescription' || prescriptions || presLoading) return;
+    setPresLoading(true);
+    fetch('/data/prescriptions.json')
+      .then(r => r.json())
+      .then(pr => { setPrescriptions(pr); setPresLoading(false); })
+      .catch(() => setPresLoading(false));
+  }, [section, prescriptions, presLoading]);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
 
   if (!result) return null;
+
+  if (loadError) {
+    return (
+      <div className="result-load-error">
+        <p>データの読み込みに失敗しました。<br />通信状況を確認してもう一度お試しください。</p>
+        <button onClick={onRetry}>もう一度試す</button>
+      </div>
+    );
+  }
 
   const { mbtiType, biasScores, fromDirectSelection } = result;
   const jungTypeId      = MBTI_TO_JUNG[mbtiType] ?? mbtiType;
