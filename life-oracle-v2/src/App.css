@@ -1,19 +1,19 @@
-/* ===== デザイントークン ===== */
+/* ===== デザイントークン（漆黒×純金 ダークテーマ）===== */
 :root {
-  --bg:          #faf6f1;
-  --text:        #2d2318;
-  --text-sub:    #6b5a48;
-  --accent:      #b8833f;
-  --accent-dark: #8c5f28;
-  --accent-bg:   rgba(184, 131, 63, 0.10);
-  --light:       #3d7a5a;
-  --shadow-cl:   #a05050;
-  --border:      rgba(184, 131, 63, 0.20);
-  --card-bg:     #ffffff;
+  --bg:          #0a0b12;                    /* 漆黒（わずかに青み） */
+  --text:        #ece4d0;                    /* 温かいクリーム文字 */
+  --text-sub:    rgba(236, 228, 208, 0.55);  /* 補助テキスト */
+  --accent:      #d4af37;                    /* 純金 */
+  --accent-dark: #e8c869;                    /* 暗地で読める明るめ金（アクセント文字用） */
+  --accent-bg:   rgba(212, 175, 55, 0.12);
+  --light:       #5fb487;                    /* 光の状態（暗地で映える緑） */
+  --shadow-cl:   #cf8a8a;                    /* 影の状態（暗地で映える赤） */
+  --border:      rgba(212, 175, 55, 0.18);
+  --card-bg:     rgba(255, 255, 255, 0.04);  /* ダークガラスカード */
   --sans:        'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
   --serif:       'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
   --radius:      12px;
-  --shadow:      0 2px 16px rgba(45, 35, 24, 0.10);
+  --shadow:      0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
 /* ===== リセット ===== */
@@ -22,8 +22,8 @@
 body {
   font-family: var(--sans);
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(184, 131, 63, 0.10), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(61, 122, 90, 0.06), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 175, 55, 0.07), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(212, 175, 55, 0.04), transparent 55%),
     var(--bg);
   background-attachment: scroll;
   color: var(--text);
@@ -295,12 +295,19 @@ button {
 }
 
 .quiz-stem {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 600;
   text-align: center;
-  line-height: 1.7;
+  line-height: 1.8;
   color: var(--text);
   padding: 0 4px;
+  letter-spacing: 0.02em;
+  animation: stemFade 0.5s ease-out;
+}
+
+@keyframes stemFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .quiz-choices {
@@ -318,38 +325,108 @@ button {
   font-weight: 600;
   border: 1.5px solid var(--border);
   background: var(--card-bg);
-  transition: border-color 0.15s, background 0.15s, transform 0.10s;
+  color: var(--text);
+  transition: border-color 0.18s, background 0.18s, transform 0.10s, box-shadow 0.18s;
 }
 
 .quiz-choice:hover {
   transform: translateY(-1px);
+  border-color: rgba(212, 175, 55, 0.5);
   box-shadow: var(--shadow);
 }
+.quiz-choice:disabled { cursor: default; }
 
+/* 押下フィードバック（歓喜の一拍） */
+.quiz-choice.is-pressed {
+  background: linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.10));
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 6px 22px rgba(212,175,55,0.18);
+  transform: translateY(-1px) scale(1.012);
+}
+
+/* ── カテゴリ型4択（レター・アンカー付き）── */
+.quiz-choices--cat .quiz-choice--cat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  padding: 15px 16px;
+  font-weight: 500;
+  line-height: 1.55;
+  opacity: 0;
+  animation: choiceRise 0.5s ease-out forwards;
+}
+
+@keyframes choiceRise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.choice-letter {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--accent);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 50%;
+  letter-spacing: 0;
+  transition: background 0.18s, color 0.18s;
+}
+.quiz-choice--cat:hover .choice-letter {
+  background: rgba(212, 175, 55, 0.14);
+}
+.quiz-choice--cat.is-pressed .choice-letter {
+  background: var(--accent);
+  color: #1a1206;
+  border-color: var(--accent);
+}
+.choice-text { flex: 1; min-width: 0; }
+
+/* ── MBTI 3択（度合いスケール）── */
 .choice-yes {
   color: var(--light);
-  border-color: rgba(61, 122, 90, 0.30);
+  border-color: rgba(95, 180, 135, 0.32);
 }
 .choice-yes:hover {
-  background: rgba(61, 122, 90, 0.06);
+  background: rgba(95, 180, 135, 0.10);
   border-color: var(--light);
+}
+.choice-yes.is-pressed {
+  background: rgba(95, 180, 135, 0.20);
+  border-color: var(--light);
+  box-shadow: 0 0 0 1px var(--light), 0 6px 22px rgba(95,180,135,0.18);
 }
 
 .choice-dk {
   color: var(--text-sub);
 }
 .choice-dk:hover {
-  background: rgba(107, 90, 72, 0.06);
+  background: rgba(255, 255, 255, 0.06);
   border-color: var(--text-sub);
+}
+.choice-dk.is-pressed {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(236,228,208,0.6);
+  box-shadow: 0 0 0 1px rgba(236,228,208,0.4);
 }
 
 .choice-no {
   color: var(--shadow-cl);
-  border-color: rgba(160, 80, 80, 0.30);
+  border-color: rgba(207, 138, 138, 0.32);
 }
 .choice-no:hover {
-  background: rgba(160, 80, 80, 0.06);
+  background: rgba(207, 138, 138, 0.10);
   border-color: var(--shadow-cl);
+}
+.choice-no.is-pressed {
+  background: rgba(207, 138, 138, 0.20);
+  border-color: var(--shadow-cl);
+  box-shadow: 0 0 0 1px var(--shadow-cl), 0 6px 22px rgba(207,138,138,0.18);
 }
 
 .quiz-count {
@@ -675,8 +752,8 @@ button {
   flex-direction: column;
   gap: 8px;
   padding: 18px 20px;
-  background: linear-gradient(135deg, rgba(45,35,24,0.04), rgba(45,35,24,0.02));
-  border: 1px solid rgba(45, 35, 24, 0.12);
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(212, 175, 55, 0.15);
   border-left: 3px solid var(--accent-dark);
   border-radius: var(--radius);
 }
@@ -841,7 +918,7 @@ button {
   padding: 14px 20px;
   margin: 16px 0;
   text-align: center;
-  background: rgba(45, 35, 24, 0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .result-adjacent-label {
@@ -1008,8 +1085,8 @@ button {
 }
 
 .mbti-type-button--shadow {
-  border-color: #d4b8b8;
-  background: #fdf7f7;
+  border-color: rgba(207, 138, 138, 0.35);
+  background: rgba(207, 138, 138, 0.08);
 }
 
 .mbti-type-button:hover {
@@ -1176,16 +1253,21 @@ button {
 
 .quiz-progress-bar {
   height: 4px;
-  background: var(--accent);
+  background: linear-gradient(90deg, #b8860b, #d4af37 60%, #f0e68c);
   border-radius: 2px;
-  transition: width 0.4s ease;
+  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
 }
 
 .quiz-progress-label {
   font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.quiz-progress-of {
   color: var(--text-sub);
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 500;
 }
 
 /* ===== MBTI Quiz：3択レイアウト ===== */
@@ -1386,15 +1468,21 @@ button {
 .quiz-oracle-reading {
   font-family: var(--serif);
   font-size: 15px;
-  color: var(--accent-dark);
+  color: #f0e8d0;
   text-align: center;
-  line-height: 1.75;
-  padding: 12px 16px;
-  background: var(--accent-bg);
+  line-height: 1.8;
+  padding: 14px 18px 14px 16px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.10), rgba(212,175,55,0.03));
+  border: 1px solid rgba(212,175,55,0.22);
   border-left: 2px solid var(--accent);
   border-radius: var(--radius);
   width: 100%;
-  animation: fadeInDown 0.5s ease forwards;
+  animation: fadeInDown 0.6s ease forwards;
+}
+.quiz-oracle-mark {
+  color: var(--accent);
+  margin-right: 8px;
+  font-size: 13px;
 }
 
 @keyframes fadeInDown {
@@ -1420,8 +1508,8 @@ button {
   flex-direction: column;
   gap: 8px;
   padding: 20px 22px;
-  background: linear-gradient(135deg, rgba(45,35,24,0.05), rgba(45,35,24,0.02));
-  border: 1px solid rgba(45,35,24,0.12);
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(212,175,55,0.15);
   border-left: 3px solid var(--accent-dark);
   border-radius: var(--radius);
 }
@@ -1901,7 +1989,7 @@ button {
 }
 
 .mbti-result-prescription-details[open] {
-  box-shadow: 0 4px 20px rgba(45, 35, 24, 0.10);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .mbti-result-prescription-summary {
