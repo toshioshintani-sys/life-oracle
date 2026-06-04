@@ -6,6 +6,7 @@
   note 記事スキ数          — 認証不要（非公式 API）
   Google Analytics 4       — 任意 (GOOGLE_CREDENTIALS_JSON + GA4_PROPERTY_ID)
   X / Twitter              — 任意 (TWITTER_BEARER_TOKEN + TWITTER_USERNAME)
+  X 投稿傾向分析（Claude）  — 任意 (ANTHROPIC_API_KEY)
   GitHub Actions 状態      — GITHUB_TOKEN（Actions 実行時は自動利用可）
   Netlify デプロイ状態     — 任意 (NETLIFY_TOKEN + NETLIFY_SITE_ID)
 
@@ -27,6 +28,14 @@ import urllib.request
 import urllib.error
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+# x_analytics.py と同じディレクトリにあるため直接インポート
+sys.path.insert(0, str(Path(__file__).parent))
+try:
+    from x_analytics import get_x_analysis as _get_x_analysis
+    _HAS_X_ANALYTICS = True
+except ImportError:
+    _HAS_X_ANALYTICS = False
 
 JST = timezone(timedelta(hours=9))
 UTC = timezone.utc
@@ -185,33 +194,12 @@ def get_ga4_stats() -> dict | None:
 # ─── X / Twitter ─────────────────────────────────────────────────────────────
 
 def get_x_stats() -> dict | None:
-    token    = os.environ.get("TWITTER_BEARER_TOKEN")
-    username = os.environ.get("TWITTER_USERNAME", "lifeoraclejp")
-    if not token:
+    """x_analytics.get_x_analysis() を呼び出す。未インストール時は None を返す。"""
+    if not os.environ.get("TWITTER_BEARER_TOKEN"):
         return None
-    auth = {"Authorization": f"Bearer {token}"}
-
-    user = http_get(f"https://api.twitter.com/2/users/by/username/{username}", headers=auth)
-    if not isinstance(user, dict) or "data" not in user:
-        return {"error": "X ユーザー取得失敗"}
-    uid = user["data"]["id"]
-
-    tweets = http_get(
-        f"https://api.twitter.com/2/users/{uid}/tweets"
-        f"?max_results=10&tweet.fields=created_at,public_metrics",
-        headers=auth,
-    )
-    if not isinstance(tweets, dict) or "data" not in tweets:
-        return {"post_count": 0, "latest_text": None}
-
-    rows = tweets["data"]
-    return {
-        "post_count":    len(rows),
-        "total_likes":   sum(t.get("public_metrics", {}).get("like_count", 0) for t in rows),
-        "total_rt":      sum(t.get("public_metrics", {}).get("retweet_count", 0) for t in rows),
-        "latest_text":   rows[0]["text"][:90] if rows else None,
-        "latest_at":     rows[0].get("created_at") if rows else None,
-    }
+    if _HAS_X_ANALYTICS:
+        return _get_x_analysis()
+    return {"error": "x_analytics.py が見つかりません"}
 
 
 # ─── GitHub Actions ───────────────────────────────────────────────────────────
@@ -373,13 +361,19 @@ def build_slack_message(
 
     # X
     if x is None:
-        x_text = "_未設定 — `TWITTER_BEARER_TOKEN` / `TWITTER_USERNAME` を追加してください_"
+        x_text = "_未設定 — `TWITTER_BEARER_TOKEN` を GitHub Secrets に追加してください_"
+        blocks.append(_section(f"🐦 *X 投稿状況*\n{x_text}"))
     elif "error" in x:
         x_text = f"❌ {x['error']}"
+        blocks.append(_section(f"🐦 *X 投稿状況*\n{x_text}"))
     else:
         latest = f"\n最新: 「{x['latest_text']}」" if x.get("latest_text") else ""
-        x_text = f"直近{x['post_count']}件 ｜ ❤️ {x['total_likes']} ｜ 🔁 {x['total_rt']}{latest}"
-    blocks.append(_section(f"🐦 *X 投稿状況*\n{x_text}"))
+        summary = f"直近{x['post_count']}件 ｜ ❤️ {x['total_likes']} ｜ 🔁 {x['total_rt']}{latest}"
+        blocks.append(_section(f"🐦 *X 投稿状況*\n{summary}"))
+        # Claude 傾向分析（取得できた場合のみ追加）
+        if x.get("analysis"):
+            blocks.append({"type": "divider"})
+            blocks.append(_section(f"🤖 *X 投稿傾向分析（Claude）*\n{x['analysis']}"))
 
     # システム
     failed = github.get("failed", [])

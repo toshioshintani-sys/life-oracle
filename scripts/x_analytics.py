@@ -1,23 +1,19 @@
 """
-X（Twitter）アナリティクス取得スクリプト
+X（Twitter）アナリティクス + Claude 傾向分析スクリプト
 
 使い方:
-  python3 scripts/x_analytics.py
+  python3 scripts/x_analytics.py              # 数値のみ表示
+  python3 scripts/x_analytics.py --analyze    # Claude で傾向分析も実行
 
 必要な環境変数:
   TWITTER_BEARER_TOKEN   — Bearer Token（公開メトリクス取得）
   TWITTER_USERNAME       — X ユーザー名（@なし, デフォルト: lifeoraclejp）
+  ANTHROPIC_API_KEY      — Claude 傾向分析に必要（--analyze 時）
 
 インプレッション数を取得するには追加で（OAuth 1.0a）:
-  TWITTER_API_KEY
-  TWITTER_API_SECRET
-  TWITTER_ACCESS_TOKEN
-  TWITTER_ACCESS_SECRET
+  TWITTER_API_KEY / TWITTER_API_SECRET / TWITTER_ACCESS_TOKEN / TWITTER_ACCESS_SECRET
 
-取得方法:
-  1. https://developer.twitter.com/ でアプリを作成
-  2. 「Free」プランでも Bearer Token は取得可能
-  3. インプレッション数は「Read & Write」権限のある OAuth 1.0a キーが必要
+分析指示書: tasks/x_analysis_prompt.md
 """
 
 from __future__ import annotations
@@ -33,18 +29,22 @@ import urllib.error
 import base64
 import secrets
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
-JST = timezone(timedelta(hours=9))
+JST      = timezone(timedelta(hours=9))
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
-USERNAME = os.environ.get("TWITTER_USERNAME", "lifeoraclejp")
-BEARER   = os.environ.get("TWITTER_BEARER_TOKEN", "")
+USERNAME      = os.environ.get("TWITTER_USERNAME", "lifeoraclejp")
+BEARER        = os.environ.get("TWITTER_BEARER_TOKEN", "")
 API_KEY       = os.environ.get("TWITTER_API_KEY", "")
 API_SECRET    = os.environ.get("TWITTER_API_SECRET", "")
 ACCESS_TOKEN  = os.environ.get("TWITTER_ACCESS_TOKEN", "")
 ACCESS_SECRET = os.environ.get("TWITTER_ACCESS_SECRET", "")
+ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
 HAS_BEARER = bool(BEARER)
 HAS_OAUTH  = all([API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_SECRET])
+HAS_CLAUDE = bool(ANTHROPIC_KEY)
 
 
 # ─── HTTP ─────────────────────────────────────────────────────────────────────
@@ -64,10 +64,26 @@ def http_get(url: str, headers: dict | None = None) -> dict | None:
         return None
 
 
+def http_post(url: str, payload: dict, headers: dict) -> dict | None:
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(url, data=data, method="POST", headers=headers)
+    req.add_header("Content-Type", "application/json")
+    req.add_header("User-Agent", "life-oracle-analytics/1.0")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        print(f"  Claude API HTTP {e.code}: {body[:300]}", file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f"  Claude API ERROR: {e}", file=sys.stderr)
+        return None
+
+
 # ─── OAuth 1.0a signature ─────────────────────────────────────────────────────
 
 def _oauth_header(method: str, url: str, params: dict) -> str:
-    """RFC 5849 OAuth 1.0a 署名ヘッダーを生成"""
     oauth = {
         "oauth_consumer_key":     API_KEY,
         "oauth_nonce":            secrets.token_hex(16),
@@ -95,18 +111,16 @@ def _oauth_header(method: str, url: str, params: dict) -> str:
         hmac.new(signing_key.encode(), base.encode(), hashlib.sha1).digest()
     ).decode()
     oauth["oauth_signature"] = sig
-    header = "OAuth " + ", ".join(
+    return "OAuth " + ", ".join(
         f'{urllib.parse.quote(k, safe="")}="{urllib.parse.quote(str(v), safe="")}"'
         for k, v in sorted(oauth.items())
     )
-    return header
 
 
 def oauth_get(url: str, params: dict | None = None) -> dict | None:
     params = params or {}
     full_url = url + ("?" + urllib.parse.urlencode(params) if params else "")
-    auth_header = _oauth_header("GET", url, params)
-    return http_get(full_url, {"Authorization": auth_header})
+    return http_get(full_url, {"Authorization": _oauth_header("GET", url, params)})
 
 
 # ─── Bearer Token ─────────────────────────────────────────────────────────────
@@ -118,14 +132,11 @@ def bearer_get(url: str) -> dict | None:
 # ─── Fetch tweets ─────────────────────────────────────────────────────────────
 
 def get_user_id() -> str | None:
-    data = bearer_get(
-        f"https://api.twitter.com/2/users/by/username/{USERNAME}"
-    )
+    data = bearer_get(f"https://api.twitter.com/2/users/by/username/{USERNAME}")
     return data["data"]["id"] if data and "data" in data else None
 
 
 def get_tweets_bearer(uid: str, count: int = 20) -> list[dict]:
-    """公開メトリクス（いいね・RT・返信）を取得"""
     data = bearer_get(
         f"https://api.twitter.com/2/users/{uid}/tweets"
         f"?max_results={count}"
@@ -136,21 +147,155 @@ def get_tweets_bearer(uid: str, count: int = 20) -> list[dict]:
 
 
 def get_tweet_impressions_oauth(tweet_id: str) -> int | None:
-    """インプレッション数（non_public_metrics）を OAuth 1.0a で取得"""
-    params = {
-        "tweet.fields": "non_public_metrics,public_metrics",
-    }
     data = oauth_get(
         f"https://api.twitter.com/2/tweets/{tweet_id}",
-        params,
+        {"tweet.fields": "non_public_metrics,public_metrics"},
     )
     if not data or "data" not in data:
         return None
-    npm = data["data"].get("non_public_metrics", {})
-    return npm.get("impression_count")
+    return data["data"].get("non_public_metrics", {}).get("impression_count")
 
 
-# ─── Format ──────────────────────────────────────────────────────────────────
+# ─── Claude API 分析 ──────────────────────────────────────────────────────────
+
+CLAUDE_SYSTEM_PROMPT = """あなたはライフオラクル（@lifeoraclejp）のコンテンツ戦略アナリストです。
+提供されたXの投稿データを分析し、以下の形式で日本語の短いレポートを返してください。
+
+【アカウント概要】
+- ライフオラクルはMBTI・ユング認知機能・行動経済学バイアスを使った心理診断アプリ
+- note連携：「対人攻略」シリーズ（上司/同僚/家族/恋人 112タイプ）を週1本公開中
+- ターゲット：職場や人間関係に悩む20〜40代
+
+【分析してほしいこと】
+
+1. **トピック傾向**（3行以内）
+   - 今週どんなテーマで発信しているか
+   - MBTI/バイアス/note紹介/日常 など大まかな分類と割合
+
+2. **エンゲージメント傾向**（3行以内）
+   - いいね・RT が多い投稿の共通点
+   - 反応が薄い投稿の共通点
+   - 「バズりやすいパターン」があれば一言で
+
+3. **今週の注目ツイート**（1件）
+   - 最もエンゲージメントが高かった投稿テキストと数値
+   - なぜ刺さったか一言コメント
+
+4. **来週への示唆**（箇条書き2〜3点）
+   - 「こういうツイートをもっと増やすと良い」
+   - 「このトピックは今旬」
+   - note記事との連携でやると良いこと など
+
+【出力形式のルール】
+- Slackに貼り付けるので絵文字を使い読みやすくする
+- 全体で300字以内に収める（箇条書き・短文を優先）
+- 「投稿がありません」「データ不足」の場合は「今週は投稿なし or データ取得不可」と一言だけ返す
+- 占い・予言のような表現は避け、データに基づいた観察と提案にする"""
+
+
+def build_tweet_payload(tweets: list[dict], impression_map: dict) -> dict:
+    now = datetime.now(JST)
+    week_ago = now - timedelta(days=7)
+    tweet_list = []
+    for t in tweets:
+        created_raw = t.get("created_at", "")
+        try:
+            dt = datetime.fromisoformat(created_raw.replace("Z", "+00:00"))
+        except Exception:
+            dt = now
+        pm = t.get("public_metrics", {})
+        imp = impression_map.get(t["id"])
+        tweet_list.append({
+            "id":         t["id"],
+            "created_at": dt.astimezone(JST).strftime("%m/%d %H:%M"),
+            "text":       t.get("text", ""),
+            "metrics": {
+                "like_count":        pm.get("like_count", 0),
+                "retweet_count":     pm.get("retweet_count", 0),
+                "reply_count":       pm.get("reply_count", 0),
+                "impression_count":  imp,
+            },
+        })
+    return {
+        "period":        f"{week_ago.strftime('%Y-%m-%d')} 〜 {now.strftime('%Y-%m-%d')}",
+        "total_tweets":  len(tweets),
+        "tweets":        tweet_list,
+    }
+
+
+def analyze_with_claude(payload: dict) -> str | None:
+    """Claude API を呼び出してX投稿の傾向分析テキストを返す"""
+    if not HAS_CLAUDE:
+        return None
+    body = {
+        "model":      "claude-haiku-4-5-20251001",
+        "max_tokens": 600,
+        "system":     CLAUDE_SYSTEM_PROMPT,
+        "messages":   [
+            {
+                "role":    "user",
+                "content": f"以下のX投稿データを分析してください：\n\n{json.dumps(payload, ensure_ascii=False, indent=2)}",
+            }
+        ],
+    }
+    headers = {
+        "x-api-key":         ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+    }
+    resp = http_post("https://api.anthropic.com/v1/messages", body, headers)
+    if not resp:
+        return None
+    try:
+        return resp["content"][0]["text"].strip()
+    except (KeyError, IndexError, TypeError):
+        return None
+
+
+# ─── Public API（daily_report.py から呼ぶ） ───────────────────────────────────
+
+def get_x_analysis() -> dict:
+    """
+    Xデータ取得 + Claude 分析を行い結果 dict を返す。
+    daily_report.py の Slack メッセージ構築に使う。
+    返却キー:
+      post_count, total_likes, total_rt, total_replies,
+      latest_text, latest_at, analysis (str | None), error (str | None)
+    """
+    if not HAS_BEARER:
+        return {"error": "TWITTER_BEARER_TOKEN 未設定"}
+
+    uid = get_user_id()
+    if not uid:
+        return {"error": "X ユーザーID取得失敗"}
+
+    tweets = get_tweets_bearer(uid, count=20)
+    if not tweets:
+        return {"post_count": 0, "total_likes": 0, "total_rt": 0,
+                "total_replies": 0, "latest_text": None, "latest_at": None,
+                "analysis": None}
+
+    impression_map: dict[str, int | None] = {}
+    if HAS_OAUTH:
+        for t in tweets[:10]:
+            impression_map[t["id"]] = get_tweet_impressions_oauth(t["id"])
+            time.sleep(0.3)
+
+    payload  = build_tweet_payload(tweets, impression_map)
+    analysis = analyze_with_claude(payload) if HAS_CLAUDE else None
+
+    pm_all = [t.get("public_metrics", {}) for t in tweets]
+    return {
+        "post_count":   len(tweets),
+        "total_likes":  sum(p.get("like_count", 0) for p in pm_all),
+        "total_rt":     sum(p.get("retweet_count", 0) for p in pm_all),
+        "total_replies":sum(p.get("reply_count", 0) for p in pm_all),
+        "latest_text":  tweets[0]["text"][:90] if tweets else None,
+        "latest_at":    tweets[0].get("created_at") if tweets else None,
+        "analysis":     analysis,
+    }
+
+
+# ─── Format helpers ──────────────────────────────────────────────────────────
 
 def jst_str(iso: str) -> str:
     try:
@@ -166,9 +311,11 @@ def fmt_num(n: int | None) -> str:
     return f"{n:,}"
 
 
-# ─── Main ─────────────────────────────────────────────────────────────────────
+# ─── CLI main ─────────────────────────────────────────────────────────────────
 
 def main():
+    do_analyze = "--analyze" in sys.argv or HAS_CLAUDE
+
     print("=" * 62)
     print(f"  @{USERNAME} X アナリティクス   {datetime.now(JST).strftime('%Y-%m-%d %H:%M JST')}")
     print("=" * 62)
@@ -183,9 +330,6 @@ def main():
         print("  3. 環境変数に設定:")
         print("       export TWITTER_BEARER_TOKEN='your_token_here'")
         print("       python3 scripts/x_analytics.py")
-        print()
-        print("または GitHub Secrets に TWITTER_BEARER_TOKEN を追加すると")
-        print("Slack 日次レポートにも自動で含まれます。")
         sys.exit(0)
 
     print()
@@ -194,36 +338,33 @@ def main():
     if not uid:
         print(f"❌ @{USERNAME} のユーザーID取得失敗。Bearer Token を確認してください。")
         sys.exit(1)
-    print(f"   User ID: {uid}")
 
+    print(f"   User ID: {uid}")
     print()
     print("📥 最新20件のツイートを取得中...")
     tweets = get_tweets_bearer(uid, count=20)
     if not tweets:
         print("   ツイートが見つかりません。")
         sys.exit(0)
-
     print(f"   {len(tweets)} 件取得")
 
-    # OAuthでインプレッション取得（設定があれば）
     impression_map: dict[str, int | None] = {}
     if HAS_OAUTH:
         print()
         print("📊 インプレッション数取得中（OAuth 1.0a）...")
-        for t in tweets[:10]:  # 最新10件だけ（レート制限対策）
-            imp = get_tweet_impressions_oauth(t["id"])
-            impression_map[t["id"]] = imp
+        for t in tweets[:10]:
+            impression_map[t["id"]] = get_tweet_impressions_oauth(t["id"])
             time.sleep(0.5)
         print("   完了")
     else:
         print()
-        print("ℹ️  インプレッション数: OAuth 1.0a キーが未設定（下記参照）")
+        print("ℹ️  インプレッション数: OAuth 1.0a キー未設定（analytics.twitter.com で確認可）")
 
-    # ─── 集計 ─────────────────────────────────────────────────────────────────
-    total_likes    = sum(t.get("public_metrics", {}).get("like_count", 0) for t in tweets)
-    total_rt       = sum(t.get("public_metrics", {}).get("retweet_count", 0) for t in tweets)
-    total_replies  = sum(t.get("public_metrics", {}).get("reply_count", 0) for t in tweets)
-    total_imp      = sum(v for v in impression_map.values() if v is not None) if impression_map else None
+    # ─── 集計 ──────────────────────────────────────────────────────────────
+    total_likes   = sum(t.get("public_metrics", {}).get("like_count", 0) for t in tweets)
+    total_rt      = sum(t.get("public_metrics", {}).get("retweet_count", 0) for t in tweets)
+    total_replies = sum(t.get("public_metrics", {}).get("reply_count", 0) for t in tweets)
+    total_imp     = sum(v for v in impression_map.values() if v is not None) if impression_map else None
 
     print()
     print("─" * 62)
@@ -236,47 +377,48 @@ def main():
         print(f"  👁️  インプレッション合計: {fmt_num(total_imp)}（最新10件）")
     print()
 
-    # ─── 個別ツイート ─────────────────────────────────────────────────────────
+    # ─── 個別ツイート ──────────────────────────────────────────────────────
     print("─" * 62)
     print("  📝 個別ツイート")
     print("─" * 62)
     for i, t in enumerate(tweets, 1):
-        pm = t.get("public_metrics", {})
+        pm  = t.get("public_metrics", {})
         imp = impression_map.get(t["id"])
-        created = jst_str(t.get("created_at", ""))
-        text_preview = t["text"][:60].replace("\n", " ")
         print()
-        print(f"  [{i:02d}] {created}")
-        print(f"       {text_preview}...")
+        print(f"  [{i:02d}] {jst_str(t.get('created_at', ''))}")
+        print(f"       {t['text'][:60].replace(chr(10),' ')}...")
         print(f"       ❤️ {fmt_num(pm.get('like_count'))}  "
               f"🔁 {fmt_num(pm.get('retweet_count'))}  "
-              f"💬 {fmt_num(pm.get('reply_count'))}  "
-              + (f"👁️ {fmt_num(imp)}" if imp is not None else ""))
+              f"💬 {fmt_num(pm.get('reply_count'))}"
+              + (f"  👁️ {fmt_num(imp)}" if imp is not None else ""))
         print(f"       https://x.com/{USERNAME}/status/{t['id']}")
 
-    # ─── インプレッション取得の設定方法 ──────────────────────────────────────
-    if not HAS_OAUTH:
+    # ─── Claude 傾向分析 ────────────────────────────────────────────────────
+    if do_analyze:
+        if not HAS_CLAUDE:
+            print()
+            print("─" * 62)
+            print("  🤖 Claude 傾向分析（ANTHROPIC_API_KEY が必要）")
+            print("─" * 62)
+            print()
+            print("  export ANTHROPIC_API_KEY='sk-ant-...'")
+            print("  python3 scripts/x_analytics.py --analyze")
+        else:
+            print()
+            print("─" * 62)
+            print("  🤖 Claude 傾向分析中...")
+            print("─" * 62)
+            payload  = build_tweet_payload(tweets, impression_map)
+            analysis = analyze_with_claude(payload)
+            print()
+            if analysis:
+                print(analysis)
+            else:
+                print("  分析取得失敗（API キーまたは接続を確認）")
+    elif not HAS_OAUTH:
         print()
-        print("─" * 62)
-        print("  👁️ インプレッション数を取得するには")
-        print("─" * 62)
-        print()
-        print("  1. https://developer.twitter.com/en/portal/dashboard")
-        print("     でアプリの「Keys and tokens」を開く")
-        print()
-        print("  2. 以下の4つを環境変数に設定:")
-        print("       export TWITTER_API_KEY='...'")
-        print("       export TWITTER_API_SECRET='...'")
-        print("       export TWITTER_ACCESS_TOKEN='...'      ← あなたのアカウント")
-        print("       export TWITTER_ACCESS_SECRET='...'")
-        print()
-        print("  3. アプリの「User authentication settings」で")
-        print("     「Read and write」以上の権限を設定")
-        print()
-        print("  注意: インプレッションは自分のツイートのみ取得可能（他者は不可）")
-        print()
-        print("  ※ X Analytics（analytics.twitter.com）でも確認可能:")
-        print(f"    https://analytics.twitter.com/user/{USERNAME}/tweets")
+        print("  ヒント: ANTHROPIC_API_KEY を設定して --analyze を付けると")
+        print("          Claude が投稿傾向を分析します。")
 
     print()
     print("=" * 62)

@@ -38,9 +38,10 @@ jobs:
           # 任意: Google Analytics 4
           GA4_PROPERTY_ID:        ${{ secrets.GA4_PROPERTY_ID }}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
-          # 任意: X / Twitter
+          # 任意: X / Twitter + Claude 傾向分析
           TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
           TWITTER_USERNAME:     ${{ secrets.TWITTER_USERNAME }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           # 任意: Netlify
           NETLIFY_TOKEN:   ${{ secrets.NETLIFY_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
