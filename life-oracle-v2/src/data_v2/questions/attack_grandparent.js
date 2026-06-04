@@ -8,7 +8,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     type: 'entry',
     order: 1,
     text: 'その祖父母は、あなたの生活ルートについてどんな反応をしますか？',
-    discriminates: [],
+    discriminates: ['jin_92', 'jin_93', 'jin_94', 'jin_97'],
     choices: [
       {
         id: 'compare_era',
@@ -50,7 +50,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     type: 'entry',
     order: 2,
     text: '久しぶりに会ったとき、その祖父母が最初にすることは？',
-    discriminates: [],
+    discriminates: ['jin_93', 'jin_94', 'jin_95', 'jin_96', 'jin_97'],
     choices: [
       {
         id: 'feed',
@@ -91,7 +91,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_003',
     type: 'probe',
     text: 'その祖父母が怒るとき、どんな形で表れますか？',
-    discriminates: [],
+    discriminates: ['jin_92', 'jin_93', 'jin_94', 'jin_95', 'jin_96', 'jin_97'],
     choices: [
       {
         id: 'long_lecture',
@@ -132,7 +132,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_004',
     type: 'probe',
     text: 'その祖父母が「昔は良かった」と感じているのは、どんな場面ですか？',
-    discriminates: [],
+    discriminates: ['jin_92', 'jin_93'],
     choices: [
       {
         id: 'community',
@@ -165,7 +165,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_005',
     type: 'probe',
     text: 'その祖父母はあなたに「こうすべきだ」という話をよくしますか？',
-    discriminates: [],
+    discriminates: ['jin_92', 'jin_93', 'jin_94', 'jin_96', 'jin_97'],
     choices: [
       {
         id: 'yes_often',
@@ -206,7 +206,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_006',
     type: 'probe',
     text: 'その祖父母はお金や物を贈ることで愛情を表現しますか？',
-    discriminates: [],
+    discriminates: ['jin_95', 'jin_97'],
     choices: [
       {
         id: 'yes_gifts',
@@ -247,7 +247,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_007',
     type: 'probe',
     text: 'その祖父母は「健康・食事・睡眠」についてあなたに何か言いますか？',
-    discriminates: [],
+    discriminates: ['jin_94', 'jin_95', 'jin_97'],
     choices: [
       {
         id: 'constantly',
@@ -288,7 +288,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_008',
     type: 'probe',
     text: 'その祖父母が自分の過去の苦労・成功を話すのは、どんな状況が多いですか？',
-    discriminates: [],
+    discriminates: ['jin_93', 'jin_96', 'jin_97'],
     choices: [
       {
         id: 'prompted_by_complaints',
@@ -329,7 +329,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_009',
     type: 'probe',
     text: 'その祖父母はあなたの「パートナー・結婚・子供」についてどんなことを言いますか？',
-    discriminates: [],
+    discriminates: ['jin_92', 'jin_93', 'jin_94', 'jin_97'],
     choices: [
       {
         id: 'traditional_pressure',
@@ -370,7 +370,7 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
     id: 'atk_gp_010',
     type: 'probe',
     text: 'その祖父母は「時代の変化（スマホ・SNS・働き方）」についてどんな反応をしますか？',
-    discriminates: [],
+    discriminates: ['jin_92', 'jin_93', 'jin_94', 'jin_97'],
     choices: [
       {
         id: 'resistant',

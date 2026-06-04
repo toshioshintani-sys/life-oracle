@@ -129,7 +129,7 @@
           "Fe": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_04",
@@ -195,7 +195,7 @@
           "Fi": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_05",
@@ -261,7 +261,7 @@
           "Fi": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_06",
@@ -327,7 +327,7 @@
           "Te": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_08",
@@ -394,7 +394,7 @@
           "Ne": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_11",
@@ -461,7 +461,7 @@
           "Si": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_17",
@@ -526,7 +526,7 @@
           "Si": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_21",
@@ -592,7 +592,7 @@
           "Fi": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_25",
@@ -660,7 +660,7 @@
           "Si": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_29",
@@ -726,7 +726,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_33",
@@ -794,7 +794,7 @@
           "Si": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_34",
@@ -863,7 +863,7 @@
           "Ti": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_36",
@@ -930,7 +930,7 @@
           "Te": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_37",
@@ -998,7 +998,7 @@
           "Ni": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_39",
@@ -1065,7 +1065,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_44",
@@ -1132,7 +1132,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_49",
@@ -1201,7 +1201,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_51",
@@ -1270,7 +1270,7 @@
           "Si": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_52",
@@ -1339,7 +1339,7 @@
           "Fi": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_53",
@@ -1408,7 +1408,7 @@
           "Fe": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_57",
@@ -1477,7 +1477,7 @@
           "Fe": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_58",
@@ -1546,7 +1546,7 @@
           "Fi": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_02",
@@ -1611,7 +1611,7 @@
           "Te": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_07",
@@ -1676,7 +1676,7 @@
           "Fi": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_09",
@@ -1742,7 +1742,7 @@
           "Fi": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_10",
@@ -1809,7 +1809,7 @@
           "Fe": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_12",
@@ -1874,7 +1874,7 @@
           "Fe": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_13",
@@ -1940,7 +1940,7 @@
           "Ni": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_18",
@@ -2005,7 +2005,7 @@
           "Fi": 3
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_19",
@@ -2071,7 +2071,7 @@
           "Ne": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_22",
@@ -2136,7 +2136,7 @@
           "Te": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_23",
@@ -2202,7 +2202,7 @@
           "Ti": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_24",
@@ -2267,7 +2267,7 @@
           "Fe": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_26",
@@ -2332,7 +2332,7 @@
           "Fi": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_27",
@@ -2398,7 +2398,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_28",
@@ -2463,7 +2463,7 @@
           "Ti": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_30",
@@ -2528,7 +2528,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_32",
@@ -2593,7 +2593,7 @@
           "Te": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_35",
@@ -2659,7 +2659,7 @@
           "Te": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_38",
@@ -2725,7 +2725,7 @@
           "Ni": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_40",
@@ -2791,7 +2791,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_41",
@@ -2857,7 +2857,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_42",
@@ -2923,7 +2923,7 @@
           "Fe": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_45",
@@ -2989,7 +2989,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_46",
@@ -3055,7 +3055,7 @@
           "Fe": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_50",
@@ -3121,7 +3121,7 @@
           "Si": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_54",
@@ -3187,7 +3187,7 @@
           "Fi": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_55",
@@ -3253,7 +3253,7 @@
           "Si": 2
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_56",
@@ -3319,7 +3319,7 @@
           "Te": 1
         }
       },
-      "notePublished": true
+      "notePublished": false
     },
     {
       "id": "jin_59",
@@ -3916,7 +3916,7 @@
           "whyItWorks": "自律して動いていることを見せることで、この親の尊重スタンスをさらに引き出す"
         }
       ],
-      "boundarySignal": "特になし。",
+      "boundarySignal": null,
       "matchSignals": {
         "situationTags": [
           "parent_autonomous",
@@ -5231,7 +5231,7 @@
           "whyItWorks": "語ることの意味（伝承・記録）を認めることで、対話が双方向になる"
         }
       ],
-      "boundarySignal": "特になし。",
+      "boundarySignal": null,
       "matchSignals": {
         "situationTags": [
           "grandparent_glory",
@@ -5272,7 +5272,7 @@
           "whyItWorks": "関係の価値を言語化することで、この安心感のある関係をさらに大切にする"
         }
       ],
-      "boundarySignal": "特になし。",
+      "boundarySignal": null,
       "matchSignals": {
         "situationTags": [
           "grandparent_accepting",

@@ -1,0 +1,48 @@
+name: Daily Monitor Report
+
+on:
+  schedule:
+    - cron: '0 23 * * *'   # 毎日 08:00 JST
+  workflow_dispatch: {}     # 手動実行も可
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write   # jin 記事の自動コミット用
+      actions:  write   # 失敗ワークフローの再実行用
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          # GitHub Actions が push できるよう GITHUB_TOKEN を使用
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          # GA4 は任意。インストール失敗しても続行
+          pip install google-analytics-data 2>/dev/null || true
+
+      - name: Run daily report
+        env:
+          # 必須
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          # 任意: Google Analytics 4
+          GA4_PROPERTY_ID:        ${{ secrets.GA4_PROPERTY_ID }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          # 任意: X / Twitter + Claude 傾向分析
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          TWITTER_USERNAME:     ${{ secrets.TWITTER_USERNAME }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          # 任意: Netlify
+          NETLIFY_TOKEN:   ${{ secrets.NETLIFY_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: python scripts/daily_report.py

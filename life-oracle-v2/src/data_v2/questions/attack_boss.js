@@ -14,7 +14,7 @@ export const ATTACK_BOSS_QUESTIONS = [
       {
         id: 'fixed',
         label: '一度貼った印象が、まず変わらない',
-        attackTypeHints: { jin_01: 3 },
+        attackTypeHints: { jin_01: 3, jin_49: 1 },
         biasHints: { B3: 2 },
         jungShadowHints: { Si: 2 },
         tags: ['fixed_judgment'],
@@ -56,7 +56,7 @@ export const ATTACK_BOSS_QUESTIONS = [
       {
         id: 'weather',
         label: '朝の機嫌で1日のチームの空気が決まる',
-        attackTypeHints: { jin_06: 3 },
+        attackTypeHints: { jin_06: 3, jin_58: 1 },
         biasHints: { B7: 2 },
         jungShadowHints: { Te: 2 },
         tags: ['mood_anchor'],
@@ -119,7 +119,7 @@ export const ATTACK_BOSS_QUESTIONS = [
       {
         id: 'attribute_to_subordinate',
         label: 'ミスは部下の能力不足として処理される',
-        attackTypeHints: { jin_01: 2, jin_04: 1 },
+        attackTypeHints: { jin_01: 2, jin_04: 1, jin_21: 1 },
         biasHints: { B3: 1 },
         tags: ['attribute_inward'],
       },
@@ -294,12 +294,12 @@ export const ATTACK_BOSS_QUESTIONS = [
     id: 'atk_b_008',
     type: 'probe',
     text: 'その上司は、新しい手法や変化をどう受け止めますか？',
-    discriminates: ['jin_17', 'jin_34', 'jin_29'],
+    discriminates: ['jin_17', 'jin_34', 'jin_29', 'jin_37'],
     choices: [
       {
         id: 'past_glory',
         label: '『自分の若い頃は』『昔はこうやって乗り越えた』が出てくる',
-        attackTypeHints: { jin_17: 3 },
+        attackTypeHints: { jin_17: 3, jin_37: 2 },
         biasHints: { B6: 2, B7: 1 },
         jungShadowHints: { Si: 3 },
         tags: ['past_glory'],
@@ -307,7 +307,7 @@ export const ATTACK_BOSS_QUESTIONS = [
       {
         id: 'precedent_block',
         label: '『前例がない』『うちではそういうやり方はしない』と止める',
-        attackTypeHints: { jin_34: 3 },
+        attackTypeHints: { jin_34: 3, jin_25: 1 },
         biasHints: { B6: 3 },
         jungShadowHints: { Si: 2 },
         tags: ['precedent_block'],
@@ -372,12 +372,12 @@ export const ATTACK_BOSS_QUESTIONS = [
     id: 'atk_b_010',
     type: 'probe',
     text: 'その上司は、チームの情報をどう上に流しますか？',
-    discriminates: ['jin_39', 'jin_11', 'jin_36'],
+    discriminates: ['jin_39', 'jin_11', 'jin_36', 'jin_05'],
     choices: [
       {
         id: 'solo_report',
         label: '自分が窓口になり、チームの成果も自分の名前で上げる',
-        attackTypeHints: { jin_39: 3 },
+        attackTypeHints: { jin_39: 3, jin_05: 1 },
         biasHints: { B5: 2 },
         jungShadowHints: { Te: 2 },
         tags: ['credit_monopoly'],
@@ -443,6 +443,203 @@ export const ATTACK_BOSS_QUESTIONS = [
         label: '議題通りに進み、時間内に終わることが多い',
         attackTypeHints: { jin_04: 1 },
         tags: ['effective_meeting'],
+      },
+    ],
+  },
+
+  // ── 成果の帰属 ──────────────────────────────────────────
+  {
+    id: 'atk_b_013',
+    type: 'probe',
+    text: '部下が作った提案や資料を上層部に届けるとき、その上司はどうしますか？',
+    discriminates: ['jin_05', 'jin_39'],
+    choices: [
+      {
+        id: 'claim_team',
+        label: 'チームの成果として自分が代表報告し、誰が作ったか出てこない',
+        attackTypeHints: { jin_05: 3 },
+        biasHints: { B10: 2 },
+        jungShadowHints: { Te: 2 },
+        tags: ['credit_stealing'],
+      },
+      {
+        id: 'give_credit',
+        label: '「○○さんがまとめました」と担当者の名前を明確に出す',
+        attackTypeHints: { jin_05: -2 },
+        tags: ['credit_given'],
+      },
+      {
+        id: 'rewrite_first',
+        label: 'いったん受け取り、内容を自分で書き直してから提出する',
+        attackTypeHints: { jin_05: 2, jin_04: 1 },
+        biasHints: { B5: 1 },
+        tags: ['rewrite_before_submit'],
+      },
+      {
+        id: 'delegate_reporting',
+        label: '「あとは自分でやって」と報告自体も丸投げする',
+        attackTypeHints: { jin_36: 1 },
+        biasHints: { B2: 1 },
+        tags: ['delegate_everything'],
+      },
+    ],
+  },
+
+  // ── 事前説明なしのミス ──────────────────────────────────
+  {
+    id: 'atk_b_014',
+    type: 'probe',
+    text: '事前に教えられていなかった業務でミスが起きたとき、その上司は？',
+    discriminates: ['jin_21', 'jin_25'],
+    choices: [
+      {
+        id: 'why_no_initiative',
+        label: '「なぜ自分で考えられなかったのか」「普通わかるはず」と叱る',
+        attackTypeHints: { jin_21: 3 },
+        biasHints: { B3: 2 },
+        jungShadowHints: { Ni: 2 },
+        tags: ['expect_mind_read'],
+      },
+      {
+        id: 'admit_gap',
+        label: '「説明が足りなかった、ごめん」と自分も認める',
+        attackTypeHints: { jin_21: -2 },
+        tags: ['admit_instruction_gap'],
+      },
+      {
+        id: 'told_you_so',
+        label: '「だから最初にリスクがあると言ったでしょ」と言う',
+        attackTypeHints: { jin_25: 2 },
+        biasHints: { B1: 1, B10: 1 },
+        jungShadowHints: { Si: 1 },
+        tags: ['told_you_so'],
+      },
+      {
+        id: 'recovery_only',
+        label: '経緯を問わず「これからどう直す？」だけを聞いてくる',
+        attackTypeHints: { jin_08: 1 },
+        tags: ['forward_only'],
+      },
+    ],
+  },
+
+  // ── 新しい案への最初の返し ──────────────────────────────
+  {
+    id: 'atk_b_015',
+    type: 'probe',
+    text: 'あなたが改善案やアイデアを出したとき、その上司が最初にするのは？',
+    discriminates: ['jin_25', 'jin_57'],
+    choices: [
+      {
+        id: 'risk_first',
+        label: '「リスクがある」「失敗したらどうする」から始まる',
+        attackTypeHints: { jin_25: 3 },
+        biasHints: { B1: 2, B6: 2 },
+        jungShadowHints: { Si: 2, Fi: 1 },
+        tags: ['risk_block'],
+      },
+      {
+        id: 'over_praise',
+        label: '「すごい！すぐやろう！」「君ならできる！」と過剰に反応する',
+        attackTypeHints: { jin_57: 3 },
+        biasHints: { B7: 2 },
+        jungShadowHints: { Ne: 2 },
+        tags: ['over_praise'],
+      },
+      {
+        id: 'neutral_listen',
+        label: '「いいね、詳しく聞かせて」と落ち着いて受け取る',
+        attackTypeHints: { jin_25: -2, jin_57: -1 },
+        tags: ['neutral_open'],
+      },
+      {
+        id: 'past_reference',
+        label: '「前回の件があるから慎重に」と過去を引き合いに出す',
+        attackTypeHints: { jin_17: 1 },
+        biasHints: { B6: 1 },
+        jungShadowHints: { Si: 1 },
+        tags: ['past_reference_caution'],
+      },
+    ],
+  },
+
+  // ── フィードバックの特徴 ──────────────────────────────────
+  {
+    id: 'atk_b_016',
+    type: 'probe',
+    text: 'その上司がフィードバックや評価を伝えるとき、多いのは？',
+    discriminates: ['jin_49', 'jin_37', 'jin_53', 'jin_58'],
+    choices: [
+      {
+        id: 'comparison_based',
+        label: '「前任者は」「同期の○○は」「他のチームでは」と比較を入れる',
+        attackTypeHints: { jin_49: 3 },
+        biasHints: { B9: 3, B11: 1 },
+        jungShadowHints: { Te: 2 },
+        tags: ['comparison_attack'],
+      },
+      {
+        id: 'experience_lesson',
+        label: '「自分の若い頃はこうだった」「この経験が大事だ」と体験談が正解になる',
+        attackTypeHints: { jin_37: 3 },
+        biasHints: { B3: 2, B5: 1 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['career_impose'],
+      },
+      {
+        id: 'gratitude_demand',
+        label: '「感謝はあるか」「この機会をもらえているとわかっているか」を問う',
+        attackTypeHints: { jin_53: 3 },
+        biasHints: { B12: 3 },
+        jungShadowHints: { Fi: 2 },
+        tags: ['gratitude_forced'],
+      },
+      {
+        id: 'negative_forecast',
+        label: '「どうせまたこうなる」「最初からこうなると思っていた」と言う',
+        attackTypeHints: { jin_58: 3 },
+        biasHints: { B3: 2, B10: 2 },
+        jungShadowHints: { Ni: 2 },
+        tags: ['negative_forecast'],
+      },
+    ],
+  },
+
+  // ── メンバーの離脱への反応 ─────────────────────────────────
+  {
+    id: 'atk_b_017',
+    type: 'probe',
+    text: 'チームのメンバーが「辞めたい」「異動したい」と申し出たとき？',
+    discriminates: ['jin_52'],
+    choices: [
+      {
+        id: 'stall',
+        label: '「今は時期が悪い」「もう少し待って」と結論を引き延ばす',
+        attackTypeHints: { jin_52: 3 },
+        biasHints: { B6: 2, B1: 1 },
+        jungShadowHints: { Fe: 2 },
+        tags: ['retention_stall'],
+      },
+      {
+        id: 'support',
+        label: '「そうか、応援する」と背中を押す',
+        attackTypeHints: { jin_52: -3 },
+        tags: ['retention_support'],
+      },
+      {
+        id: 'guilt_trip',
+        label: '「チームへの影響を考えろ」「今辞めるのはどうか」と感情的に訴える',
+        attackTypeHints: { jin_52: 2 },
+        biasHints: { B8: 1, B1: 1 },
+        jungShadowHints: { Fe: 1 },
+        tags: ['guilt_trip'],
+      },
+      {
+        id: 'interpret_as_complaint',
+        label: '「私の何が問題だったのか」と自分への批判として解釈する',
+        attackTypeHints: { jin_04: 1 },
+        biasHints: { B8: 1 },
+        tags: ['self_reference'],
       },
     ],
   },

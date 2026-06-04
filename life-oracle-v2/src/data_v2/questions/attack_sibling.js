@@ -8,7 +8,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     type: 'entry',
     order: 1,
     text: 'きょうだい間で意見が食い違ったとき、その人はどうしますか？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_86', 'jin_87', 'jin_88', 'jin_89', 'jin_91'],
     choices: [
       {
         id: 'argue',
@@ -50,7 +50,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     type: 'entry',
     order: 2,
     text: 'そのきょうだいは、あなたの成功や良いニュースにどう反応しますか？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_86', 'jin_87', 'jin_89', 'jin_91'],
     choices: [
       {
         id: 'compare',
@@ -91,7 +91,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_003',
     type: 'probe',
     text: '家族の集まりで、そのきょうだいが取る役割は？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_86', 'jin_87', 'jin_88', 'jin_89', 'jin_90'],
     choices: [
       {
         id: 'organizer',
@@ -132,7 +132,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_004',
     type: 'probe',
     text: 'そのきょうだいが「貸して」「助けて」と言ってくるとき、どんな状況が多いですか？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_85', 'jin_86', 'jin_90', 'jin_91'],
     choices: [
       {
         id: 'emergency',
@@ -173,7 +173,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_005',
     type: 'probe',
     text: 'そのきょうだいは「家族のルール・慣習」に対してどんな態度をとりますか？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_87', 'jin_88', 'jin_89'],
     choices: [
       {
         id: 'follows',
@@ -214,7 +214,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_006',
     type: 'probe',
     text: 'そのきょうだいはあなたに「お金・物の貸し借り」を持ち出すことがありますか？',
-    discriminates: [],
+    discriminates: ['jin_85', 'jin_88', 'jin_90'],
     choices: [
       {
         id: 'yes_often',
@@ -255,7 +255,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_007',
     type: 'probe',
     text: 'そのきょうだいはあなたとの「過去の出来事」を会話に引き出しますか？',
-    discriminates: [],
+    discriminates: ['jin_86', 'jin_88', 'jin_89', 'jin_91'],
     choices: [
       {
         id: 'old_wounds',
@@ -296,7 +296,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_008',
     type: 'probe',
     text: 'そのきょうだいは親からの扱われ方に「えこひいき」を感じていそうですか？',
-    discriminates: [],
+    discriminates: ['jin_86', 'jin_87', 'jin_88', 'jin_91'],
     choices: [
       {
         id: 'strong_resentment',
@@ -337,7 +337,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_009',
     type: 'probe',
     text: 'そのきょうだいとの連絡頻度はどのくらいですか？',
-    discriminates: [],
+    discriminates: ['jin_85', 'jin_87', 'jin_88', 'jin_90'],
     choices: [
       {
         id: 'frequent',
@@ -378,7 +378,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_010',
     type: 'probe',
     text: 'そのきょうだいが「大変だ・困っている」と言ってくるとき、その性質は？',
-    discriminates: [],
+    discriminates: ['jin_85', 'jin_86', 'jin_90', 'jin_91'],
     choices: [
       {
         id: 'chronic',
@@ -419,7 +419,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_011',
     type: 'probe',
     text: 'そのきょうだいはあなたが困っているとき、どう反応しますか？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_85', 'jin_87', 'jin_88', 'jin_89'],
     choices: [
       {
         id: 'actively_helps',
@@ -460,7 +460,7 @@ export const ATTACK_SIBLING_QUESTIONS = [
     id: 'atk_sb_012',
     type: 'probe',
     text: 'そのきょうだいはあなたの生活に「口出し」してきますか？',
-    discriminates: [],
+    discriminates: ['jin_84', 'jin_87', 'jin_88'],
     choices: [
       {
         id: 'yes_often',

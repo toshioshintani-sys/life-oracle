@@ -16,8 +16,8 @@ export function PostQuiz({ onComplete }) {
   return (
     <div className="post-quiz-screen">
       <div className="post-quiz-header">
-        <p className="post-quiz-lead">あと少しだけ教えてください。</p>
-        <p className="post-quiz-sub">2,016通りの処方箋から絞り込むために使います。</p>
+        <p className="post-quiz-lead">よりくわしい結果のために</p>
+        <p className="post-quiz-sub">2,016通りの処方箋から絞り込みます。スキップも可能です。</p>
       </div>
 
       <div className="post-quiz-section">
@@ -27,7 +27,7 @@ export function PostQuiz({ onComplete }) {
             <button
               key={o}
               className={`post-quiz-chip${occupation === o ? ' selected' : ''}`}
-              onClick={() => setOccupation(o)}
+              onClick={() => setOccupation(prev => prev === o ? null : o)}
             >
               {o}
             </button>
@@ -42,7 +42,7 @@ export function PostQuiz({ onComplete }) {
             <button
               key={g}
               className={`post-quiz-chip${generation === g ? ' selected' : ''}`}
-              onClick={() => setGeneration(g)}
+              onClick={() => setGeneration(prev => prev === g ? null : g)}
             >
               {g}
             </button>
@@ -56,6 +56,13 @@ export function PostQuiz({ onComplete }) {
         onClick={() => onComplete(occupation, generation)}
       >
         結果を見る
+      </button>
+
+      <button
+        className="post-quiz-skip"
+        onClick={() => onComplete(null, null)}
+      >
+        スキップして結果を見る
       </button>
     </div>
   );
