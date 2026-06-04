@@ -1209,6 +1209,56 @@ button {
   color: var(--text);
 }
 
+/* ===== 歓喜の演出：選択画面・結果ハブへ入場アニメ＆ホバーリフトを波及 ===== */
+
+/* 段階フェードイン（純CSS・nth-childで遅延） */
+.topic-choices .topic-button,
+.target-choices .target-button,
+.mbti-type-grid .mbti-type-button,
+.hub-cards .hub-card {
+  opacity: 0;
+  animation: choiceRise 0.5s ease-out forwards;
+}
+.topic-choices .topic-button:nth-child(1),
+.target-choices .target-button:nth-child(1),
+.hub-cards .hub-card:nth-child(1) { animation-delay: 0.05s; }
+.topic-choices .topic-button:nth-child(2),
+.target-choices .target-button:nth-child(2),
+.hub-cards .hub-card:nth-child(2) { animation-delay: 0.11s; }
+.topic-choices .topic-button:nth-child(3),
+.target-choices .target-button:nth-child(3),
+.hub-cards .hub-card:nth-child(3) { animation-delay: 0.17s; }
+.topic-choices .topic-button:nth-child(4),
+.target-choices .target-button:nth-child(4),
+.hub-cards .hub-card:nth-child(4) { animation-delay: 0.23s; }
+.target-choices .target-button:nth-child(n+5),
+.hub-cards .hub-card:nth-child(n+5) { animation-delay: 0.29s; }
+.hub-cards .hub-card:nth-child(n+6) { animation-delay: 0.34s; }
+.hub-cards .hub-card:nth-child(n+7) { animation-delay: 0.39s; }
+.hub-cards .hub-card:nth-child(n+8) { animation-delay: 0.44s; }
+
+/* mbti型グリッドは数が多いので軽いフェードのみ */
+.mbti-type-grid .mbti-type-button { animation-duration: 0.4s; }
+
+/* ホバー時の浮き上がり（Quizと統一） */
+.topic-button:hover,
+.target-button:hover,
+.hub-card:hover {
+  transform: translateY(-2px);
+}
+.topic-button,
+.target-button {
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s, transform 0.12s;
+}
+
+/* アクティブ（押下）時の沈み込み */
+.topic-button:active,
+.target-button:active,
+.mbti-type-button:active,
+.hub-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
 .target-desc {
   font-size: 11px;
   color: var(--text-sub);
