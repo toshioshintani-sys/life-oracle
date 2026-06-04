@@ -63,14 +63,14 @@ export const ATTACK_BOSS_QUESTIONS = [
       },
       {
         id: 'stable_fixed',
-        label: '機嫌は安定しているが、評価や見方は固まっている',
+        label: '評価や見方が一度決まると、もう動かない',
         attackTypeHints: { jin_01: 2 },
         jungShadowHints: { Si: 1 },
         tags: ['stable_but_fixed'],
       },
       {
         id: 'stable_volatile',
-        label: '機嫌は安定しているが、指示が変わる',
+        label: '言うことや指示が、日によってコロコロ変わる',
         attackTypeHints: { jin_08: 2 },
         biasHints: { B2: 1 },
         tags: ['stable_but_volatile'],
