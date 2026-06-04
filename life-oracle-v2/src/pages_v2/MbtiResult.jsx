@@ -183,14 +183,19 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     return (
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
         <p className="detail-eyebrow">あなた専用の処方箋</p>
-        <p className="detail-note">{occupation} × {jungTypeId} × {generation}</p>
+        <p className="detail-note">{[occupation, generation].filter(Boolean).join(' × ') || 'あなたのタイプに合わせた処方箋'}</p>
         <p className="detail-note" style={{ marginBottom: 16 }}>
           職種・タイプ・年代の組み合わせ2,016通りから導き出しました。
         </p>
-        {loading ? (
+        {loading || presLoading ? (
           <p className="detail-body">読み込んでいます…</p>
         ) : prescriptionText ? (
           <p className="detail-body" style={{ fontSize: 16, lineHeight: 1.9 }}>{prescriptionText}</p>
+        ) : (!occupation || !generation) ? (
+          <p className="detail-body" style={{ lineHeight: 1.9 }}>
+            職業と年代を選ぶと、2,016通りからあなた専用の処方箋が表示されます。<br />
+            「もう一度診断」のあと、最後の質問で選んでみてください。
+          </p>
         ) : (
           <p className="detail-body">該当するデータがありません。</p>
         )}
@@ -330,7 +335,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             onClick={() => setSection('mechanism')} />
         )}
         <HubCard icon="📋" title="あなた専用の処方箋"
-          preview={`${occupation} × ${jungTypeId} × ${generation}`}
+          preview={[occupation, generation].filter(Boolean).join(' × ') || 'タイプ別に最適化'}
           onClick={() => setSection('prescription')} />
         {top2.length > 0 && (
           <HubCard icon="🎯" title="あなたの思考のクセ"
