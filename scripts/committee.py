@@ -39,6 +39,15 @@ from pathlib import Path
 JST = timezone(timedelta(hours=9))
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# ローカル実行時: REPO_ROOT/.env があれば読み込む（GitHub Actions では Secrets が優先）
+_env_file = REPO_ROOT / ".env"
+if _env_file.exists():
+    for _line in _env_file.read_text(encoding="utf-8").splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _k, _, _v = _line.partition("=")
+            os.environ.setdefault(_k.strip(), _v.strip())
 SCRIPTS_DIR = Path(__file__).resolve().parent
 ROLES_DIR = REPO_ROOT / "tasks" / "committee" / "roles"
 REPORTS_DIR = REPO_ROOT / "tasks" / "committee" / "reports"
