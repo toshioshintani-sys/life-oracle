@@ -10,6 +10,9 @@
  */
 export function updateBiasScore(biasScores, question, response) {
   if (question.kind !== 'bias' || !question.bias) return biasScores;
+  // SIT（究極の選択型）は accidents/triggers 専用。バイアス(B1-B12)ではないので
+  // biasScores には積まない。積むと「思考のクセ」の上位に化けて表示が壊れる。
+  if (question.bias === 'SIT') return biasScores;
   const key = question.bias;
   const delta = response === 1 ? question.weight : 0;
   return {

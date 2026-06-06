@@ -2781,6 +2781,35 @@ button {
   gap: 16px;
 }
 
+/* ===== 結果：インライン本文ブロック（まず文章で読み切る）===== */
+.result-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 20px 0 8px;
+}
+.readout-block {
+  background: var(--surface, #fff);
+  border: 1px solid var(--hairline, rgba(140, 95, 40, 0.14));
+  border-radius: var(--radius, 14px);
+  padding: 20px 18px;
+}
+.readout-block .detail-eyebrow { margin-bottom: 10px; display: block; }
+.readout-block .detail-headline { margin-bottom: 8px; }
+
+/* 処方箋のインライン職業/年代ピッカー */
+.pres-picker-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+.pres-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 7px;
+}
+
 .detail-eyebrow {
   font-size: 11px;
   font-weight: 700;

@@ -4,7 +4,6 @@ import { MbtiEntry }    from './pages_v2/MbtiEntry.jsx';
 import { TopicSelect }  from './pages_v2/TopicSelect.jsx';
 import { TargetSelect } from './pages_v2/TargetSelect.jsx';
 import { Quiz }         from './pages_v2/Quiz.jsx';
-import { PostQuiz }     from './pages_v2/PostQuiz.jsx';
 import { MbtiResult }   from './pages_v2/MbtiResult.jsx';
 import { Result }       from './pages_v2/Result.jsx';
 import { AttackResult } from './pages_v2/AttackResult.jsx';
@@ -171,7 +170,7 @@ export default function App() {
       const result = buildMbtiResult(mbtiSession);
       setMbtiResult(result);
       trackEvent('quiz_complete', { mode: 'mbti', mbti_type: result.mbtiType });
-      setScreen('post-quiz');
+      setScreen('result-mbti');   // 診断後はまず結果テキストへ（職業/年代は結果内で任意選択）
       return;
     }
 
@@ -180,7 +179,7 @@ export default function App() {
       const result = buildMbtiResult(mbtiSession);
       setMbtiResult(result);
       trackEvent('quiz_complete', { mode: 'mbti', mbti_type: result.mbtiType });
-      setScreen('post-quiz');
+      setScreen('result-mbti');
       return;
     }
 
@@ -189,11 +188,6 @@ export default function App() {
     setOracleMessage(getMbtiOracleMessage(mbtiSession));
   }, [mbtiSession]);
 
-  const handlePostQuizComplete = useCallback((occupation, generation) => {
-    setMbtiOccupation(occupation);
-    setMbtiGeneration(generation);
-    setScreen('result-mbti');
-  }, []);
 
   // ── Situation flow ──────────────────────────────────────────────────────
 
@@ -290,7 +284,7 @@ export default function App() {
       questionCount: 0,
       fromDirectSelection: true,
     });
-    setScreen('post-quiz');
+    setScreen('result-mbti');
   }, []);
 
   const handleStart = useCallback((mode) => {
@@ -419,10 +413,6 @@ export default function App() {
         onAnswer={handleAnswer}
       />
     );
-  }
-
-  if (screen === 'post-quiz') {
-    return <PostQuiz onComplete={handlePostQuizComplete} />;
   }
 
   if (screen === 'result-mbti') {

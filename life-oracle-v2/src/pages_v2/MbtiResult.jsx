@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { cognitiveFunctionMap, famousPeople } from '../data_v2/meta/cognitiveFunctions.js';
 import { biasInfo }          from '../data_v2/meta/biasInfo.js';
 import mechanismsJson        from '../data_v2/meta/prescriptions_mechanism.json';
-import ShareButtons          from '../components/ShareButtons.jsx';
-import ShareCard             from '../components/ShareCard.jsx';
 import CrossFlowActions      from '../components/CrossFlowActions.jsx';
 import { NotePromo }         from '../components/NotePromo.jsx';
 import { ResultDetail }      from '../components/ResultDetail.jsx';
@@ -11,6 +9,15 @@ import { OracleWall }        from './OracleWall.jsx';
 import { incrementOnce }     from '../lib/stats.js';
 
 const MECHANISMS = mechanismsJson.mechanisms;
+
+// 処方箋の絞り込み用（任意・後から選べる）
+const OCCUPATIONS = [
+  '会社員', '公務員', '医療職', '教育職', '士業',
+  'クリエイター', '接客', '調理', '理美容師', '介護',
+  'フリーランス', '自営業', '一次産業', '建設業',
+  '主婦/主夫', '非正規雇用', '学生', '無職',
+];
+const GENERATIONS = ['10代', '20代', '30代', '40代', '50代', '60代', '70代以上'];
 
 const MBTI_TO_JUNG = {
   ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
@@ -51,7 +58,7 @@ function HubCard({ icon, title, preview, onClick }) {
   );
 }
 
-export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFlow }) {
+export function MbtiResult({ result, occupation: occProp, generation: genProp, onRetry, onSwitchFlow }) {
   const [section, setSection]             = useState(null);
   const [typeProfiles, setTypeProfiles]   = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
@@ -59,6 +66,10 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   const [loading, setLoading]             = useState(true);
   const [loadError, setLoadError]         = useState(false);
   const [presLoading, setPresLoading]     = useState(false);
+
+  // 処方箋の絞り込みは「結果を読んだあと」に任意で選ぶ（診断直後はテキストを優先）
+  const [occupation, setOccupation] = useState(occProp ?? null);
+  const [generation, setGeneration] = useState(genProp ?? null);
 
   // 初期ロード: 表示に必要な2ファイルのみ（5.5MB のprescriptionsは除外）
   useEffect(() => {
@@ -76,17 +87,17 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     });
   }, []);
 
-  // 処方箋は「処方箋」セクションを開いたときだけ遅延ロード
+  // 処方箋は職業・年代が両方そろったときだけ遅延ロード（5.5MB）
   useEffect(() => {
-    if (section !== 'prescription' || prescriptions || presLoading) return;
+    if (!occupation || !generation || prescriptions || presLoading) return;
     setPresLoading(true);
     fetch('/data/prescriptions.json')
       .then(r => r.json())
       .then(pr => { setPrescriptions(pr); setPresLoading(false); })
       .catch(() => setPresLoading(false));
-  }, [section, prescriptions, presLoading]);
+  }, [occupation, generation, prescriptions, presLoading]);
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
+  useEffect(() => { if (section) window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
 
   if (!result) return null;
 
@@ -112,19 +123,18 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     ? `${occupation}_${jungTypeId}_${generation}` : '';
   const prescriptionText = prescriptions?.[prescriptionKey]?.text ?? null;
 
+  // biasInfo に存在する正規のバイアス(B1-B12)だけを対象にする。
+  // SIT など非バイアスのキーが混ざると表示が壊れるためフィルタする。
   const top2 = Object.entries(biasScores ?? {})
+    .filter(([key, score]) => biasInfo[key] && score > 0)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 2)
     .map(([key]) => key);
 
-  const biasMsg1 = biasMessages && top2[0]
-    ? (biasMessages[`${jungTypeId}_${biasInfo[top2[0]]?.messageKey}`] ?? null) : null;
-  const biasMsg2 = biasMessages && top2[1]
-    ? (biasMessages[`${jungTypeId}_${biasInfo[top2[1]]?.messageKey}`] ?? null) : null;
+  const biasMsg = (idx) => (biasMessages && top2[idx])
+    ? (biasMessages[`${jungTypeId}_${biasInfo[top2[idx]]?.messageKey}`] ?? null) : null;
 
-  const shareText = `ライフオラクルで自分の動き方を読み解きました。\n私は〈${typeName}〉(${jungTypeId})\n${isShadow ? `光は${cf.lightName}` : `影は${cf.shadowName}`}\n\nあなたの動き方は？ #ライフオラクル`;
-
-  // ── 詳細ページ ──────────────────────────────
+  // ── 詳細ページ（今日の一歩・note・みんなのひとこと だけカード式）──────────
   if (section === 'action') {
     return (
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
@@ -141,124 +151,6 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             ))}
           </div>
         )}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'mechanism') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        {mechanism ? (
-          <>
-            <p className="detail-eyebrow">なぜそれが起きるか</p>
-            <p className="detail-headline">{mechanism.mechanismName}</p>
-            <p className="detail-body">{mechanism.whyItEmerges}</p>
-            {isShadow && mechanism.whyItPersists && (
-              <p className="detail-body" style={{ marginTop: 12 }}>{mechanism.whyItPersists}</p>
-            )}
-            {isShadow && mechanism.interventionPoint && (
-              <p className="detail-body" style={{ marginTop: 12, opacity: 0.85 }}>
-                <strong>介入のポイント：</strong>{mechanism.interventionPoint}
-              </p>
-            )}
-            {!isShadow && mechanism.shortBenefit && (
-              <p className="detail-body" style={{ marginTop: 12 }}>
-                <strong>効く場面：</strong>{mechanism.shortBenefit}
-              </p>
-            )}
-            {!isShadow && mechanism.whenItHurts && (
-              <p className="detail-body" style={{ marginTop: 8, opacity: 0.85 }}>
-                <strong>裏返るとき：</strong>{mechanism.whenItHurts}
-              </p>
-            )}
-          </>
-        ) : (
-          <p className="detail-body">データがありません。</p>
-        )}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'prescription') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <p className="detail-eyebrow">あなた専用の処方箋</p>
-        <p className="detail-note">{[occupation, generation].filter(Boolean).join(' × ') || 'あなたのタイプに合わせた処方箋'}</p>
-        <p className="detail-note" style={{ marginBottom: 16 }}>
-          職種・タイプ・年代の組み合わせ2,016通りから導き出しました。
-        </p>
-        {loading || presLoading ? (
-          <p className="detail-body">読み込んでいます…</p>
-        ) : prescriptionText ? (
-          <p className="detail-body" style={{ fontSize: 16, lineHeight: 1.9 }}>{prescriptionText}</p>
-        ) : (!occupation || !generation) ? (
-          <p className="detail-body" style={{ lineHeight: 1.9 }}>
-            職業と年代を選ぶと、2,016通りからあなた専用の処方箋が表示されます。<br />
-            「もう一度診断」のあと、最後の質問で選んでみてください。
-          </p>
-        ) : (
-          <p className="detail-body">該当するデータがありません。</p>
-        )}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'biases') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <p className="detail-eyebrow">あなたの思考のクセ</p>
-        {top2.map((biasId, idx) => {
-          const info = biasInfo[biasId];
-          const msg  = idx === 0 ? biasMsg1 : biasMsg2;
-          return (
-            <div key={biasId} className={`mbti-bias-card${idx === 0 ? ' mbti-bias-card--top' : ''}`}>
-              <div className="mbti-bias-card-header">
-                <span className="mbti-bias-rank">{idx + 1}位</span>
-                <span className="mbti-bias-name">{info?.name}</span>
-              </div>
-              <p className="mbti-bias-short">{info?.short}</p>
-              <p className="mbti-bias-msg">{msg ?? info?.description}</p>
-              {info?.noteUrl && new Date() >= new Date(info.noteScheduledAt ?? 0) && (
-                <a href={info.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link">
-                  このバイアスを深掘りする →
-                </a>
-              )}
-            </div>
-          );
-        })}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'profile') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        {typeProfile ? (
-          <>
-            <p className="detail-eyebrow">あなたの強み</p>
-            <p className="detail-body" style={{ fontSize: 16, lineHeight: 1.9 }}>{typeProfile.praiseText}</p>
-            <p className="detail-eyebrow" style={{ marginTop: 24 }}>心の癖</p>
-            <p className="detail-body" style={{ fontSize: 16, lineHeight: 1.9 }}>{typeProfile.habitText}</p>
-          </>
-        ) : (
-          <p className="detail-body">読み込んでいます…</p>
-        )}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'share') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <ShareCard
-          headline="私の動き方は"
-          mainText={typeName}
-          subText={jungTypeId}
-          tagline={isShadow ? `光は${cf.lightName}` : `影は${cf.shadowName}`}
-        />
-        <div style={{ marginTop: 16 }}>
-          <ShareButtons shareText={shareText} />
-        </div>
       </ResultDetail>
     );
   }
@@ -296,7 +188,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     );
   }
 
-  // ── ハブ画面 ────────────────────────────────
+  // ── メイン結果（まず文章で読み切れる）────────────────────────────
   return (
     <div className="result-hub">
 
@@ -322,30 +214,126 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
         </div>
       </div>
 
-      {/* カードリスト */}
+      {/* ── 本文（インラインで読める。タップ不要）── */}
+      <div className="result-readout">
+
+        {/* なぜそれが起きるか */}
+        {mechanism && (
+          <section className="readout-block">
+            <p className="detail-eyebrow">なぜそれが起きるか</p>
+            <p className="detail-headline">{mechanism.mechanismName}</p>
+            <p className="detail-body">{mechanism.whyItEmerges}</p>
+            {isShadow && mechanism.whyItPersists && (
+              <p className="detail-body" style={{ marginTop: 12 }}>{mechanism.whyItPersists}</p>
+            )}
+            {isShadow && mechanism.interventionPoint && (
+              <p className="detail-body" style={{ marginTop: 12, opacity: 0.85 }}>
+                <strong>介入のポイント：</strong>{mechanism.interventionPoint}
+              </p>
+            )}
+            {!isShadow && mechanism.shortBenefit && (
+              <p className="detail-body" style={{ marginTop: 12 }}>
+                <strong>効く場面：</strong>{mechanism.shortBenefit}
+              </p>
+            )}
+            {!isShadow && mechanism.whenItHurts && (
+              <p className="detail-body" style={{ marginTop: 8, opacity: 0.85 }}>
+                <strong>裏返るとき：</strong>{mechanism.whenItHurts}
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* 強み・心の癖 */}
+        {typeProfile && (
+          <section className="readout-block">
+            <p className="detail-eyebrow">あなたの強み</p>
+            <p className="detail-body">{typeProfile.praiseText}</p>
+            <p className="detail-eyebrow" style={{ marginTop: 20 }}>心の癖</p>
+            <p className="detail-body">{typeProfile.habitText}</p>
+          </section>
+        )}
+
+        {/* 思考のクセ（バイアス上位2） */}
+        {top2.length > 0 && (
+          <section className="readout-block">
+            <p className="detail-eyebrow">あなたの思考のクセ</p>
+            {top2.map((biasId, idx) => {
+              const info = biasInfo[biasId];
+              const msg  = biasMsg(idx);
+              return (
+                <div key={biasId} className={`mbti-bias-card${idx === 0 ? ' mbti-bias-card--top' : ''}`}>
+                  <div className="mbti-bias-card-header">
+                    <span className="mbti-bias-rank">{idx + 1}位</span>
+                    <span className="mbti-bias-name">{info?.name}</span>
+                  </div>
+                  <p className="mbti-bias-short">{info?.short}</p>
+                  <p className="mbti-bias-msg">{msg ?? info?.description}</p>
+                  {info?.noteUrl && new Date() >= new Date(info.noteScheduledAt ?? 0) && (
+                    <a href={info.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link">
+                      このバイアスを深掘りする →
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </section>
+        )}
+
+        {/* 処方箋（職業・年代は任意・あとから選べる）*/}
+        <section className="readout-block">
+          <p className="detail-eyebrow">あなた専用の処方箋</p>
+          {prescriptionText ? (
+            <>
+              <p className="detail-note" style={{ marginBottom: 10 }}>
+                {[occupation, generation].filter(Boolean).join(' × ')}
+              </p>
+              <p className="detail-body">{prescriptionText}</p>
+            </>
+          ) : (
+            <>
+              <p className="detail-body" style={{ marginBottom: 14 }}>
+                職業と年代を選ぶと、2,016通りからあなた専用の処方箋を表示します。
+              </p>
+              <div className="pres-picker">
+                <p className="pres-picker-label">職業</p>
+                <div className="pres-picker-grid">
+                  {OCCUPATIONS.map(o => (
+                    <button key={o}
+                      className={`post-quiz-chip${occupation === o ? ' selected' : ''}`}
+                      onClick={() => setOccupation(prev => prev === o ? null : o)}>
+                      {o}
+                    </button>
+                  ))}
+                </div>
+                <p className="pres-picker-label" style={{ marginTop: 14 }}>年代</p>
+                <div className="pres-picker-grid">
+                  {GENERATIONS.map(g => (
+                    <button key={g}
+                      className={`post-quiz-chip${generation === g ? ' selected' : ''}`}
+                      onClick={() => setGeneration(prev => prev === g ? null : g)}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+                {occupation && generation && presLoading && (
+                  <p className="detail-body" style={{ marginTop: 12 }}>処方箋を読み込んでいます…</p>
+                )}
+                {occupation && generation && !presLoading && prescriptions && !prescriptionText && (
+                  <p className="detail-body" style={{ marginTop: 12 }}>該当するデータがありません。</p>
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      </div>
+
+      {/* ── ここから下はカード（今日の一歩 以下）── */}
       <div className="hub-cards">
         {cf.todayAction && (
           <HubCard icon="⚡" title="今日ひとつだけ試すなら"
             preview={cf.todayAction.slice(0, 35) + '…'}
             onClick={() => setSection('action')} />
-        )}
-        {mechanism && (
-          <HubCard icon="🧠" title="なぜそれが起きるか"
-            preview={mechanism.mechanismName}
-            onClick={() => setSection('mechanism')} />
-        )}
-        <HubCard icon="📋" title="あなた専用の処方箋"
-          preview={[occupation, generation].filter(Boolean).join(' × ') || 'タイプ別に最適化'}
-          onClick={() => setSection('prescription')} />
-        {top2.length > 0 && (
-          <HubCard icon="🎯" title="あなたの思考のクセ"
-            preview={biasInfo[top2[0]]?.name + ' ほか'}
-            onClick={() => setSection('biases')} />
-        )}
-        {typeProfile && (
-          <HubCard icon="✨" title="あなたの強み・心の癖"
-            preview={typeProfile.praiseText.slice(0, 35) + '…'}
-            onClick={() => setSection('profile')} />
         )}
         <HubCard icon="📖" title="note で深く読む"
           preview="記事・シリーズ・メンバーシップ"
@@ -353,9 +341,6 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じタイプの人たちのコメント"
           onClick={() => setSection('wall')} />
-        <HubCard icon="↗" title="この結果をシェアする"
-          preview="X・LINE・コピー"
-          onClick={() => setSection('share')} />
       </div>
 
       <CrossFlowActions
