@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getResultWithFallback } from '../data_v2/results/index.js';
 import { biasInfo }              from '../data_v2/meta/biasInfo.js';
-import ShareButtons              from '../components/ShareButtons.jsx';
-import ShareCard                 from '../components/ShareCard.jsx';
 import CrossFlowActions          from '../components/CrossFlowActions.jsx';
 import { NotePromo }             from '../components/NotePromo.jsx';
 import { ResultDetail }          from '../components/ResultDetail.jsx';
@@ -52,7 +50,7 @@ export function Result({ result, onRetry, onSwitchFlow }) {
   const [section, setSection] = useState(null);
 
   useEffect(() => { if (result) incrementOnce('situation'); }, [result]);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
+  useEffect(() => { if (section) window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
 
   if (!result) return null;
 
@@ -62,86 +60,11 @@ export function Result({ result, onRetry, onSwitchFlow }) {
   const showSecond  = (result.situationGap ?? 1) < 0.15 && result.secondSituation;
   const thirdLabel  = SITUATION_LABELS[result.thirdSituation];
   const showForecast = result.showThird && thirdLabel;
-  const topBiases   = (result.topBiases ?? []).map(key => biasInfo[key]).filter(Boolean);
-  const shareText   = `ライフオラクルで今の状況を整理しました。\n直面しているのは〈${label}〉\n\n#ライフオラクル`;
+  const topBiases   = (result.topBiases ?? [])
+    .filter(key => biasInfo[key])
+    .map(key => biasInfo[key]);
 
-  // ── 詳細ページ ──────────────────────────────
-  if (section === 'layers') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <p className="detail-eyebrow">今あなたの中で起きていること</p>
-        <div className="result-layers">
-          <div className="result-layer result-layer-surface">
-            <p className="result-layer-label">今感じていること</p>
-            <p className="result-layer-text">{text?.sideA}</p>
-          </div>
-          <div className="result-layer result-layer-root">
-            <p className="result-layer-label">その根っこにある可能性</p>
-            <p className="result-layer-text">{text?.sideB}</p>
-          </div>
-          {text?.closing && <p className="result-closing">{text.closing}</p>}
-        </div>
-        {showSecond && (
-          <div className="result-adjacent" style={{ marginTop: 20 }}>
-            <p className="result-adjacent-label">近くにあるかもしれないテーマ</p>
-            <p className="result-adjacent-tag">{secondLabel}</p>
-          </div>
-        )}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'why') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <p className="detail-eyebrow">なぜそうなっているか</p>
-        {text?.jungNote && <p className="detail-body">{text.jungNote}</p>}
-        {text?.biasNote && <p className="detail-body" style={{ marginTop: 12 }}>{text.biasNote}</p>}
-        {topBiases.length > 0 && (
-          <div className="result-biases-mini" style={{ marginTop: 20 }}>
-            {topBiases.map((b, i) => (
-              <div key={i} className={`result-bias-mini bias-rank-${i + 1}`}>
-                <span className="bias-name-mini">{b.name}</span>
-                <span className="bias-short-mini">{b.short}</span>
-                {b.noteUrl && new Date() >= new Date(b.noteScheduledAt ?? 0) && (
-                  <a href={b.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link-mini">詳しく →</a>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        {showForecast && (
-          <div className="result-forecast" style={{ marginTop: 24 }}>
-            <p className="result-section-title">このまま続くと</p>
-            <p className="result-forecast-text">
-              今の状態を放置した場合、あなたの中で「{thirdLabel}」という局面が顔を出してくる可能性があります。
-            </p>
-          </div>
-        )}
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'action') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <p className="detail-eyebrow">今日の一歩</p>
-        <p className="detail-phrase">{text?.action}</p>
-      </ResultDetail>
-    );
-  }
-
-  if (section === 'share') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <ShareCard headline="今直面しているのは" mainText={label} subText="" tagline="" />
-        <div style={{ marginTop: 16 }}>
-          <ShareButtons shareText={shareText} />
-        </div>
-      </ResultDetail>
-    );
-  }
-
+  // ── サブページ（note・みんなのひとことのみカード）─────────────────
   if (section === 'wall') {
     return (
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
@@ -155,24 +78,19 @@ export function Result({ result, onRetry, onSwitchFlow }) {
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
         <p className="detail-eyebrow">この状況をもっと深く読む</p>
         <NotePromo />
-        <a
-          href="https://note.com/lifeoraclejp"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="detail-note-link"
-          style={{ marginTop: 16, display: 'block' }}
-        >
+        <a href="https://note.com/lifeoraclejp" target="_blank" rel="noopener noreferrer"
+           className="detail-note-link" style={{ marginTop: 16, display: 'block' }}>
           全記事一覧を見る →
         </a>
       </ResultDetail>
     );
   }
 
-  // ── ハブ画面 ────────────────────────────────
+  // ── メイン結果画面（スクロールだけで読み切れる）─────────────────────────
   return (
     <div className="result-hub">
 
-      {/* 推論ログ（コンパクト） */}
+      {/* 推論ログ */}
       {result.evidenceLog?.length > 0 && (
         <div className="hub-readings">
           <p className="hub-readings-label">私はこう読みました。</p>
@@ -189,32 +107,79 @@ export function Result({ result, onRetry, onSwitchFlow }) {
         {text?.hook && <p className="hub-oracle-preview">{text.hook}</p>}
       </div>
 
-      {/* カードリスト */}
+      {/* ── インライン本文（タップ不要） ── */}
+      {text && (
+        <div className="result-readout">
+
+          {/* ① 今感じていることと根っこ（主コンテンツ）*/}
+          <section className="readout-block readout-block--hero">
+            <p className="detail-eyebrow">今感じていること</p>
+            <p className="detail-body" style={{ lineHeight: 1.9 }}>{text.sideA}</p>
+            <p className="detail-eyebrow" style={{ marginTop: 20 }}>その根っこにある可能性</p>
+            <p className="detail-body" style={{ lineHeight: 1.9 }}>{text.sideB}</p>
+            {text.closing && (
+              <p className="result-closing" style={{ marginTop: 16 }}>{text.closing}</p>
+            )}
+            {showSecond && (
+              <div className="result-adjacent" style={{ marginTop: 16 }}>
+                <p className="result-adjacent-label">近くにあるかもしれないテーマ</p>
+                <p className="result-adjacent-tag">{secondLabel}</p>
+              </div>
+            )}
+          </section>
+
+          {/* ② なぜそうなっているか */}
+          {(text.jungNote || text.biasNote || topBiases.length > 0) && (
+            <section className="readout-block">
+              <p className="detail-eyebrow">なぜそうなっているか</p>
+              {text.jungNote && <p className="detail-body">{text.jungNote}</p>}
+              {text.biasNote && (
+                <p className="detail-body" style={{ marginTop: 12 }}>{text.biasNote}</p>
+              )}
+              {topBiases.length > 0 && (
+                <div className="result-biases-mini" style={{ marginTop: 20 }}>
+                  {topBiases.map((b, i) => (
+                    <div key={i} className={`result-bias-mini bias-rank-${i + 1}`}>
+                      <span className="bias-name-mini">{b.name}</span>
+                      <span className="bias-short-mini">{b.short}</span>
+                      {b.noteUrl && new Date() >= new Date(b.noteScheduledAt ?? 0) && (
+                        <a href={b.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link-mini">詳しく →</a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ③ 今日の一歩 */}
+          {text.action && (
+            <section className="readout-block">
+              <p className="detail-eyebrow">今日の一歩</p>
+              <p className="detail-phrase">{text.action}</p>
+            </section>
+          )}
+
+          {/* ④ このまま続くと（予測） */}
+          {showForecast && (
+            <section className="readout-block">
+              <p className="detail-eyebrow">このまま続くと</p>
+              <p className="detail-body">
+                今の状態を放置した場合、あなたの中で「{thirdLabel}」という局面が顔を出してくる可能性があります。
+              </p>
+            </section>
+          )}
+        </div>
+      )}
+
+      {/* ── noteとみんなのひとことだけカード ── */}
       <div className="hub-cards">
-        {text && (
-          <HubCard icon="🔍" title="今感じていることと根っこ"
-            preview={text.sideA?.slice(0, 40) + '…'}
-            onClick={() => setSection('layers')} />
-        )}
-        {text && (text.jungNote || text.biasNote) && (
-          <HubCard icon="🧩" title="なぜそうなっているか"
-            preview={text.jungNote?.slice(0, 35) + '…'}
-            onClick={() => setSection('why')} />
-        )}
-        {text?.action && (
-          <HubCard icon="🚶" title="今日の一歩"
-            preview={text.action.slice(0, 40) + '…'}
-            onClick={() => setSection('action')} />
-        )}
         <HubCard icon="📖" title="note で深く読む"
           preview="記事・シリーズ・メンバーシップ"
           onClick={() => setSection('note')} />
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じ状況の人たちのコメント"
           onClick={() => setSection('wall')} />
-        <HubCard icon="↗" title="この結果をシェアする"
-          preview="X・LINE・コピー"
-          onClick={() => setSection('share')} />
       </div>
 
       <CrossFlowActions

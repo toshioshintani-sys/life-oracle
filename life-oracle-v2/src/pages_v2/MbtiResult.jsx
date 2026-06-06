@@ -10,15 +10,6 @@ import { incrementOnce }     from '../lib/stats.js';
 
 const MECHANISMS = mechanismsJson.mechanisms;
 
-// 処方箋の絞り込み用（任意・後から選べる）
-const OCCUPATIONS = [
-  '会社員', '公務員', '医療職', '教育職', '士業',
-  'クリエイター', '接客', '調理', '理美容師', '介護',
-  'フリーランス', '自営業', '一次産業', '建設業',
-  '主婦/主夫', '非正規雇用', '学生', '無職',
-];
-const GENERATIONS = ['10代', '20代', '30代', '40代', '50代', '60代', '70代以上'];
-
 const MBTI_TO_JUNG = {
   ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
   ESTP: 'Se-光', ESFP: 'Se-影', ENTP: 'Ne-光', ENFP: 'Ne-影',
@@ -58,7 +49,7 @@ function HubCard({ icon, title, preview, onClick }) {
   );
 }
 
-export function MbtiResult({ result, occupation: occProp, generation: genProp, onRetry, onSwitchFlow }) {
+export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFlow }) {
   const [section, setSection]             = useState(null);
   const [typeProfiles, setTypeProfiles]   = useState(null);
   const [prescriptions, setPrescriptions] = useState(null);
@@ -67,11 +58,6 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
   const [loadError, setLoadError]         = useState(false);
   const [presLoading, setPresLoading]     = useState(false);
 
-  // 処方箋の絞り込みは「結果を読んだあと」に任意で選ぶ（診断直後はテキストを優先）
-  const [occupation, setOccupation] = useState(occProp ?? null);
-  const [generation, setGeneration] = useState(genProp ?? null);
-
-  // 初期ロード: 表示に必要な2ファイルのみ（5.5MB のprescriptionsは除外）
   useEffect(() => {
     incrementOnce('mbti');
     Promise.all([
@@ -87,7 +73,7 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
     });
   }, []);
 
-  // 処方箋は職業・年代が両方そろったときだけ遅延ロード（5.5MB）
+  // 処方箋は職業・年代が両方そろっているときだけ遅延ロード（5.5MB）
   useEffect(() => {
     if (!occupation || !generation || prescriptions || presLoading) return;
     setPresLoading(true);
@@ -123,8 +109,7 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
     ? `${occupation}_${jungTypeId}_${generation}` : '';
   const prescriptionText = prescriptions?.[prescriptionKey]?.text ?? null;
 
-  // biasInfo に存在する正規のバイアス(B1-B12)だけを対象にする。
-  // SIT など非バイアスのキーが混ざると表示が壊れるためフィルタする。
+  // biasInfo に存在する正規のバイアス(B1-B12)のみ対象
   const top2 = Object.entries(biasScores ?? {})
     .filter(([key, score]) => biasInfo[key] && score > 0)
     .sort(([, a], [, b]) => b - a)
@@ -134,7 +119,7 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
   const biasMsg = (idx) => (biasMessages && top2[idx])
     ? (biasMessages[`${jungTypeId}_${biasInfo[top2[idx]]?.messageKey}`] ?? null) : null;
 
-  // ── 詳細ページ（今日の一歩・note・みんなのひとこと だけカード式）──────────
+  // ── サブページ（今日の一歩・note・みんなのひとこと だけカード）────────────
   if (section === 'action') {
     return (
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
@@ -175,24 +160,19 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
           </a>
         )}
         <NotePromo />
-        <a
-          href="https://note.com/lifeoraclejp"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="detail-note-link"
-          style={{ marginTop: 16, display: 'block' }}
-        >
+        <a href="https://note.com/lifeoraclejp" target="_blank" rel="noopener noreferrer"
+           className="detail-note-link" style={{ marginTop: 16, display: 'block' }}>
           全記事一覧を見る →
         </a>
       </ResultDetail>
     );
   }
 
-  // ── メイン結果（まず文章で読み切れる）────────────────────────────
+  // ── メイン結果画面（スクロールだけで読み切れる）────────────────────────────
   return (
     <div className="result-hub">
 
-      {/* 「私はこう読みました」（診断経由のみ） */}
+      {/* 「私はこう読みました」 */}
       {reading && !fromDirectSelection && (
         <div className="hub-readings">
           <p className="hub-readings-label">私はこう読みました。</p>
@@ -214,10 +194,33 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
         </div>
       </div>
 
-      {/* ── 本文（インラインで読める。タップ不要）── */}
+      {/* ── インライン本文（タップ不要） ── */}
       <div className="result-readout">
 
-        {/* なぜそれが起きるか */}
+        {/* ① 処方箋（主役 — 最初に表示）*/}
+        <section className="readout-block readout-block--hero">
+          <p className="detail-eyebrow">あなた専用の処方箋</p>
+          {presLoading ? (
+            <p className="detail-body">読み込んでいます…</p>
+          ) : prescriptionText ? (
+            <>
+              <p className="detail-note" style={{ marginBottom: 10 }}>
+                {[occupation, generation].filter(Boolean).join(' × ')} ×{' '}
+                {jungTypeId}の組み合わせ 2,016通りから導きました
+              </p>
+              <p className="detail-body" style={{ fontSize: 16, lineHeight: 1.9 }}>{prescriptionText}</p>
+            </>
+          ) : (occupation && generation) ? (
+            <p className="detail-body">該当するデータがありません。</p>
+          ) : (
+            <p className="detail-body" style={{ lineHeight: 1.9 }}>
+              職業・年代を設定していないため表示できません。<br />
+              「もう一度診断」のあと職業・年代を選ぶと、2,016通りから<br />あなた専用の処方箋が出ます。
+            </p>
+          )}
+        </section>
+
+        {/* ② なぜそれが起きるか */}
         {mechanism && (
           <section className="readout-block">
             <p className="detail-eyebrow">なぜそれが起きるか</p>
@@ -244,17 +247,7 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
           </section>
         )}
 
-        {/* 強み・心の癖 */}
-        {typeProfile && (
-          <section className="readout-block">
-            <p className="detail-eyebrow">あなたの強み</p>
-            <p className="detail-body">{typeProfile.praiseText}</p>
-            <p className="detail-eyebrow" style={{ marginTop: 20 }}>心の癖</p>
-            <p className="detail-body">{typeProfile.habitText}</p>
-          </section>
-        )}
-
-        {/* 思考のクセ（バイアス上位2） */}
+        {/* ③ 思考のクセ */}
         {top2.length > 0 && (
           <section className="readout-block">
             <p className="detail-eyebrow">あなたの思考のクセ</p>
@@ -280,55 +273,18 @@ export function MbtiResult({ result, occupation: occProp, generation: genProp, o
           </section>
         )}
 
-        {/* 処方箋（職業・年代は任意・あとから選べる）*/}
-        <section className="readout-block">
-          <p className="detail-eyebrow">あなた専用の処方箋</p>
-          {prescriptionText ? (
-            <>
-              <p className="detail-note" style={{ marginBottom: 10 }}>
-                {[occupation, generation].filter(Boolean).join(' × ')}
-              </p>
-              <p className="detail-body">{prescriptionText}</p>
-            </>
-          ) : (
-            <>
-              <p className="detail-body" style={{ marginBottom: 14 }}>
-                職業と年代を選ぶと、2,016通りからあなた専用の処方箋を表示します。
-              </p>
-              <div className="pres-picker">
-                <p className="pres-picker-label">職業</p>
-                <div className="pres-picker-grid">
-                  {OCCUPATIONS.map(o => (
-                    <button key={o}
-                      className={`post-quiz-chip${occupation === o ? ' selected' : ''}`}
-                      onClick={() => setOccupation(prev => prev === o ? null : o)}>
-                      {o}
-                    </button>
-                  ))}
-                </div>
-                <p className="pres-picker-label" style={{ marginTop: 14 }}>年代</p>
-                <div className="pres-picker-grid">
-                  {GENERATIONS.map(g => (
-                    <button key={g}
-                      className={`post-quiz-chip${generation === g ? ' selected' : ''}`}
-                      onClick={() => setGeneration(prev => prev === g ? null : g)}>
-                      {g}
-                    </button>
-                  ))}
-                </div>
-                {occupation && generation && presLoading && (
-                  <p className="detail-body" style={{ marginTop: 12 }}>処方箋を読み込んでいます…</p>
-                )}
-                {occupation && generation && !presLoading && prescriptions && !prescriptionText && (
-                  <p className="detail-body" style={{ marginTop: 12 }}>該当するデータがありません。</p>
-                )}
-              </div>
-            </>
-          )}
-        </section>
+        {/* ④ 強み・心の癖 */}
+        {typeProfile && (
+          <section className="readout-block">
+            <p className="detail-eyebrow">あなたの強み</p>
+            <p className="detail-body" style={{ fontSize: 15, lineHeight: 1.9 }}>{typeProfile.praiseText}</p>
+            <p className="detail-eyebrow" style={{ marginTop: 20 }}>心の癖</p>
+            <p className="detail-body" style={{ fontSize: 15, lineHeight: 1.9 }}>{typeProfile.habitText}</p>
+          </section>
+        )}
       </div>
 
-      {/* ── ここから下はカード（今日の一歩 以下）── */}
+      {/* ── 今日の一歩以下はカード ── */}
       <div className="hub-cards">
         {cf.todayAction && (
           <HubCard icon="⚡" title="今日ひとつだけ試すなら"

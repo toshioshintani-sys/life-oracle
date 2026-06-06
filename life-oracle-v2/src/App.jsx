@@ -4,6 +4,7 @@ import { MbtiEntry }    from './pages_v2/MbtiEntry.jsx';
 import { TopicSelect }  from './pages_v2/TopicSelect.jsx';
 import { TargetSelect } from './pages_v2/TargetSelect.jsx';
 import { Quiz }         from './pages_v2/Quiz.jsx';
+import { PostQuiz }     from './pages_v2/PostQuiz.jsx';
 import { MbtiResult }   from './pages_v2/MbtiResult.jsx';
 import { Result }       from './pages_v2/Result.jsx';
 import { AttackResult } from './pages_v2/AttackResult.jsx';
@@ -170,7 +171,7 @@ export default function App() {
       const result = buildMbtiResult(mbtiSession);
       setMbtiResult(result);
       trackEvent('quiz_complete', { mode: 'mbti', mbti_type: result.mbtiType });
-      setScreen('result-mbti');   // 診断後はまず結果テキストへ（職業/年代は結果内で任意選択）
+      setScreen('post-quiz');   // 職業・年代を取得して2016通りの処方箋を出す
       return;
     }
 
@@ -179,7 +180,7 @@ export default function App() {
       const result = buildMbtiResult(mbtiSession);
       setMbtiResult(result);
       trackEvent('quiz_complete', { mode: 'mbti', mbti_type: result.mbtiType });
-      setScreen('result-mbti');
+      setScreen('post-quiz');
       return;
     }
 
@@ -284,6 +285,12 @@ export default function App() {
       questionCount: 0,
       fromDirectSelection: true,
     });
+    setScreen('post-quiz');
+  }, []);
+
+  const handlePostQuizComplete = useCallback((occupation, generation) => {
+    setMbtiOccupation(occupation);
+    setMbtiGeneration(generation);
     setScreen('result-mbti');
   }, []);
 
@@ -413,6 +420,10 @@ export default function App() {
         onAnswer={handleAnswer}
       />
     );
+  }
+
+  if (screen === 'post-quiz') {
+    return <PostQuiz onComplete={handlePostQuizComplete} />;
   }
 
   if (screen === 'result-mbti') {
