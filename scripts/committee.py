@@ -380,24 +380,39 @@ def run_role(role_id: str, now: datetime) -> str | None:
 
 # ─── git ───────────────────────────────────────────────────────────────────────
 
-def git_commit_push(paths: list[Path], message: str) -> bool:
-    """tasks/committee/ 配下を main にコミット&プッシュ。CI ループ防止に [skip ci]。"""
+def _current_branch() -> str:
+    """現在の git ブランチ名を返す。失敗時は 'main'。"""
     try:
-        subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=REPO_ROOT)
+        r = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True, cwd=REPO_ROOT,
+            encoding="utf-8", errors="replace",
+        )
+        return r.stdout.strip() or "main"
+    except Exception:
+        return "main"
+
+
+def git_commit_push(paths: list[Path], message: str) -> bool:
+    """tasks/committee/ 配下を現在ブランチにコミット&プッシュ。CI ループ防止に [skip ci]。"""
+    _enc = {"encoding": "utf-8", "errors": "replace"}
+    try:
+        subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=REPO_ROOT, **_enc)
         subprocess.run(
             ["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"],
-            cwd=REPO_ROOT,
+            cwd=REPO_ROOT, **_enc,
         )
-        subprocess.run(["git", "add", *[str(p) for p in paths]], cwd=REPO_ROOT)
+        subprocess.run(["git", "add", *[str(p) for p in paths]], cwd=REPO_ROOT, **_enc)
         commit = subprocess.run(
             ["git", "commit", "-m", f"{message} [skip ci]"],
-            capture_output=True, text=True, cwd=REPO_ROOT,
+            capture_output=True, cwd=REPO_ROOT, **_enc,
         )
         if commit.returncode != 0:
             print(f"  コミット対象なし: {commit.stdout.strip()} {commit.stderr.strip()}")
             return False
+        branch = _current_branch()
         push = subprocess.run(
-            ["git", "push", "origin", "main"], capture_output=True, text=True, cwd=REPO_ROOT
+            ["git", "push", "origin", branch], capture_output=True, cwd=REPO_ROOT, **_enc,
         )
         if push.returncode != 0:
             print(f"  push 失敗: {push.stderr.strip()}", file=sys.stderr)
