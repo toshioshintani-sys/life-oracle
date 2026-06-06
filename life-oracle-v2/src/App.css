@@ -385,7 +385,26 @@ button {
   color: #1a1206;
   border-color: var(--accent);
 }
-.choice-text { flex: 1; min-width: 0; }
+.choice-text { flex: 1; min-width: 0; line-height: 1.5; }
+
+/* 2段表示（アンカー + 詳細）*/
+.choice-text--split {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.choice-anchor {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.3;
+}
+.choice-detail {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
 
 /* ── MBTI 3択（度合いスケール）── */
 .choice-yes {
