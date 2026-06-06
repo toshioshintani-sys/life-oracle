@@ -1,0 +1,33 @@
+name: Committee 14:00 Meeting
+
+# 毎日 14:00 JST = 05:00 UTC。10:00 の各担当レポートを持ち寄り、
+# 議長（秘書）が議事録を生成して Slack に報告し、LEDGER に追記する。
+# scheduled ワークフローは main ブランチにマージ後に発火する。
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  meeting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write   # LEDGER.md の自動コミット用
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run committee meeting (14:00)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          COMMITTEE_MODEL:   ${{ secrets.COMMITTEE_MODEL }}
+        run: python scripts/committee.py --phase meeting

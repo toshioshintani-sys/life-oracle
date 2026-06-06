@@ -8,9 +8,9 @@
           {
             "type": "command",
             "if": "Bash(git push*)",
-            "command": "/home/user/life-oracle/.claude/pre-push-stress-test.sh",
-            "timeout": 30,
-            "statusMessage": "ストレステスト実行中（3回走行）..."
+            "command": "/home/user/life-oracle/.claude/pre-push-stress-gate.sh",
+            "timeout": 10,
+            "statusMessage": "proposal-stress-test ゲート確認中..."
           }
         ]
       }

@@ -1,0 +1,41 @@
+name: Committee 10:00 Research
+
+# 毎日 10:00 JST = 01:00 UTC。各担当 AI が調査し reports/ にコミットする。
+# scheduled ワークフローは main ブランチにマージ後に発火する。
+# 手動テストは workflow_dispatch で可能。
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write   # reports/ の自動コミット用
+      actions:  read    # engine 担当が CI 状態を読む用
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install optional GA4 client
+        run: pip install google-analytics-data 2>/dev/null || true
+
+      - name: Run committee research (10:00)
+        env:
+          ANTHROPIC_API_KEY:       ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_WEBHOOK_URL:       ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY:       ${{ github.repository }}
+          COMMITTEE_MODEL:         ${{ secrets.COMMITTEE_MODEL }}
+          # 任意: data 担当の実データ
+          GA4_PROPERTY_ID:         ${{ secrets.GA4_PROPERTY_ID }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: python scripts/committee.py --phase research
