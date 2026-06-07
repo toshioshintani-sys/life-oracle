@@ -2,6 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
+// ラベルをアンカー（短いキーワード）と詳細に分割する
+// 。、・で区切り、アンカー部分が12字以内なら2段表示
+function splitLabel(label) {
+  const SEPS = ['。', '、', '・', '。\n', '．'];
+  for (const sep of SEPS) {
+    const idx = label.indexOf(sep);
+    if (idx > 0 && idx <= 12) {
+      const anchor = label.slice(0, idx);
+      const detail = label.slice(idx + sep.length).trim();
+      if (detail.length > 0) return { anchor, detail };
+    }
+  }
+  return { anchor: null, detail: label };
+}
+
 export function Quiz({ question, mode, questionNum, estimatedTotal, oracleMessage, onAnswer }) {
   const [pressed, setPressed] = useState(null);
   const timerRef = useRef(null);
@@ -83,7 +98,17 @@ export function Quiz({ question, mode, questionNum, estimatedTotal, oracleMessag
               onClick={() => choose(choice.id, () => onAnswer(question, choice))}
             >
               <span className="choice-letter" aria-hidden="true">{LETTERS[i] ?? '・'}</span>
-              <span className="choice-text">{choice.label}</span>
+              {(() => {
+                const { anchor, detail } = splitLabel(choice.label);
+                return anchor ? (
+                  <span className="choice-text choice-text--split">
+                    <span className="choice-anchor">{anchor}</span>
+                    <span className="choice-detail">{detail}</span>
+                  </span>
+                ) : (
+                  <span className="choice-text">{detail}</span>
+                );
+              })()}
             </button>
           ))}
         </div>

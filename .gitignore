@@ -1,3 +1,9 @@
 node_modules/
 dist/
 __pycache__/
+.claude/.stress-test-ok
+
+# 秘密情報（CLAUDE.md セキュリティ規約準拠・絶対にコミットしない）
+.env
+.env.local
+.env.*.local

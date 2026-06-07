@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "/home/user/life-oracle/.claude/pre-push-stress-gate.sh",
+            "timeout": 10,
+            "statusMessage": "proposal-stress-test ゲート確認中..."
+          }
+        ]
+      }
+    ]
+  }
+}

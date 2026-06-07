@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Entry }        from './pages_v2/Entry.jsx';
 import { MbtiEntry }    from './pages_v2/MbtiEntry.jsx';
 import { TopicSelect }  from './pages_v2/TopicSelect.jsx';
@@ -65,6 +65,12 @@ const ATTACK_QUESTIONS_BY_TARGET = {
 
 import './App.css';
 
+function trackEvent(action, params = {}) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', action, { event_category: 'app_flow', ...params });
+  }
+}
+
 const MBTI_MAX_QUESTIONS    = 20;
 const MBTI_ESTIMATED_TOTAL  = 20;
 const SITU_ESTIMATED_TOTAL  = 12;
@@ -125,6 +131,8 @@ function topicQuestions(topicId) {
 }
 
 export default function App() {
+  useEffect(() => { trackEvent('app_loaded'); }, []);
+
   const [screen, setScreen]               = useState('entry');
   const [flow, setFlow]                   = useState(null);
   const [mbtiSession, setMbtiSession]     = useState(null);
@@ -152,6 +160,7 @@ export default function App() {
     setOracleMessage(null);
     setFlow('mbti');
     setScreen('quiz');
+    trackEvent('quiz_start', { mode: 'mbti' });
   }, []);
 
   const handleMbtiAnswer = useCallback((question, response) => {
@@ -159,14 +168,18 @@ export default function App() {
     applyAnswer(mbtiSession, question, response);
 
     if (isFinished(mbtiSession)) {
-      setMbtiResult(buildMbtiResult(mbtiSession));
-      setScreen('post-quiz');
+      const result = buildMbtiResult(mbtiSession);
+      setMbtiResult(result);
+      trackEvent('quiz_complete', { mode: 'mbti', mbti_type: result.mbtiType });
+      setScreen('post-quiz');   // 職業・年代を取得して2016通りの処方箋を出す
       return;
     }
 
     const next = nextQuestion(mbtiSession);
     if (!next) {
-      setMbtiResult(buildMbtiResult(mbtiSession));
+      const result = buildMbtiResult(mbtiSession);
+      setMbtiResult(result);
+      trackEvent('quiz_complete', { mode: 'mbti', mbti_type: result.mbtiType });
       setScreen('post-quiz');
       return;
     }
@@ -176,11 +189,6 @@ export default function App() {
     setOracleMessage(getMbtiOracleMessage(mbtiSession));
   }, [mbtiSession]);
 
-  const handlePostQuizComplete = useCallback((occupation, generation) => {
-    setMbtiOccupation(occupation);
-    setMbtiGeneration(generation);
-    setScreen('result-mbti');
-  }, []);
 
   // ── Situation flow ──────────────────────────────────────────────────────
 
@@ -194,6 +202,7 @@ export default function App() {
     setOracleMessage(null);
     setFlow('situation');
     setScreen('quiz');
+    trackEvent('quiz_start', { mode: 'situation', topic: topicId });
   }, []);
 
   const handleSituAnswer = useCallback((question, choice) => {
@@ -201,14 +210,18 @@ export default function App() {
     if (!recordAnswer(situSession, question, choice)) return;
 
     if (shouldFinish(situSession, SITU_MIN_QUESTIONS)) {
-      setSituResult(buildSituResult(situSession));
+      const result = buildSituResult(situSession);
+      setSituResult(result);
+      trackEvent('quiz_complete', { mode: 'situation', jin_id: result?.jinId ?? result?.topJin });
       setScreen('result-situation');
       return;
     }
 
     const next = getNextQuestion(situSession, situQuestions);
     if (!next) {
-      setSituResult(buildSituResult(situSession));
+      const result = buildSituResult(situSession);
+      setSituResult(result);
+      trackEvent('quiz_complete', { mode: 'situation', jin_id: result?.jinId ?? result?.topJin });
       setScreen('result-situation');
       return;
     }
@@ -230,6 +243,7 @@ export default function App() {
     setOracleMessage(null);
     setFlow('attack');
     setScreen('quiz');
+    trackEvent('quiz_start', { mode: 'attack', target: targetId });
   }, []);
 
   const handleAttackAnswer = useCallback((question, choice) => {
@@ -237,14 +251,18 @@ export default function App() {
     if (!recordAttackAnswer(attackSession, question, choice)) return;
 
     if (shouldFinishAttack(attackSession, ATTACK_MIN_QUESTIONS)) {
-      setAttackResult(buildAttackResult(attackSession));
+      const result = buildAttackResult(attackSession);
+      setAttackResult(result);
+      trackEvent('quiz_complete', { mode: 'attack', jin_id: result?.jinId ?? result?.topJin, target: attackSession?.targetId });
       setScreen('result-attack');
       return;
     }
 
     const next = getNextAttackQuestion(attackSession, attackQuestions);
     if (!next) {
-      setAttackResult(buildAttackResult(attackSession));
+      const result = buildAttackResult(attackSession);
+      setAttackResult(result);
+      trackEvent('quiz_complete', { mode: 'attack', jin_id: result?.jinId ?? result?.topJin, target: attackSession?.targetId });
       setScreen('result-attack');
       return;
     }
@@ -268,6 +286,12 @@ export default function App() {
       fromDirectSelection: true,
     });
     setScreen('post-quiz');
+  }, []);
+
+  const handlePostQuizComplete = useCallback((occupation, generation) => {
+    setMbtiOccupation(occupation);
+    setMbtiGeneration(generation);
+    setScreen('result-mbti');
   }, []);
 
   const handleStart = useCallback((mode) => {
