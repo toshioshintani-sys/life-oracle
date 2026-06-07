@@ -229,6 +229,20 @@ def _github(path: str, method: str = "GET", body: dict | None = None) -> dict | 
         return None
 
 
+# 自動再実行の対象とする失敗の鮮度（時間）。
+# これより古い失敗は「過去の壊れたコミット」を再実行しても直らないため対象外にする。
+RERUN_FRESHNESS_HOURS = 48
+
+
+def _is_recent(iso_ts: str, hours: int) -> bool:
+    """ISO8601 タイムスタンプが現在から hours 時間以内かを判定。"""
+    try:
+        ts = datetime.fromisoformat(iso_ts.replace("Z", "+00:00"))
+        return (datetime.now(timezone.utc) - ts) <= timedelta(hours=hours)
+    except (ValueError, AttributeError):
+        return False
+
+
 def get_github_status() -> dict:
     result: dict = {"runs": [], "failed": [], "errors": []}
     data = _github("actions/runs?per_page=30&branch=main")
@@ -245,7 +259,12 @@ def get_github_status() -> dict:
             "created_at": run["created_at"],
         }
         result["runs"].append(entry)
-        if run["conclusion"] in ("failure", "timed_out") and run["status"] == "completed":
+        # 失敗の自動再実行は「直近 RERUN_FRESHNESS_HOURS 以内に作成された run」のみ対象。
+        # 古い失敗 run を /rerun すると当時のコミットを再チェックアウトするため、
+        # 既に修正済みでも同じエラーで永久に落ち続ける（無限再実行ループの原因）。
+        if (run["conclusion"] in ("failure", "timed_out")
+                and run["status"] == "completed"
+                and _is_recent(run.get("created_at", ""), RERUN_FRESHNESS_HOURS)):
             result["failed"].append(entry)
     return result
 
