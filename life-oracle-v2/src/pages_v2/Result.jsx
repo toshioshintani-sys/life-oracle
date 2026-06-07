@@ -6,6 +6,7 @@ import { NotePromo }             from '../components/NotePromo.jsx';
 import { ResultDetail }          from '../components/ResultDetail.jsx';
 import { OracleWall }            from './OracleWall.jsx';
 import { incrementOnce }         from '../lib/stats.js';
+import { trackEvent }            from '../lib/analytics.js';
 
 const SITUATION_LABELS = {
   w_boss_power:       '上司との関係',
@@ -162,6 +163,7 @@ export function Result({ result, onRetry, onSwitchFlow }) {
                 onClick={() => {
                   const shareText = `【今日の一歩 — ${label}】\n${text.action}\n\nライフオラクルで自分の状況を診断する: https://life-oracle.jp/`;
                   navigator.clipboard?.writeText(shareText).catch(() => {});
+                  trackEvent('result_share_intent', { mode: 'situation', section: 'kyou_no_ippo', situation: result.situation });
                 }}
               >コピーしてシェア</button>
             </section>
