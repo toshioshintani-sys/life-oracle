@@ -56,7 +56,7 @@ LEDGER_PATH = REPO_ROOT / "tasks" / "committee" / "LEDGER.md"
 WEEKLY_SPRINT_PATH = REPO_ROOT / "docs" / "WEEKLY_SPRINT.md"
 NOT_DOING_PATH = REPO_ROOT / "docs" / "NOT_DOING.md"
 
-MODEL = os.environ.get("COMMITTEE_MODEL", "claude-opus-4-8")
+MODEL = os.environ.get("COMMITTEE_MODEL") or "claude-opus-4-8"  # 空文字(未設定Secretが""で渡る)でもデフォルトに落とす
 WEB_SEARCH_TOOL = os.environ.get("WEB_SEARCH_TOOL", "web_search_20250305")
 
 # 既存 daily_report.py のヘルパを再利用（Slack 送信・GA4・note・GitHub 状態）
@@ -460,8 +460,15 @@ def phase_research() -> int:
         time.sleep(1)
 
     if not done:
-        print("リサーチ成果なし。終了。")
-        return 0
+        print("リサーチ成果なし。終了。", file=sys.stderr)
+        # 原則7: 無人で静かに死なない。成果ゼロは失敗として Slack通知＋非ゼロ終了する。
+        slack = os.environ.get("SLACK_WEBHOOK_URL")
+        if slack:
+            http_post_json(slack, {"blocks": [_section(
+                "⚠️ *委員会リサーチ: 成果ゼロ（要確認）*\n"
+                f"全担当がスキップ/失敗しました。model={MODEL!r} / "
+                "ANTHROPIC_API_KEY・COMMITTEE_MODEL の設定を確認してください。")]})
+        return 1
 
     day_dir = REPORTS_DIR / now.strftime("%Y-%m-%d")
     git_commit_push([day_dir], f"docs(committee): {now.strftime('%m/%d')} 各担当の調査メモ")
