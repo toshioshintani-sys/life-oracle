@@ -157,6 +157,13 @@ export function Result({ result, onRetry, onSwitchFlow }) {
             <section className="readout-block">
               <p className="detail-eyebrow">今日の一歩</p>
               <p className="detail-phrase">{text.action}</p>
+              <button
+                className="ashita-copy-btn ashita-copy-btn--block"
+                onClick={() => {
+                  const shareText = `【今日の一歩 — ${label}】\n${text.action}\n\nライフオラクルで自分の状況を診断する: https://life-oracle.jp/`;
+                  navigator.clipboard?.writeText(shareText).catch(() => {});
+                }}
+              >コピーしてシェア</button>
             </section>
           )}
 

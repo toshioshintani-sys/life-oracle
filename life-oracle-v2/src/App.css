@@ -3996,3 +3996,55 @@ a:focus-visible {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ── 明日の一手 ──────────────────────────────────────────────── */
+.ashita-no-itte {
+  margin: 28px 0 8px;
+  padding: 24px 20px 20px;
+  background: rgba(184, 131, 63, 0.07);
+  border: 1px solid rgba(184, 131, 63, 0.35);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.ashita-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b8833f;
+  margin: 0 0 10px;
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+}
+
+.ashita-text {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #f5ede0;
+  margin: 0 0 16px;
+  font-weight: 500;
+}
+
+.ashita-copy-btn {
+  background: transparent;
+  border: 1px solid rgba(184, 131, 63, 0.55);
+  color: #b8833f;
+  padding: 7px 20px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+  letter-spacing: 0.05em;
+}
+
+.ashita-copy-btn:hover,
+.ashita-copy-btn:focus-visible {
+  background: rgba(184, 131, 63, 0.14);
+  border-color: rgba(184, 131, 63, 0.8);
+  outline: none;
+}
+
+/* Result.jsx の「今日の一歩」直下に置くインラインボタン */
+.ashita-copy-btn--block {
+  display: block;
+  margin: 14px auto 0;
+}

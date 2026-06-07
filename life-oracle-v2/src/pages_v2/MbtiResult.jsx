@@ -109,6 +109,11 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     ? `${occupation}_${jungTypeId}_${generation}` : '';
   const prescriptionText = prescriptions?.[prescriptionKey]?.text ?? null;
 
+  // 明日の一手: 処方箋の第1文 → todayAction の順でフォールバック
+  const itteText = prescriptionText
+    ? (prescriptionText.split('。')[0] + '。')
+    : (cf.todayAction ?? null);
+
   // biasInfo に存在する正規のバイアス(B1-B12)のみ対象
   const top2 = Object.entries(biasScores ?? {})
     .filter(([key, score]) => biasInfo[key] && score > 0)
@@ -283,6 +288,21 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           </section>
         )}
       </div>
+
+      {/* ── 明日の一手 ── */}
+      {itteText && (
+        <div className="ashita-no-itte">
+          <p className="ashita-label">明日の一手</p>
+          <p className="ashita-text">{itteText}</p>
+          <button
+            className="ashita-copy-btn"
+            onClick={() => {
+              const shareText = `【明日の一手 — ${typeName}】\n${itteText}\n\nライフオラクルで自分の動き方を診断する: https://life-oracle.jp/`;
+              navigator.clipboard?.writeText(shareText).catch(() => {});
+            }}
+          >コピーしてシェア</button>
+        </div>
+      )}
 
       {/* ── 今日の一歩以下はカード ── */}
       <div className="hub-cards">
