@@ -52,6 +52,9 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 ROLES_DIR = REPO_ROOT / "tasks" / "committee" / "roles"
 REPORTS_DIR = REPO_ROOT / "tasks" / "committee" / "reports"
 LEDGER_PATH = REPO_ROOT / "tasks" / "committee" / "LEDGER.md"
+# 計画拘束(原則2)・DO-NOT-ADOPT(原則6)の素材（docs/ 配下・無くても会議は回す）
+WEEKLY_SPRINT_PATH = REPO_ROOT / "docs" / "WEEKLY_SPRINT.md"
+NOT_DOING_PATH = REPO_ROOT / "docs" / "NOT_DOING.md"
 
 MODEL = os.environ.get("COMMITTEE_MODEL", "claude-opus-4-8")
 WEB_SEARCH_TOOL = os.environ.get("WEB_SEARCH_TOOL", "web_search_20250305")
@@ -339,6 +342,24 @@ def load_role_brief(role_id: str) -> str | None:
     return p.read_text(encoding="utf-8")
 
 
+def load_plan_docs() -> str:
+    """計画拘束(原則2)・DO-NOT-ADOPT(原則6)の素材。会議が冒頭で読む。
+    docs/ が無くても会議は止めない（未作成なら『未作成』と明示）。"""
+    parts = []
+    for label, p in [
+        ("今週の計画（WEEKLY_SPRINT・律速）", WEEKLY_SPRINT_PATH),
+        ("採択禁止リスト（NOT_DOING / DO-NOT-ADOPT）", NOT_DOING_PATH),
+    ]:
+        try:
+            if p.exists():
+                parts.append(f"### {label}\n{_truncate(p.read_text(encoding='utf-8'), 3000)}")
+            else:
+                parts.append(f"### {label}\n（未作成）")
+        except Exception as exc:
+            parts.append(f"### {label}\n（読込失敗: {exc}）")
+    return "\n\n".join(parts)
+
+
 def due_today(role_id: str, now: datetime) -> bool:
     cfg = ROLES[role_id]
     if not cfg["enabled"]:
@@ -489,17 +510,25 @@ def phase_meeting() -> int:
     system = (
         "あなたはライフオラクル制作委員会の進行役（議長）兼、俊雄さん（代表）付きの秘書です。"
         "各担当の本日レポートを統合し、会議の議事録を作ります。\n" + BENCHMARK + "\n"
+        "【計画拘束（最重要・自律運用ルール 原則2/6）】会議は冒頭で『今週の計画(WEEKLY_SPRINT)』と"
+        "『採択禁止リスト(NOT_DOING)』を読み、今週の律速（North Star）に沿った手だけを採択する。"
+        "NOT_DOING に該当する案は採択しない（自動除外）。計画外の思いつきで動かない。\n"
         "議事録は日本語 Markdown で、次の見出しを厳守:\n"
-        "## 本日の決定事項（合意・即実行できるもの。担当と一文の根拠つき）\n"
+        "## 計画整合（今週の律速＝WEEKLY_SPRINTとの対応／NOT_DOING抵触チェック。除外した案があれば理由を1行）\n"
+        "## 本日の決定事項（合意・即実行できるもの。担当と一文の根拠つき。owner=エージェントで即実行可を最優先）\n"
+        "## 執行レビュー（前回LEDGERの決定事項のうち実行された/されていないを1行ずつ。"
+        "同系統の未執行が3回続く論点は『別レバレッジへ』と明示）\n"
         "## 継続審議（今日決まらず明日へ持ち越す論点と、その理由）\n"
         "## 俊雄さんへの依頼（理由つき）（俊雄さん自身の実行が必要なもの。"
         "なぜ必要かを必ず添える。無ければ『なし』）\n"
         "## 担当ハイライト（各担当の最重要ポイントを1行ずつ）\n"
         "原則: 提案は具体的・優先度つき。絶対に触らないデータへの変更提案は禁止。"
-        "決定はするが、最終判断は俊雄さんに委ねる姿勢を保つ。"
+        "採択は必ず実行に接続する（採択して終わりを禁止）。決定はするが、最終判断は俊雄さんに委ねる。"
     )
+    plan = load_plan_docs()
     user = (
         f"日付: {now.strftime('%Y-%m-%d (%a)')}\n\n"
+        f"=== 今週の計画・採択禁止（計画拘束のため冒頭で必ず読む）===\n{plan}\n\n"
         f"=== 前回までの継続審議（LEDGER 抜粋）===\n{carryover or '（なし）'}\n\n"
         f"=== 本日の各担当レポート ===\n{bundle}"
     )
