@@ -22,6 +22,7 @@ const CHOICES = [
     title: '自分を知る',
     desc:  '思考と行動のパターンを読み解く',
     hint:  '約20問',
+    meta:  'Jung',
   },
   {
     flow:  'situation',
@@ -29,6 +30,7 @@ const CHOICES = [
     title: '状況を知る',
     desc:  '言葉にならない感情の根っこを見つける',
     hint:  '約12問',
+    meta:  'Bias',
   },
   {
     flow:  'attack',
@@ -36,6 +38,7 @@ const CHOICES = [
     title: '相手を知る',
     desc:  'その人がそう動く理由と通じる一言',
     hint:  '約12問',
+    meta:  'OS',
   },
 ];
 
@@ -54,6 +57,9 @@ export function Entry({ onStart, onOpenNoteIndex }) {
   return (
     <div className="entry-screen">
 
+      <div className="entry-depth" aria-hidden="true" />
+      <div className="entry-grid" aria-hidden="true" />
+
       {/* 星 */}
       <div className="entry-stars" aria-hidden="true">
         {STARS.map((s, i) => (
@@ -65,53 +71,69 @@ export function Entry({ onStart, onOpenNoteIndex }) {
         ))}
       </div>
 
-      {/* ヘッダー */}
-      <header className="entry-header">
-        {/* 羅針盤モチーフ */}
-        <div className="entry-compass" aria-hidden="true">
-          <div className="entry-compass-ring1" />
-          <div className="entry-compass-ring2" />
-          <div className="entry-compass-core">
-            <div className="entry-compass-diamond" />
-          </div>
-          <span className="entry-compass-n">N</span>
+      <main className="entry-stage">
+        <div className="entry-brandbar" aria-hidden="true">
+          <span>Jung</span>
+          <span>Behavioral Economics</span>
+          <span>Career</span>
         </div>
 
-        <p className="entry-en">LIFE ORACLE</p>
-        <h1 className="entry-title">ライフオラクル</h1>
-        <div className="entry-rule" />
-        <p className="entry-tagline">あなたのことを、静かに読み取ります。</p>
-        {totalCount !== null && (
-          <p className="entry-stat">
-            <strong>{formatCount(totalCount)}人</strong>が自分を読みました
-          </p>
-        )}
-      </header>
+        {/* ヘッダー */}
+        <header className="entry-header">
+          {/* 羅針盤モチーフ */}
+          <div className="entry-compass-shell">
+            <div className="entry-compass" aria-hidden="true">
+              <div className="entry-compass-ring1" />
+              <div className="entry-compass-ring2" />
+              <div className="entry-compass-core">
+                <div className="entry-compass-diamond" />
+              </div>
+              <span className="entry-compass-n">N</span>
+            </div>
+          </div>
 
-      {/* 3択 */}
-      <nav className="entry-choices" aria-label="診断の種類を選ぶ">
-        {CHOICES.map((c, i) => (
-          <button
-            key={c.flow}
-            className="entry-choice-button"
-            style={{ animationDelay: `${0.1 * (i + 1)}s` }}
-            onClick={() => onStart(c.flow)}
-          >
-            <span className="choice-kanji" aria-hidden="true">{c.kanji}</span>
-            <span className="choice-body">
-              <span className="choice-title">{c.title}</span>
-              <span className="choice-desc">{c.desc}</span>
-            </span>
-            <span className="choice-hint">{c.hint}</span>
-          </button>
-        ))}
-      </nav>
+          <p className="entry-en">LIFE ORACLE</p>
+          <h1 className="entry-title">ライフオラクル</h1>
+          <div className="entry-rule" />
+          <p className="entry-tagline">あなたのことを、静かに読み取ります。</p>
+          {totalCount !== null && (
+            <p className="entry-stat">
+              <strong>{formatCount(totalCount)}人</strong>が自分を読みました
+            </p>
+          )}
+        </header>
 
-      {showNoteIndex && (
-        <button className="entry-note-link" onClick={onOpenNoteIndex}>
-          note 記事まとめを読む →
-        </button>
-      )}
+        {/* 3択 */}
+        <nav className="entry-choices" aria-label="診断の種類を選ぶ">
+          {CHOICES.map((c, i) => (
+            <button
+              key={c.flow}
+              className="entry-choice-button"
+              style={{ animationDelay: `${0.1 * (i + 1)}s` }}
+              onClick={() => onStart(c.flow)}
+            >
+              <span className="choice-kanji" aria-hidden="true">{c.kanji}</span>
+              <span className="choice-body">
+                <span className="choice-title">{c.title}</span>
+                <span className="choice-desc">{c.desc}</span>
+              </span>
+              <span className="choice-side">
+                <span className="choice-meta">{c.meta}</span>
+                <span className="choice-hint">{c.hint}</span>
+              </span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="entry-footer-row">
+          <span className="entry-secure">無料・登録不要</span>
+          {showNoteIndex && (
+            <button className="entry-note-link" onClick={onOpenNoteIndex}>
+              note 記事まとめを読む →
+            </button>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

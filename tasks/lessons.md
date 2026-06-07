@@ -2,6 +2,8 @@
 
 ## ⚡ 最新引き継ぎポインタ
 
+→ **`tasks/HANDOFF_claude_ui_premium_deploy_2026-06-07.md`** を読むこと（UI最高級化・本番公開・未コミット巻き戻り防止）
+
 → **`tasks/HANDOFF_cloud_resume_2026-06-06.md`** を読むこと（自己完結の引き継ぎ書）
 
 ---
