@@ -11,9 +11,9 @@
 Claude Code・Cowork の両方がセッション開始時に必ず読む共有教訓ファイルです。
 エラーや非効率を踏んだら、即ここに追記してください。
 
-> ⚡ **最新の引き継ぎ（2026-06-06）**：ローカル作業をクラウドに引き継ぎ済み。次の一手は
-> **このブランチ（委員会インフラ＋アプリ結果画面リニューアル）を main にマージ**すること（要・俊雄さん承認／本番デプロイを伴う）。
-> 詳細・委員会の動かし方・push前ゲートの注意は **`tasks/HANDOFF_cloud_resume_2026-06-06.md`** を必読。
+> ⚡ **最新（2026-06-07）自律運用ルール適用B 完了**：`docs/WEEKLY_SPRINT.md`・`docs/NOT_DOING.md` 新規、`committee.py` に計画拘束/DO-NOT-ADOPT除外/執行レビュー、`scripts/runway_check.py`＋週次タスク `LifeOracle_RunwayCheck_Weekly`（予約21日未満でSlack通知・**通知のみ**）。North Star＝サムネ追加＋発信。詳細は `docs/WEEKLY_SPRINT.md`。
+> ⚡ **教訓（2026-06-07）在庫/ランウェイ監視はローカル専用**：`daily_report.py` はクラウド(GitHub Actions)で動き、予約データ（別フォルダ `ライフオラクルnoteネタ/articles/` の記事ファイル）を見られない。さらに note.com の list系API は予約記事を隠す。∴ 在庫・ランウェイ系の監視はローカルスクリプトでしか正しく動かない（クラウド(daily_report.py)に置こうとしない）。stress-testの初期案を実測で訂正した実例。
+> ⚡ **引き継ぎ（2026-06-06）**：委員会インフラ＋アプリ改修ブランチを main にマージが次の一手（要承認・本番デプロイ）。詳細 `tasks/HANDOFF_cloud_resume_2026-06-06.md`。
 
 ---
 
