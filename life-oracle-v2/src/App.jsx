@@ -64,12 +64,7 @@ const ATTACK_QUESTIONS_BY_TARGET = {
 };
 
 import './App.css';
-
-function trackEvent(action, params = {}) {
-  if (typeof window.gtag === 'function') {
-    window.gtag('event', action, { event_category: 'app_flow', ...params });
-  }
-}
+import { trackEvent } from './lib/analytics.js';
 
 const MBTI_MAX_QUESTIONS    = 20;
 const MBTI_ESTIMATED_TOTAL  = 20;

@@ -7,6 +7,7 @@ import { NotePromo }         from '../components/NotePromo.jsx';
 import { ResultDetail }      from '../components/ResultDetail.jsx';
 import { OracleWall }        from './OracleWall.jsx';
 import { incrementOnce }     from '../lib/stats.js';
+import { trackEvent }        from '../lib/analytics.js';
 
 const MECHANISMS = mechanismsJson.mechanisms;
 
@@ -299,6 +300,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             onClick={() => {
               const shareText = `【明日の一手 — ${typeName}】\n${itteText}\n\nライフオラクルで自分の動き方を診断する: https://life-oracle.jp/`;
               navigator.clipboard?.writeText(shareText).catch(() => {});
+              trackEvent('result_share_intent', { mode: 'mbti', section: 'ashita_no_itte', mbti_type: mbtiType });
             }}
           >コピーしてシェア</button>
         </div>
