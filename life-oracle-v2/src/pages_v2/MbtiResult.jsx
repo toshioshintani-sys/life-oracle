@@ -37,6 +37,26 @@ const TYPE_READING = {
   ISFP: '答えのひとつひとつが、あなた自身のペースで選ばれています。感じたことに正直な人です。',
 };
 
+// 語りたくなる1行（殺し文句）— TYPE_READING の核だけを凝縮
+const KILLER_LINE = {
+  ENTJ: '「決める」ことで、周囲が動き出すのを知っている人です。',
+  INTJ: '遠くを見ながら、静かに動いている人です。',
+  ENTP: '「まだ誰も気づいていないこと」を見つけるのが好きな人です。',
+  INTP: '自分の中に体系を持っている人です。',
+  ENFJ: '人のことを、自分のことのように考えている人です。',
+  INFJ: '静かですが、強い人です。',
+  ENFP: '人に希望を与えることが、あなたの自然な在り方です。',
+  INFP: '自分に正直に生きている人です。',
+  ESTJ: '責任を引き受ける姿勢がある。頼まれると断れない人でもありますね。',
+  ISTJ: '約束を守ることを、当たり前だと思っている人です。',
+  ESTP: '考えるより先に動ける人です。',
+  ISTP: '静かに観察してから動く人。無駄がない。',
+  ESFJ: '場の空気を読むのが、自然にできてしまう人です。',
+  ISFJ: '気づかれないところで、ずっと支えている人です。',
+  ESFP: '一緒にいると、なぜか明るくなる人です。',
+  ISFP: '感じたことに、正直な人です。',
+};
+
 function HubCard({ icon, title, preview, onClick }) {
   return (
     <button className="hub-card" onClick={onClick}>
@@ -103,6 +123,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   const cf              = cognitiveFunctionMap[mbtiType] ?? {};
   const famous          = famousPeople[mbtiType]?.people ?? [];
   const reading         = TYPE_READING[mbtiType] ?? null;
+  const killerLine      = KILLER_LINE[mbtiType] ?? null;
   const typeProfile     = typeProfiles?.[jungTypeId] ?? null;
   const typeName        = isShadow ? cf.shadowName : cf.lightName;
   const mechanism       = MECHANISMS[jungTypeId] ?? null;
@@ -177,6 +198,13 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   // ── メイン結果画面（スクロールだけで読み切れる）────────────────────────────
   return (
     <div className="result-hub">
+
+      {/* 殺し文句（語りたくなる1行）*/}
+      {killerLine && (
+        <div className="killer-line">
+          <p className="killer-line-text">{killerLine}</p>
+        </div>
+      )}
 
       {/* 「私はこう読みました」 */}
       {reading && !fromDirectSelection && (
