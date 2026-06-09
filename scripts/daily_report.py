@@ -46,6 +46,10 @@ BIAS_INFO_PATH = REPO_ROOT / "life-oracle-v2" / "src" / "data_v2" / "meta" / "bi
 ARTICLES_DIR   = REPO_ROOT / "tasks" / "jin_articles"
 GITHUB_REPO    = os.environ.get("GITHUB_REPOSITORY", "toshioshintani-sys/life-oracle")
 
+# 役目を終えた（予約完了で停止した）ワークフロー。失敗を報告も再実行もしない。
+# gachi は2026-11月まで予約完了済み＝gachijin パイプラインは引退（docs/NOT_DOING.md #8 と同期）。
+RETIRED_WORKFLOW_KEYWORDS = ("gachijin",)
+
 
 # ─── HTTP helpers ────────────────────────────────────────────────────────────
 
@@ -236,6 +240,9 @@ def get_github_status() -> dict:
         result["errors"].append("GitHub Actions API 取得失敗")
         return result
     for run in data.get("workflow_runs", []):
+        blob = f"{run.get('path', '')} {run.get('name', '')}".lower()
+        if any(k in blob for k in RETIRED_WORKFLOW_KEYWORDS):
+            continue  # 引退ワークフロー（gachijin等）の失敗は報告も再実行もしない
         entry = {
             "id":         run["id"],
             "name":       run["name"],
