@@ -45,6 +45,18 @@ Claude Code・Cowork の両方がセッション開始時に必ず読む共有�
 
 <!-- 新しい教訓はここに追記する（新しいものが上） -->
 
+## 2026-06-09 【CI/委員会】累積失敗の正体＝gachijin(無視対象)・委員会本体は健全（決定3点検）
+
+**状況**：委員会2026-06-09 決定3「累積16失敗のログを4分類＋Researchジョブに timeout-minutes 明記」を実施するため `gh run list` で実査した。
+
+**問題**：engine担当が「累積16失敗」を懸念していたが内訳が不明で、緑/赤信号の信頼性が判断できなかった。
+
+**原因（実測）**：直近80 runのワークフロー別失敗は **Committee Research 0/4・Committee Meeting 0/4・Daily Report 0/6（＝委員会クラウド本体は失敗ゼロ・健全）**。失敗46件はすべて **Gachijin Pipeline** で、最新runは全て **2026-05-08 の workflow_dispatch(手動)**。cronは当日コメントアウト済み（`gachijin-scheduler.yml`「Daily cron disabled on 2026-05-08」／`gachijin-pipeline.yml`はworkflow_dispatchのみ）。∴以降の自動失敗ゼロ＝赤信号は増えていない。
+
+**解決策**：新規実装は不要だった。(1)timeout-minutesは committee-research.yml=20・committee-meeting.yml=15 で**両方すでに明記済み**。(2)gachijin失敗は NOT_DOING #8（役目終了・無視対象）＋daily_report fix(6/9 d4ac7bf で毎朝報告から除外)で既にカバー済み。(3)4分類の精査は対象が全て停止済みgachijinのため NOT_DOING #8 に従いスキップ（労力漏れ防止）。
+
+**再発防止**：「累積N失敗」を見たら、まず **ワークフロー別＋実行日時＋trigger(event)** で切り分ける。古い手動runの失敗を「進行中の異常」と誤認しない。最速＝`gh run list --json workflowName,conclusion,createdAt,event`。
+
 ## 2026-05-06 【設計】GitHub repo secrets は GITHUB_ プレフィックス禁止
 
 **状況**：ガチ人スケジューラ初の自動cron実行（2026-05-06 17:24 JST）が `Process completed with exit code 1` で失敗。失敗メールが俊雄さんに届いた。

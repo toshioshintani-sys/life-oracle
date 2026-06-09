@@ -4048,3 +4048,35 @@ a:focus-visible {
   display: block;
   margin: 14px auto 0;
 }
+
+/* ── 殺し文句（語りたくなる1行）───────────────────────────── */
+.killer-line {
+  margin: 0 0 20px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.10) 0%, rgba(212, 175, 55, 0.04) 100%);
+  border-left: 3px solid var(--accent, #d4af37);
+  border-radius: 0 10px 10px 0;
+  position: relative;
+}
+
+.killer-line::before {
+  content: '\201C';
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--accent, #d4af37);
+  opacity: 0.4;
+  font-family: 'Noto Serif JP', serif;
+}
+
+.killer-line-text {
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-size: 16px;
+  line-height: 1.8;
+  font-weight: 500;
+  color: var(--accent-dark, #e8c869);
+  padding-left: 8px;
+  margin: 0;
+}
