@@ -927,7 +927,7 @@ button {
 .result-forecast-text {
   font-size: 15px;
   line-height: 1.85;
-  color: #2d4a3e;
+  color: var(--light);
 }
 
 /* ===== Result：近くにあるかもしれないテーマ（拮抗時のみ） ===== */
@@ -1092,7 +1092,8 @@ button {
 }
 
 .mbti-type-button {
-  padding: 10px 4px;
+  padding: 14px 4px;
+  min-height: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1140,8 +1141,9 @@ button {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-sub);
-  padding: 6px 0;
+  padding: 12px 0;
   align-self: flex-start;
+  min-height: 44px;
 }
 
 .back-button:hover { color: var(--accent); }
@@ -1653,7 +1655,8 @@ button {
 }
 
 .post-quiz-chip {
-  padding: 9px 6px;
+  padding: 12px 8px;
+  min-height: 44px;
   border-radius: 10px;
   font-size: 13.5px;
   font-weight: 500;

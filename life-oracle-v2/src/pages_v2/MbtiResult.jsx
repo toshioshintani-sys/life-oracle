@@ -3,6 +3,7 @@ import { cognitiveFunctionMap, famousPeople } from '../data_v2/meta/cognitiveFun
 import { biasInfo }          from '../data_v2/meta/biasInfo.js';
 import mechanismsJson        from '../data_v2/meta/prescriptions_mechanism.json';
 import CrossFlowActions      from '../components/CrossFlowActions.jsx';
+import { ShareButtons }      from '../components/ShareButtons.jsx';
 import { NotePromo }         from '../components/NotePromo.jsx';
 import { ResultDetail }      from '../components/ResultDetail.jsx';
 import { OracleWall }        from './OracleWall.jsx';
@@ -78,6 +79,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   const [loading, setLoading]             = useState(true);
   const [loadError, setLoadError]         = useState(false);
   const [presLoading, setPresLoading]     = useState(false);
+  const [presError, setPresError]         = useState(false);
 
   useEffect(() => {
     incrementOnce('mbti');
@@ -101,7 +103,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     fetch('/data/prescriptions.json')
       .then(r => r.json())
       .then(pr => { setPrescriptions(pr); setPresLoading(false); })
-      .catch(() => setPresLoading(false));
+      .catch(() => { setPresLoading(false); setPresError(true); });
   }, [occupation, generation, prescriptions, presLoading]);
 
   useEffect(() => { if (section) window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
@@ -236,6 +238,15 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           <p className="detail-eyebrow">あなた専用の処方箋</p>
           {presLoading ? (
             <p className="detail-body">読み込んでいます…</p>
+          ) : presError ? (
+            <div>
+              <p className="detail-body">処方箋の読み込みに失敗しました。</p>
+              <button
+                className="ashita-copy-btn"
+                style={{ marginTop: 10 }}
+                onClick={() => { setPresError(false); setPresLoading(false); }}
+              >もう一度読み込む</button>
+            </div>
           ) : prescriptionText ? (
             <>
               <p className="detail-note" style={{ marginBottom: 10 }}>
@@ -348,6 +359,10 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           preview="同じタイプの人たちのコメント"
           onClick={() => setSection('wall')} />
       </div>
+
+      <ShareButtons
+        shareText={`【${typeName}】${reading ?? ''}\n\nライフオラクルで自分の動き方を診断する`}
+      />
 
       <CrossFlowActions
         currentFlow="mbti"
