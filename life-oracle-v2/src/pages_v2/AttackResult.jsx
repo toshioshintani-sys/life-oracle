@@ -159,7 +159,7 @@ export function AttackResult({ result, onRetry, onSwitchFlow }) {
       </div>
 
       <ShareButtons
-        shareText={`${type.psychologyOS.mechanismShort}\n\nライフオラクルで相手の動きを読み解く`}
+        shareText={`${type.psychologyOS?.mechanismShort ?? ''}\n\nライフオラクルで相手の動きを読み解く`}
       />
 
       <CrossFlowActions

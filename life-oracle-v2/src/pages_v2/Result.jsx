@@ -57,7 +57,7 @@ export function Result({ result, onRetry, onSwitchFlow }) {
   if (!result) return null;
 
   const text        = getResultWithFallback(result.situation, result.age);
-  const label       = SITUATION_LABELS[result.situation] ?? result.situation;
+  const label       = SITUATION_LABELS[result.situation] ?? result.situation ?? '';
   const secondLabel = SITUATION_LABELS[result.secondSituation] ?? result.secondSituation;
   const showSecond  = (result.situationGap ?? 1) < 0.15 && result.secondSituation;
   const thirdLabel  = SITUATION_LABELS[result.thirdSituation];

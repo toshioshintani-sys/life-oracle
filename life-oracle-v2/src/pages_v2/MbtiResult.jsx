@@ -98,13 +98,13 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
 
   // 処方箋は職業・年代が両方そろっているときだけ遅延ロード（5.5MB）
   useEffect(() => {
-    if (!occupation || !generation || prescriptions || presLoading) return;
+    if (!occupation || !generation || prescriptions || presLoading || presError) return;
     setPresLoading(true);
     fetch('/data/prescriptions.json')
       .then(r => r.json())
       .then(pr => { setPrescriptions(pr); setPresLoading(false); })
       .catch(() => { setPresLoading(false); setPresError(true); });
-  }, [occupation, generation, prescriptions, presLoading]);
+  }, [occupation, generation, prescriptions, presLoading, presError]);
 
   useEffect(() => { if (section) window.scrollTo({ top: 0, behavior: 'instant' }); }, [section]);
 
