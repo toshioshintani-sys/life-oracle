@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getResultWithFallback } from '../data_v2/results/index.js';
 import { biasInfo }              from '../data_v2/meta/biasInfo.js';
 import CrossFlowActions          from '../components/CrossFlowActions.jsx';
+import { ShareButtons }          from '../components/ShareButtons.jsx';
 import { NotePromo }             from '../components/NotePromo.jsx';
 import { ResultDetail }          from '../components/ResultDetail.jsx';
 import { OracleWall }            from './OracleWall.jsx';
@@ -56,7 +57,7 @@ export function Result({ result, onRetry, onSwitchFlow }) {
   if (!result) return null;
 
   const text        = getResultWithFallback(result.situation, result.age);
-  const label       = SITUATION_LABELS[result.situation] ?? result.situation;
+  const label       = SITUATION_LABELS[result.situation] ?? result.situation ?? '';
   const secondLabel = SITUATION_LABELS[result.secondSituation] ?? result.secondSituation;
   const showSecond  = (result.situationGap ?? 1) < 0.15 && result.secondSituation;
   const thirdLabel  = SITUATION_LABELS[result.thirdSituation];
@@ -190,6 +191,10 @@ export function Result({ result, onRetry, onSwitchFlow }) {
           preview="同じ状況の人たちのコメント"
           onClick={() => setSection('wall')} />
       </div>
+
+      <ShareButtons
+        shareText={`【${label}】${text?.hook ?? ''}\n\nライフオラクルで今の状況を読み解く`}
+      />
 
       <CrossFlowActions
         currentFlow="situation"
