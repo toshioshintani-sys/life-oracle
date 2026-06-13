@@ -55,6 +55,7 @@ LEDGER_PATH = REPO_ROOT / "tasks" / "committee" / "LEDGER.md"
 # 計画拘束(原則2)・DO-NOT-ADOPT(原則6)の素材（docs/ 配下・無くても会議は回す）
 WEEKLY_SPRINT_PATH = REPO_ROOT / "docs" / "WEEKLY_SPRINT.md"
 NOT_DOING_PATH = REPO_ROOT / "docs" / "NOT_DOING.md"
+RESOLVED_FACTS_PATH = REPO_ROOT / "docs" / "RESOLVED_FACTS.md"  # 確定事実・解決済み台帳（蒸し返し防止の真実源）
 
 MODEL = os.environ.get("COMMITTEE_MODEL") or "claude-opus-4-8"  # 空文字(未設定Secretが""で渡る)でもデフォルトに落とす
 WEB_SEARCH_TOOL = os.environ.get("WEB_SEARCH_TOOL", "web_search_20250305")
@@ -349,6 +350,7 @@ def load_plan_docs() -> str:
     for label, p in [
         ("今週の計画（WEEKLY_SPRINT・律速）", WEEKLY_SPRINT_PATH),
         ("採択禁止リスト（NOT_DOING / DO-NOT-ADOPT）", NOT_DOING_PATH),
+        ("確定事実・解決済み（RESOLVED_FACTS・蒸し返し禁止）", RESOLVED_FACTS_PATH),
     ]:
         try:
             if p.exists():
@@ -520,8 +522,14 @@ def phase_meeting() -> int:
         "【計画拘束（最重要・自律運用ルール 原則2/6）】会議は冒頭で『今週の計画(WEEKLY_SPRINT)』と"
         "『採択禁止リスト(NOT_DOING)』を読み、今週の律速（North Star）に沿った手だけを採択する。"
         "NOT_DOING に該当する案は採択しない（自動除外）。計画外の思いつきで動かない。\n"
+        "【確定事実（蒸し返し防止）】会議は『確定事実・解決済み(RESOLVED_FACTS)』も読む。"
+        "ここに『済み/設定済み/稼働中』とある事項は前提として扱い、未着手・未設定として再提案・再依頼しない"
+        "（例：GA4 Secrets登録の依頼・gachijin修復は済み＝二度と出さない）。古い前提に立つ担当レポートは"
+        "『（確定事実により済み）』と明記して除外する。"
+        "ただし盲信は禁止：本日の実データ/ログが確定事実と矛盾する場合（例：稼働中のはずが本日失敗・401等）は、"
+        "済み扱いをやめ『確定事実の更新要』として継続審議に上げる（新障害は握りつぶさない）。\n"
         "議事録は日本語 Markdown で、次の見出しを厳守:\n"
-        "## 計画整合（今週の律速＝WEEKLY_SPRINTとの対応／NOT_DOING抵触チェック。除外した案があれば理由を1行）\n"
+        "## 計画整合（今週の律速＝WEEKLY_SPRINTとの対応／NOT_DOING抵触／RESOLVED_FACTS蒸し返しチェック。除外・済み扱いにした案は理由を1行）\n"
         "## 本日の決定事項（合意・即実行できるもの。担当と一文の根拠つき。owner=エージェントで即実行可を最優先）\n"
         "## 執行レビュー（前回LEDGERの決定事項のうち実行された/されていないを1行ずつ。"
         "同系統の未執行が3回続く論点は『別レバレッジへ』と明示）\n"

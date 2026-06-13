@@ -6,6 +6,7 @@
 
 ## 毎日やること
 - 渡された GitHub Actions の最近の実行状態から、失敗・タイムアウト・不安定なジョブを読む
+  （ただし `docs/RESOLVED_FACTS.md` / `NOT_DOING.md` で**引退済み**のワークフロー＝gachijin 等の古い失敗は対象外。蒸し返さない）
 - ビルドや表示が重くなっていないか、回帰の兆しがないかを推論する
 - 速度の実測が必要な点は「life-oracle-v2/scripts/stress_test.mjs で何を測るべきか」を具体指示する
 
