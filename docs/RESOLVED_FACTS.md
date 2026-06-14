@@ -33,5 +33,14 @@
 - 2026-06-11〜13 に 401(invalid x-api-key) で委員会が4日停止 → ローカルの有効キーを `ANTHROPIC_API_KEY` Secret に同期して復旧。
 - ⚠️ **キーをローテしたら GitHub Secret も `gh secret set ANTHROPIC_API_KEY` で必ず更新**（ローカル .env だけだとクラウドが401で止まる）。
 
+### stress_test baseline — 記録済み（as-of 2026-06-14）
+- `life-oracle-v2/scripts/stress_test.mjs` を実行し `scripts/baseline.json` に保存：**dist gzip 291.7KB / build 9.0秒 / 診断計算 0.22ms（中央値）**。
+- ✅ **「stress_test baseline を記録せよ」の3回連続持ち越しは解消**。委員会は再提案しない（次は回帰検知＝baselineとの比較に進む）。
+
+### GSC（Google Search Console）連携 — 未連携・ブロッカー明確（as-of 2026-06-14）
+- **技術ブロッカー＝認証情報が webmasters スコープ未付与**。GA4用 `monitoring/config/adc.json`(ユーザーADC)は `analytics.readonly` のみ＝Search Console API は HTTP403。
+- **残るのは俊雄さんの Google アカウント操作のみ**：①life-oracle.jp の GSC 所有権確認 ②`webmasters.readonly` スコープでの再認証。これが済めば collect_gsc 実装で連携完結。
+- ✅ 委員会への意味：GSC は「俊雄さんのアカウント操作待ち」と確定。**毎回ふわっと「GSC連携を」と再依頼せず、上記2ステップの完了可否だけ確認する**。
+
 ---
 *更新：解決・設定が確定した事項を as-of 付で追記。古くなった/矛盾が出た項目は日付を更新するか削除する。*
