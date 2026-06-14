@@ -26,6 +26,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -191,6 +192,62 @@ def get_ga4_stats() -> dict | None:
         return {"sessions": 0, "users": 0, "pageviews": 0, "avg_duration": 0, "bounce_rate": 0}
     except ImportError:
         return {"error": "google-analytics-data 未インストール"}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ─── Google Search Console ───────────────────────────────────────────────────
+
+GSC_SITE = "https://life-oracle.jp/"
+
+
+def _gsc_credentials():
+    """GA4と共通のサービスアカウント認証（webmasters.readonly）。
+    cloud=GOOGLE_CREDENTIALS_JSON / local=monitoring/config/ga4-sa.json。"""
+    from google.oauth2 import service_account
+    scopes = ["https://www.googleapis.com/auth/webmasters.readonly"]
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+    if creds_json:
+        return service_account.Credentials.from_service_account_info(
+            json.loads(creds_json), scopes=scopes)
+    sa = REPO_ROOT.parent / "monitoring" / "config" / "ga4-sa.json"  # ローカルSA鍵
+    if sa.exists():
+        return service_account.Credentials.from_service_account_file(str(sa), scopes=scopes)
+    return None
+
+
+def get_gsc_stats() -> dict | None:
+    """Search Console の直近28日のクリック/表示 + 上位クエリ。認証情報が無ければ None。"""
+    try:
+        creds = _gsc_credentials()
+        if creds is None:
+            return None
+        import google.auth.transport.requests as gtr
+        creds.refresh(gtr.Request())
+        token = creds.token
+        end = (datetime.now(UTC) - timedelta(days=3)).date()   # GSC は2-3日遅延
+        start = end - timedelta(days=27)
+        site = urllib.parse.quote(GSC_SITE, safe="")
+        url = f"https://searchconsole.googleapis.com/webmasters/v3/sites/{site}/searchAnalytics/query"
+        body = json.dumps({"startDate": str(start), "endDate": str(end),
+                           "dimensions": ["query"], "rowLimit": 10}).encode()
+        req = urllib.request.Request(url, data=body, method="POST",
+                                     headers={"Authorization": f"Bearer {token}",
+                                              "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read())
+        rows = data.get("rows", [])
+        return {
+            "period": f"{start}〜{end}",
+            "clicks": sum(r["clicks"] for r in rows),
+            "impressions": sum(r["impressions"] for r in rows),
+            "query_count": len(rows),
+            "top": [{"query": r["keys"][0], "clicks": r["clicks"],
+                     "impressions": r["impressions"], "position": round(r["position"], 1)}
+                    for r in rows[:8]],
+        }
+    except ImportError:
+        return {"error": "google-auth 未インストール"}
     except Exception as exc:
         return {"error": str(exc)}
 

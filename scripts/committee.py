@@ -67,6 +67,7 @@ try:
         http_post_json,
         _section,
         get_ga4_stats,
+        get_gsc_stats,
         get_note_stats,
         get_github_status,
     )
@@ -98,6 +99,9 @@ except Exception as exc:  # pragma: no cover - インポート失敗時も会議
 
     def get_github_status():
         return {"runs": [], "failed": [], "errors": []}
+
+    def get_gsc_stats():
+        return None
 
 
 # ─── 担当（委員）の定義 ─────────────────────────────────────────────────────────
@@ -325,9 +329,25 @@ def _gather_seo() -> str:
     arts = note.get("articles", [])
     lines = [f"- {a['label']}: ❤️{a.get('likes')}" for a in arts[:10]]
     base = f"公開 note 記事 {len(arts)} 本 / 合計スキ {note.get('total_likes', 0)}\n" + "\n".join(lines)
+
+    # Search Console 実データ（SA方式で連携済み・確定事実 2026-06-14）
+    gsc = get_gsc_stats()
+    if gsc is None:
+        base += "\n\nSearch Console: 未連携。"
+    elif "error" in gsc:
+        base += f"\n\nSearch Console 取得エラー: {gsc['error']}（原因切り分けと暫定の代替指標を提案すること）。"
+    elif gsc.get("query_count", 0) == 0:
+        base += (f"\n\nSearch Console（{gsc['period']}・連携済み実データ）: クリック0/表示0/クエリ0 ＝"
+                 "**まだ検索結果にほぼ出ていない**段階。『流入を作る前に、まず検索に載る』ための"
+                 "インデックス状況・狙うクエリの仮説を述べること。")
+    else:
+        tops = "、".join(f"{t['query']}(表示{t['impressions']}・順位{t['position']})" for t in gsc["top"][:5])
+        base += (f"\n\nSearch Console（{gsc['period']}・実データ）: "
+                 f"クリック{gsc['clicks']}/表示{gsc['impressions']}/クエリ{gsc['query_count']}件。"
+                 f"上位: {tops}。この実クエリを起点に、獲りに行くキーワードと改善提案を出すこと。")
+
     base += (
-        "\n\nSearch Console は未連携（将来 GSC 認証で実データ化）。"
-        "Web 検索で『MBTI 診断 / 性格診断 / 自己分析』周辺の検索トレンド・上位競合を調べ、"
+        "\n\nWeb 検索で『MBTI 診断 / 性格診断 / 自己分析』周辺の検索トレンド・上位競合も調べ、"
         "ライフオラクルが獲りに行くべきキーワードと、その理由・改善提案を出すこと。"
     )
     return base

@@ -37,10 +37,11 @@
 - `life-oracle-v2/scripts/stress_test.mjs` を実行し `scripts/baseline.json` に保存：**dist gzip 291.7KB / build 9.0秒 / 診断計算 0.22ms（中央値）**。
 - ✅ **「stress_test baseline を記録せよ」の3回連続持ち越しは解消**。委員会は再提案しない（次は回帰検知＝baselineとの比較に進む）。
 
-### GSC（Google Search Console）連携 — 未連携・ブロッカー明確（as-of 2026-06-14）
-- **技術ブロッカー＝認証情報が webmasters スコープ未付与**。GA4用 `monitoring/config/adc.json`(ユーザーADC)は `analytics.readonly` のみ＝Search Console API は HTTP403。
-- **残るのは俊雄さんの Google アカウント操作のみ**：①life-oracle.jp の GSC 所有権確認 ②`webmasters.readonly` スコープでの再認証。これが済めば collect_gsc 実装で連携完結。
-- ✅ 委員会への意味：GSC は「俊雄さんのアカウント操作待ち」と確定。**毎回ふわっと「GSC連携を」と再依頼せず、上記2ステップの完了可否だけ確認する**。
+### GSC（Google Search Console）連携 — 連携済み・稼働中（as-of 2026-06-14）
+- **サービスアカウント方式で連携完了**。SA `life-oracle-ga4@gen-lang-client-0791471309.iam.gserviceaccount.com` を Search Console の `https://life-oracle.jp/` に siteFullUser で追加済み＋GCPで Search Console API 有効化済み。SA実APIで疎通確認済み。
+- 委員会 SEO担当は `get_gsc_stats()`（`daily_report.py`）経由で**GSC実データ（直近28日のクリック/表示/上位クエリ）を取得**。クラウドは `GOOGLE_CREDENTIALS_JSON`(同一SA)、ローカルは `monitoring/config/ga4-sa.json`(発行したSA鍵)。
+- ⚠️ OAuth(gcloud ADC)方式は Google にブロックされる（汎用クライアント＋機微スコープ）ため**SA方式が正**。`adc.json`(ユーザーADC)はGA4専用(analyticsのみ)。
+- ✅ **「GSC連携を」「所有権確認を」の再依頼は出さない（済み）。** 現状データは空（検索流入ほぼゼロ）だが連携は機能。残課題は「検索に載る（インデックス/コンテンツ）」であってGSC設定ではない。
 
 ---
 *更新：解決・設定が確定した事項を as-of 付で追記。古くなった/矛盾が出た項目は日付を更新するか削除する。*
