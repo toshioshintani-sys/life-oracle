@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { biasInfo }         from '../data_v2/meta/biasInfo.js';
 import CrossFlowActions     from '../components/CrossFlowActions.jsx';
+import EmailCaptureForm     from '../components/EmailCaptureForm.jsx';
 import { NotePromo }        from '../components/NotePromo.jsx';
 import { ResultDetail }     from '../components/ResultDetail.jsx';
 import { OracleWall }       from './OracleWall.jsx';
@@ -156,6 +157,8 @@ export function AttackResult({ result, onRetry, onSwitchFlow }) {
           preview="同じ結果の人たちのコメント"
           onClick={() => setSection('wall')} />
       </div>
+
+      <EmailCaptureForm flow="attack" meta={{}} />
 
       <CrossFlowActions
         currentFlow="attack"

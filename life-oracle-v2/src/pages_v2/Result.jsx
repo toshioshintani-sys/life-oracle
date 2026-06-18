@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getResultWithFallback } from '../data_v2/results/index.js';
 import { biasInfo }              from '../data_v2/meta/biasInfo.js';
 import CrossFlowActions          from '../components/CrossFlowActions.jsx';
+import EmailCaptureForm          from '../components/EmailCaptureForm.jsx';
 import { NotePromo }             from '../components/NotePromo.jsx';
 import { ResultDetail }          from '../components/ResultDetail.jsx';
 import { OracleWall }            from './OracleWall.jsx';
@@ -190,6 +191,8 @@ export function Result({ result, onRetry, onSwitchFlow }) {
           preview="同じ状況の人たちのコメント"
           onClick={() => setSection('wall')} />
       </div>
+
+      <EmailCaptureForm flow="situation" meta={{ situation: result.situation }} />
 
       <CrossFlowActions
         currentFlow="situation"
