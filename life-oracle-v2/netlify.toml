@@ -2,6 +2,15 @@
   command = "npm install && npm run build"
   publish = "dist"
 
+# Netlify生サブドメイン(*.netlify.app)を本ドメインへ301集約。
+# 放置するとGoogleがnetlify.app側を正規URLに選び、life-oracle.jpが重複扱いで検索評価を失う(2026-06-19 GSCで確認)。
+# 必ずSPAのcatch-all(/*)より前に置く(Netlifyは上から最初の一致を採用)。
+[[redirects]]
+  from = "https://incredible-llama-51caa2.netlify.app/*"
+  to = "https://life-oracle.jp/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
