@@ -20,7 +20,10 @@
 ### GA4 計測基盤 — 設定済み・稼働中（as-of 2026-06-08）
 - GitHub Secrets `GA4_PROPERTY_ID` / `GOOGLE_CREDENTIALS_JSON` は **2026-06-08 に登録済み**。クラウド委員会/daily_report は **実データを取得できている**（2026-06-13 の data担当が「セッション2/ユーザー1/PV2/滞在49秒」を取得）。
 - ✅ **「GA4 Secrets を登録してください」という俊雄さんへの依頼は出さない**（済み）。
-- 🔧 **残課題（別物）**：診断ファネルの**カスタムイベント**（`diagnosis_start` / `question_view` / `diagnosis_complete` 等）が**アプリ(`life-oracle-v2`)に未実装**。これは Secret でなく**アプリ側のコード作業**。完走率・離脱設問はこれが入るまで算出不可。
+- 🔧 **診断ファネルのカスタムイベント — 大半が実装済み（as-of 2026-06-19 コードで確認）**：`life-oracle-v2/src/lib/analytics.js` の `trackEvent()`（→`window.gtag('event',...)`）経由で、**`app_loaded` / `quiz_start`（mbti/situation/attack）/ `quiz_complete`（mbti_type・jin_id付）/ `result_share_intent` / `lead_captured` が既に発火している**。
+  - ✅ **完走率は今すぐ算出可能**（`quiz_start`数 vs `quiz_complete`数）。「完走率が算出不可」は**誤り**＝この前提で蒸し返さない。`diagnosis_start`/`complete` は **名称違いで実体は実装済み**（`quiz_start`/`quiz_complete`）。
+  - ❌ **唯一の未実装＝`question_view`（設問ごとの閲覧イベント）**。これだけが「どの設問で離脱したか（離脱設問）」の算出に必要。残るアプリ側コード作業はこの1イベントのみ。
+  - ⚠️ 委員会/データ担当が「カスタムイベント未実装・完走率算出不能」を繰り返してきたのは、本台帳のこの項目が不正確だったため（2026-06-19 修正）。
 
 ### gachijin パイプライン — 引退（as-of 2026-06-13・[[NOT_DOING.md]] #8）
 - gachi は2026-11月まで予約完了済み＝パイプラインは役目を終えている。`gachijin-pipeline` / `gachijin-scheduler` の古いCI失敗（直近実行2026-05-08）は**無視してよい**。修復を律速・最優先として採択しない。daily_report も `RETIRED_WORKFLOW_KEYWORDS` で報告・再実行から除外済み。

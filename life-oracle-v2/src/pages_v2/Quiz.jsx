@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { trackEvent } from '../lib/analytics.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -21,9 +22,12 @@ export function Quiz({ question, mode, questionNum, estimatedTotal, oracleMessag
   const [pressed, setPressed] = useState(null);
   const timerRef = useRef(null);
 
-  // 問題が切り替わったら押下状態をリセット
+  // 問題が切り替わったら押下状態をリセット＋設問表示を計測（離脱設問の特定用）
   useEffect(() => {
     setPressed(null);
+    if (question?.id) {
+      trackEvent('question_view', { mode, q_num: questionNum, question_id: question.id });
+    }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [question?.id]);
 
