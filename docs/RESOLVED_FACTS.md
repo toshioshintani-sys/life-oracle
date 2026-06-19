@@ -44,7 +44,13 @@
 - **サービスアカウント方式で連携完了**。SA `life-oracle-ga4@gen-lang-client-0791471309.iam.gserviceaccount.com` を Search Console の `https://life-oracle.jp/` に siteFullUser で追加済み＋GCPで Search Console API 有効化済み。SA実APIで疎通確認済み。
 - 委員会 SEO担当は `get_gsc_stats()`（`daily_report.py`）経由で**GSC実データ（直近28日のクリック/表示/上位クエリ）を取得**。クラウドは `GOOGLE_CREDENTIALS_JSON`(同一SA)、ローカルは `monitoring/config/ga4-sa.json`(発行したSA鍵)。
 - ⚠️ OAuth(gcloud ADC)方式は Google にブロックされる（汎用クライアント＋機微スコープ）ため**SA方式が正**。`adc.json`(ユーザーADC)はGA4専用(analyticsのみ)。
-- ✅ **「GSC連携を」「所有権確認を」の再依頼は出さない（済み）。** 現状データは空（検索流入ほぼゼロ）だが連携は機能。残課題は「検索に載る（インデックス/コンテンツ）」であってGSC設定ではない。
+- ✅ **「GSC連携を」「所有権確認を」の再依頼は出さない（済み）。** 連携は機能。残課題は「検索に載る」だが、その真因は下記（コンテンツでなく重複）。
+
+### GA4/GSC 徹底調査 — アプリSEO不振の真因特定＋計測実態（as-of 2026-06-19・実API確認）
+- 🔴 **アプリが検索に載らない真因＝Netlify生サブドメインが正規URLを奪っていた（修正済）**：GSC URL検査で `googleCanonical=https://incredible-llama-51caa2.netlify.app/`＝life-oracle.jpは重複扱い。`life-oracle-v2/netlify.toml` にホスト301（netlify.app/*→life-oracle.jp）を追加・デプロイ済（curlで301確認）。**SEO不振はコンテンツ不足でなくこの重複が真因**＝「記事を増やせ/タイトルだけ直せ」で蒸し返さない。次＝Google再クロール＋GSCインデックス登録リクエスト（俊雄さん操作）。
+- 🔴 **note記事のインデックスはGSCで不可視**：note.com＝別ドメイン・所有外。委員会の「GSCでnote記事を点検」は前提誤り＝再提案しない（site:検索のみ・US-IPでは不発）。
+- 🔧 **GA4ローカル読み取りは権限不足**：ローカルSAはGA4プロパティのViewer権限ゼロ（GSCには有）。`monitoring/config/sites.json`の life-oracle.jp=`534433669` はSAから読めず＝誤りor権限未付与。GA4 Admin APIはGCPで無効でプロパティ自動特定不可。**クラウド日次は取得成功**。→ 俊雄さん操作待ち（SAをpropertyにViewer追加／Admin API有効化 or `GA4_PROPERTY_ID`値開示）。済むまでローカルGA4は乖離。
+- ✅ **question_view 実装済（2026-06-19デプロイ）**：離脱設問も算出可能に（完走率は元から quiz_start/complete で算出可）。詳細＝`tasks/committee/ga4_gsc_investigation_2026-06-19.md`。
 
 ---
 *更新：解決・設定が確定した事項を as-of 付で追記。古くなった/矛盾が出た項目は日付を更新するか削除する。*
