@@ -327,11 +327,20 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           <button
             className="ashita-copy-btn"
             onClick={() => {
-              const shareText = `【明日の一手 — ${typeName}】\n${itteText}\n\nライフオラクルで自分の動き方を診断する: https://life-oracle.jp/`;
-              navigator.clipboard?.writeText(shareText).catch(() => {});
-              trackEvent('result_share_intent', { mode: 'mbti', section: 'ashita_no_itte', mbti_type: mbtiType });
+              const APP_URL = 'https://life-oracle.jp/';
+              // ラベル（先読み人 等）は他者に伝わらないので出さず、性格を表現した殺し文句で誘う
+              const hook = killerLine ?? itteText ?? 'ライフオラクルで自分の動き方が分かりました。';
+              const shareText = `${hook}\n\nあなたの動き方は？ 無料で診断できます。`;
+              trackEvent('result_share_intent', { mode: 'mbti', section: 'app_share', mbti_type: mbtiType });
+              if (navigator.share) {
+                navigator
+                  .share({ title: 'ライフオラクル — 自分の動き方診断', text: shareText, url: APP_URL })
+                  .catch(() => {});
+              } else {
+                navigator.clipboard?.writeText(`${shareText}\n${APP_URL}`).catch(() => {});
+              }
             }}
-          >コピーしてシェア</button>
+          >この結果をシェア</button>
         </div>
       )}
 
