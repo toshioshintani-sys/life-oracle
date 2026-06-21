@@ -61,7 +61,7 @@ def _url_guard_or_abort(text, payload, article) -> bool:
     return True
 ```
 
-> 推奨（将来）：`x_posting_system` 全体を版管理に入れる or repo へ取り込む（critical path が消えないように）。今回は本憲章に正本を保存して最小対応。
+> ✅ **2026-06-21 実施済**：`x_posting_system` を**ローカルgit管理下**にした（`git init`・コードのみ21ファイル追跡）。`chrome_profile/`（ログイン済みXセッション・約1.1GB）・`.env`（X/Anthropic/Gemini実鍵）・`data/`・デバッグ画像は `.gitignore` で除外し、追跡前に機密ゼロを検証済。∴ poster.py の正本（finalize/guard）が版管理され、改ざん時に履歴から復元可能。**リモートは未設定（機密漏洩防止・必要なら private repo のみ・push前に再検証）。**
 
 ---
 *この憲章は X投稿の正しさの最終的な拠り所。変更時は proposal-stress-test を通し、不変条件(§2)を弱める変更は原則禁止。*
