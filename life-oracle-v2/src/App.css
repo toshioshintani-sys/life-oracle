@@ -3274,6 +3274,20 @@ a:focus-visible {
   color: rgba(244, 236, 218, 0.68);
 }
 
+/* 「知っている」＝サブ導線：少し小さく・控えめに（診断を主役にする） */
+.entry-choices .entry-choice-button.entry-choice-button--sub {
+  min-height: 0;
+  padding: 12px 16px;
+  opacity: 0.8;
+}
+.entry-choices .entry-choice-button.entry-choice-button--sub .choice-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+.entry-choices .entry-choice-button.entry-choice-button--sub .choice-desc {
+  font-size: 11px;
+}
+
 .choice-side {
   flex-shrink: 0;
   display: flex;

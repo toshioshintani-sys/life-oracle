@@ -37,13 +37,13 @@ export function MbtiEntry({ onStartQuiz, onSelectType, onBack }) {
           <p className="mbti-entry-sub">知っていれば診断を省いて直接結果に進めます</p>
         </div>
         <div className="entry-choices">
-          <button className="entry-choice-button" onClick={() => setStep('select')}>
-            <span className="choice-title">知っている</span>
-            <span className="choice-desc">パターンを選んで結果を見る</span>
-          </button>
           <button className="entry-choice-button" onClick={onStartQuiz}>
             <span className="choice-title">知らない・改めて診断する</span>
             <span className="choice-desc">約20問の診断を受ける</span>
+          </button>
+          <button className="entry-choice-button entry-choice-button--sub" onClick={() => setStep('select')}>
+            <span className="choice-title">知っている</span>
+            <span className="choice-desc">パターンを選んで結果を見る</span>
           </button>
         </div>
       </div>
