@@ -23,6 +23,7 @@ const CHOICES = [
     desc:  '思考と行動のパターンを読み解く',
     hint:  '約20問',
     meta:  'Jung',
+    badge: '🎁 結果から、あなたを“神”にする画像プロンプトがもらえる',
   },
   {
     flow:  'situation',
@@ -116,6 +117,7 @@ export function Entry({ onStart, onOpenNoteIndex }) {
               <span className="choice-body">
                 <span className="choice-title">{c.title}</span>
                 <span className="choice-desc">{c.desc}</span>
+                {c.badge && <span className="choice-badge">{c.badge}</span>}
               </span>
               <span className="choice-side">
                 <span className="choice-meta">{c.meta}</span>
