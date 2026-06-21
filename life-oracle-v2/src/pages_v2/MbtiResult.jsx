@@ -58,6 +58,46 @@ const KILLER_LINE = {
   ISFP: '感じたことに、正直な人です。',
 };
 
+// 「あなたを“神”にする」ChatGPTプロンプトを診断結果から組み立てる純関数。
+// ・タイプ名ラベル（先読み人 等）は画像に出さず、性格の“表現”で描かせる
+// ・処方箋は全文をプロンプトに載せ、画像内は要点1文に凝縮（可読性確保）
+// ・性別はアプリで聞かず、ChatGPT に会話履歴から推定させる
+function buildDeityPrompt({ generation, occupation, killerLine, praiseText, habitText, mechanismWhy, biasName, biasDesc, prescriptionText }) {
+  const attrs   = [generation, occupation].filter(Boolean).join('・');
+  const persona = [killerLine, praiseText, habitText].filter(Boolean).join(' ');
+  const lines = [
+    'あなた(ChatGPT)は「ライフオラクル」の神格化絵師です。次の手順で進めてください。',
+    '',
+    '【手順1：私の性別を推定】',
+    'これまでの私との会話やメモリから私の性別を推定して。自信が無ければ一文だけ確認して。',
+    attrs ? `私の固定属性：${attrs}。` : '',
+    '',
+    '【手順2：私を“神”として描く（縦長ポスター 2:3）】',
+    '・上記の年代・性別・職業を母体にした日本の神。職業の要素（服装・道具）が神衣・神器へ昇華するように。',
+    '・様式：荘厳でシネマティック、静謐で神秘的、神話画の品格。戦闘感は出さず「自然の化身」として。高精細。',
+    '・光と色：アンバーゴールドの神光＋深い藍の高コントラスト。画面内に「金の羅針盤」を神器として必ず配置。',
+    '・構図：中央に神。周囲の余白に和文を“密”だが判読できる荘厳さ（御札・曼荼羅風）で配置。文字は明朝系。',
+    '',
+    '【私の人物像（※タイプ名のラベルは画像に書かない。下記の“性格”を絵と言葉で表現して）】',
+    persona,
+    mechanismWhy ? `背景：${mechanismWhy}` : '',
+    biasName ? `思考のクセ：${biasName}（${biasDesc ?? ''}）` : '',
+    prescriptionText ? `私への処方箋（全文）：${prescriptionText}` : '',
+    '',
+    '【画像内に描く日本語テキスト】',
+    '・神名（私の性格から荘厳に創作。タイプ名ラベルは使わない）',
+    '・神徳：私の強みを3〜5語の箇条で',
+    '・試練と学び：私が気をつける点を3〜4語の箇条で',
+    biasName ? `・思考のクセ：${biasName}` : '',
+    prescriptionText ? '・処方箋は要点1文に凝縮して荘厳に' : '',
+    '・私への一言（私らしさを突いた一文）',
+    '・最下部に小さく：life-oracle.jp ｜ 本物の診断はこちら',
+    '',
+    'まず手順1の推定を一言述べてから、画像を生成して。誤字や文字崩れが出た箇所だけ描き直して。',
+  ];
+  return lines.filter((l) => l !== '').join('\n');
+}
+
 function HubCard({ icon, title, preview, onClick }) {
   return (
     <button className="hub-card" onClick={onClick}>
@@ -146,6 +186,19 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
 
   const biasMsg = (idx) => (biasMessages && top2[idx])
     ? (biasMessages[`${jungTypeId}_${biasInfo[top2[idx]]?.messageKey}`] ?? null) : null;
+
+  // 「あなたを“神”にする」プロンプト（結果の翻訳層のみ流す・ラベルは出さない）
+  const deityPrompt = buildDeityPrompt({
+    generation,
+    occupation,
+    killerLine,
+    praiseText:   typeProfile?.praiseText,
+    habitText:    typeProfile?.habitText,
+    mechanismWhy: mechanism?.whyItEmerges,
+    biasName:     biasInfo[top2[0]]?.name,
+    biasDesc:     biasInfo[top2[0]]?.short,
+    prescriptionText,
+  });
 
   // ── サブページ（今日の一歩・note・みんなのひとこと だけカード）────────────
   if (section === 'action') {
@@ -343,6 +396,34 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           >この結果をシェア</button>
         </div>
       )}
+
+      {/* ── あなたを“神”にするプロンプト ── */}
+      <div className="ashita-no-itte">
+        <p className="ashita-label">あなたを“神”にする</p>
+        <p className="ashita-text" style={{ fontSize: 14 }}>
+          診断結果をもとに、ChatGPT で「自分を模した神」の一枚絵が作れます。
+        </p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button
+            className="ashita-copy-btn"
+            onClick={() => {
+              navigator.clipboard?.writeText(deityPrompt).catch(() => {});
+              trackEvent('deity_prompt_copy', { mode: 'mbti', mbti_type: mbtiType });
+            }}
+          >プロンプトをコピー</button>
+          <button
+            className="ashita-copy-btn"
+            onClick={() => {
+              navigator.clipboard?.writeText(deityPrompt).catch(() => {});
+              window.open('https://chatgpt.com/', '_blank', 'noopener');
+              trackEvent('deity_prompt_open_chatgpt', { mode: 'mbti', mbti_type: mbtiType });
+            }}
+          >ChatGPTで開く</button>
+        </div>
+        <p className="detail-note" style={{ marginTop: 8 }}>
+          コピーしたプロンプトを ChatGPT に貼り付けてください。
+        </p>
+      </div>
 
       {/* ── 今日の一歩以下はカード ── */}
       <div className="hub-cards">
