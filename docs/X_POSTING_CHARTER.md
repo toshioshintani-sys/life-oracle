@@ -14,11 +14,15 @@
 
 ## 2. 不変条件（INVARIANT・二度と破らない）
 
-**すべてのX投稿は、本文確定を `poster.finalize_tweet_text(payload, article)` 1関数（単一チョークポイント）に通し、note記事URLを構造的に含む。**
+**すべてのX投稿は、最終ツイート本文に note記事URLを構造的に含む。単発・スレッドの【両経路】で保証する。**
 
-- `finalize_tweet_text` が `payload["article_url"]`（generator が設定）を本文末尾へ**冪等付与**（既にあれば二重付与しない）。**ClaudeにURLを生成させない**（出力が不安定なため）。
-- 投稿直前に `_url_guard_or_abort()` が**最後の砦**：`article_url` が在るのに本文に無ければ **fail-loud で投稿中止＋Slackアラート**（URLが元々無い純粋告知ツイートは対象外＝誤殺しない）。
+- URLの出所＝`article["url"]`（main.py が `post()` に渡す）。`_note_url_for()`＋`_append_note_url()` で本文末尾へ**冪等付与**（既にあれば二重付与しない）。**生成（Claude/Gemini）の出力にURLを依存させない**（出力が不安定なため）。
+- **単発** `post_single`：`finalize_tweet_text(payload, article)` が唯一の本文確定経路。
+- **スレッド** `post_thread`：**最終ツイート**に `_append_note_url` で付与（中間ツイートには付けない）。
+- 投稿直前に `_url_guard_or_abort()` が**最後の砦**：URLが期待される（`article["url"]`あり）のに本文に無ければ **fail-loud で投稿中止＋Slackアラート**（単発＝本文／スレッド＝最終ツイートを検査。URLが元々無い純粋告知は対象外＝誤殺しない）。
 - ∴ **URL欠落のまま投稿が出ることは構造的に不可能**（付与される、さもなくば止まって通知される）。
+
+> ⚠️ **2026-06-22 再発の教訓（最重要）**：この不変条件を `post_single` にしか実装せず `post_thread` を素通りさせていたため、`ENABLE_THREAD_TYPES=False` のはずのF-1/F-2スレッドが漏れて投稿され**全件リンク欠落**が続いた（加えて `ENABLE_LINK_ONLY_REPLY=True` でURLを別リプライに回す設計だがPlaywright版はリプライ未投稿）。＝「単一チョークポイント」は**全ての投稿関数（single/thread）に実装して初めて成立する**。一部にしか入れない“やったつもり”を二度と繰り返さない。修正＝`poster.py`（commit 578554b・dry-runで両経路URL付与/ガード/冪等を検証）。
 
 ## 3. 責任の所在（"責任者"の物質化）
 
