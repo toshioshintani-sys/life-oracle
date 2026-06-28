@@ -39,6 +39,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 
 from gachijin.article import generate_article_bundle, _short_theme  # noqa: E402
 from gachijin.markdown import markdown_to_note_html  # noqa: E402
+from gachijin.cross_promo_footer import append_cross_promo_footer  # noqa: E402
 from gachijin.thumbnails import IMAGE_SIZE, render_thumbnail  # noqa: E402
 
 DEFAULT_HASHTAGS = ["#行動経済学", "#心理学", "#職場", "#ガチ人", "#ライフオラクル"]
@@ -299,7 +300,17 @@ def phase_thumbnails(
 
 def _build_note_payload(bundle: dict[str, Any], day_key: str) -> dict[str, Any]:
     article = bundle["articles"][day_key]
-    free_body_html = markdown_to_note_html(article["body_md"])
+    # クロス送客フッター（サブスクやめた）を本文「最下段」へ付与してから HTML 変換する。
+    # 仕様の単一の正 = サブスクやめた repo: docs/syndication/LIFEORACLE_NOTE_CROSS_PROMO.md /
+    #   scripts/note/cross-promo-footer.mjs（文言・UTM・テーマ判定A/B/Cと一字一句そろえる）。
+    # 過去記事には遡及しない（オーケストレータは過去記事を再投稿しないため、今日以降の新規分にだけ付く）。
+    # 別ブランドの「おまけの一言」のみ・冒頭広告は不可（CLAUDE.md §9 / §2-2 / §1）。
+    body_md = append_cross_promo_footer(
+        article["body_md"],
+        title=article.get("title", ""),
+        tags=bundle.get("theme_name", ""),
+    )
+    free_body_html = markdown_to_note_html(body_md)
     return {
         "name": article["title"],
         "free_body": free_body_html,
