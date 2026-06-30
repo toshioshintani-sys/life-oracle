@@ -1,0 +1,545 @@
+---
+name: slide-md-creator
+description: 既存のスライド・画像・WebサイトからデザインシステムSLIDE.mdと6ページのHTMLサンプルスライドを生成する。「このスライドのデザインシステムを作って」「SLIDE.mdを生成して」「SLIDE.mdを作りたい」「このサイトのデザインでSLIDE.mdを生成して」「slide-md-creator」と言われたときに使用する。
+---
+
+# slide-md-creator
+
+既存のスライド・画像・Webサイト・テキストからデザイン情報を解析し、AIツール（Claude Design、NotebookLM、Google Slides等）向けのスライドデザインシステム定義ファイル（SLIDE.md）と6ページのHTMLサンプルスライドを生成する。
+
+## STEP 1：入力の受け取り
+
+スキル起動時、ユーザーが以下のいずれかを提供しているか確認する：
+
+- 画像ファイル（スライドのスクリーンショット、ロゴ、ブランドガイド等）
+- WebサイトのURL
+- 既存スライドのファイル（PowerPoint / Google Slides）
+- テキストによるデザインの説明
+
+**何も提供されていない場合**、以下のように尋ねる：
+
+> 「参考にしたいスライド・画像・WebサイトのURLはありますか？テキストでデザインのイメージを説明していただくことも可能です。」
+
+複数の入力が提供された場合はすべてを受け取り、STEP 2の分析に使用する。
+
+## STEP 2：デザイン要素の分析
+
+受け取った入力を解析し、以下の要素を読み取る。読み取れた内容をユーザーに箇条書きで提示する。
+
+### 分析する要素
+
+**Colors（カラー）**
+- Primary（メインカラー）：最も多く使われている色。HEXコードで記録する。
+- Secondary（サブカラー）：2番目に使われている色。HEXコードで記録する。
+- Background（背景色）：スライドの背景色。HEXコードで記録する。
+- Accent（強調色）：ボタン・下線・強調に使われている色。HEXコードで記録する。
+- Text（テキスト色）：本文テキストの色（最も濃い色）。HEXコードで記録する。
+- Text Sub（見出し・ラベル色）：本文より少し薄い色（例：#444746）。読み取れない場合はTextより15〜20%明るい値を推定する。
+- Text Muted（補足・キャプション色）：さらに薄い色（例：#5E5E5E）。読み取れない場合はTextより30〜40%明るい値を推定する。
+- Gradient（グラデーション）：グラデーションの有無と使用カラーストップ・方向。例：「Primary → Secondary → Accent・90deg（横）」または「なし」。グラデーションが使われている場合は方向（横・縦・斜め）も必ず記録する。
+
+**Typography（タイポグラフィ）**
+- 見出しフォント（Display）：フォント名・サイズ（px）・ウェイト（bold / regular等）
+- 本文フォント（Body）：フォント名・サイズ（px）・ウェイト
+- キャプションフォント：フォント名・サイズ（px）・ウェイト
+- モノスペースフォント（Mono）：数値・コード・ページ番号などに使われているフォント名。読み取れない場合は「なし」と記録する。
+- フォント名が不明な場合は「不明」と記録し、STEP 3で確認する
+
+**Layout（レイアウト）**
+- スライドサイズ：16:9 / 4:3 / その他
+- 余白：上下左右のおおよその余白サイズ（px）
+- 整列の基準：左寄せ / 中央寄せ / 右寄せ
+
+**Slide Frame（枠要素）**
+- タイトルエリア：上部左寄せ / 上部中央揃え、装飾の有無（アクセントバー・下線 等）
+- ページ番号：右下 / 左下 / なし、表示フォーマット（01 / 1 / 1/5 等）
+- 装飾：アクセントバー・装飾図形・ロゴ等の有無と配置
+
+**Background Accent（背景装飾）**
+- 半透明の装飾（グラデーション丸・装飾図形等）の有無
+- ある場合：配置（右上・左下 等）・使用カラー（Primaryカラーの薄め / Secondaryカラーの薄め 等）・おおよそのサイズ感
+- ない場合：「なし」と記録する
+
+**Component Style（コンポーネントスタイル）**
+- カードの角丸：スライドのコンテンツカードに使われている角丸サイズ（例：12px / 22px / なし）
+- カードの影：影の有無と強さ（例：あり（薄め）/ あり（標準）/ なし）
+- 縦バー：見出し左側に縦バーが使われているか（あり / なし）。ある場合は色（単色 / グラデーション）と幅
+- 箇条書きマーカー：ドットの色（単色 / Primary・Secondary・Accentの複数色 / グラデーション）と形状（丸 / 四角 / 線等）
+- 番号スタイル：番号付きリストのスタイル（グラデーション円に白数字 / 単色円 / テキストのみ 等）
+
+**Tone（雰囲気）**
+- フォーマル / カジュアル / ミニマル / ボールド / 等
+- どんなシーンに合うか（ビジネス発表・社内共有・カンファレンス 等）
+
+### 分析結果の提示例
+
+> 「以下のデザイン要素を読み取りました：
+>
+> **カラー**
+> - Primary：#4285F4（ブルー）
+> - Secondary：#9168C0（パープル）
+> - Background：#F8FAFD（ほぼ白）
+> - Accent：#D96570（ピンク）
+> - Text：#1F1F1F（ほぼ黒）
+> - Text Sub：#444746（濃いグレー）
+> - Text Muted：#5E5E5E（グレー）
+> - Gradient：Primary → Secondary → Accent・90deg（横）および180deg（縦）
+>
+> **タイポグラフィ**
+> - 見出し（Display）：Manrope / 54〜96px / 800
+> - 本文（Body）：Manrope / 18〜22px / 400〜500
+> - キャプション：Manrope / 12px / 500
+> - モノスペース（Mono）：Roboto Mono / ページ番号・数値・コードに使用
+>
+> **レイアウト**
+> - スライドサイズ：16:9（1920 × 1080px）
+> - 余白：上下90〜96px・左右140px
+> - 整列：左寄せ
+>
+> **背景装飾**：右上と左下に半透明グラデーション丸あり（Secondary / Primary カラー・透明度8〜16%）
+>
+> **コンポーネントスタイル**
+> - カード：border-radius 22px・薄い影あり・border 1px solid rgba(0,0,0,0.04)
+> - 縦バー：グラデーション縦バー（幅8px、Primary→Secondary→Accent）あり
+> - 箇条書きマーカー：Primary / Secondary / Accentの3色丸ドット
+> - 番号スタイル：グラデーション円に白数字
+>
+> **雰囲気**：ボールド・モダン、テクノロジー系カンファレンス・プロダクト紹介向け」
+
+## STEP 3：確認の対話
+
+STEP 2の分析結果を提示した後、不明・不確かな点についてユーザーに確認する。
+
+### 確認のルール
+
+- 質問は**合計3〜5問以内**に抑える
+- 1つのメッセージにつき**1問だけ**聞く
+- 読み取れた情報については聞かない（不明な情報だけを確認する）
+- ユーザーが「わからない」と答えた場合は、一般的な値（Webセーフフォント、標準余白等）を使用して進める
+
+### 確認すべき優先順位
+
+1. フォント名が「不明」の場合 → 「見出しや本文に使われているフォントをご存知ですか？（例：Noto Sans JP、Hiragino Kaku Gothic等）」
+2. カラーが読み取れなかった場合 → 「〇〇の色をご存知でしたら教えてください」
+3. スライドサイズが不明の場合 → 「スライドのサイズは16:9（横長）と4:3（やや正方形）のどちらですか？」
+4. 雰囲気の確認 → 「このデザインはどんな場面での使用を想定していますか？（例：社内会議・顧客向けプレゼン・カンファレンス等）」
+
+### 確認完了の判断
+
+以下のいずれかになったら確認終了とする：
+- 5問の確認が終わった
+- 未確認の情報がなくなった
+- ユーザーが「進めてください」等の意思を示した
+
+確認完了後、「では内容をもとにSLIDE.mdとsample.htmlを生成します」と伝えてSTEP 4に進む。
+
+## STEP 4：SLIDE.mdの生成
+
+STEP 2〜3で確定したデザイン情報を使い、以下のテンプレートに値を埋めて `SLIDE.md` を生成する。
+
+### 出力フォルダの決定
+
+ファイルはカレントディレクトリ内の `SLIDE-md/` フォルダの中に `SLIDE-md-{source}` というフォルダを作成して保存する。`{source}` はソースの種類に応じて以下のルールで決める：
+
+- **URLの場合：** ドメイン名から主要な単語を抽出する（例：`https://www.apple.com` → `apple`、`https://www.google.co.jp` → `google`）
+- **ファイルの場合：** ファイル名（拡張子なし）を使う（例：`company-deck.pptx` → `company-deck`）
+- **テキスト説明の場合：** 説明文からブランド名や代表的なキーワードを1つ抽出する
+
+フォルダ名はすべて小文字・半角英数字・ハイフンのみを使用する。作成するフォルダの例：`SLIDE-md/SLIDE-md-apple`、`SLIDE-md/SLIDE-md-google`、`SLIDE-md/SLIDE-md-toyota`
+
+### SLIDE.mdの出力形式
+
+以下の形式で出力すること。各項目の `[　]` の中に分析・確認で得た実際の値を入れる。Markdownの各セクションの後にYAML形式でも同じ値を記載し、AIツールが値を正確に読み取れるようにする。
+
+---
+出力ファイル名：SLIDE-md/SLIDE-md-{source}/SLIDE.md
+
+# SLIDE.md
+
+このファイルはスライドデザインシステムの定義書です。AIツール（Claude Design、NotebookLM、Google Slides等）にこのファイルを渡すことで、一貫したデザインのスライドを生成できます。
+
+## Overview
+
+**参照ソース：** [参考にしたスライド・サイト・ブランドの名称や説明]
+**マッチするシーン：** [このデザインが合う場面・用途・雰囲気]
+
+## Colors
+
+| 役割 | カラー名 | HEXコード |
+|---|---|---|
+| Primary | [色名] | [#XXXXXX] |
+| Secondary | [色名] | [#XXXXXX] |
+| Background | [色名] | [#XXXXXX] |
+| Accent | [色名] | [#XXXXXX] |
+| Text | [色名] | [#XXXXXX] |
+| Text Sub | [色名] | [#XXXXXX] |
+| Text Muted | [色名] | [#XXXXXX] |
+
+**グラデーション：** [「Primary → Secondary → Accent・90deg（横）」など / なし]
+
+    colors:
+      primary: "[#XXXXXX]"
+      secondary: "[#XXXXXX]"
+      background: "[#XXXXXX]"
+      accent: "[#XXXXXX]"
+      text: "[#XXXXXX]"
+      text_sub: "[#XXXXXX]"
+      text_muted: "[#XXXXXX]"
+      gradient_main: "[linear-gradient(90deg, Primary, Secondary, Accent) / なし]"
+      gradient_vert: "[linear-gradient(180deg, Primary, Secondary, Accent) / なし]"
+
+## Typography
+
+| 役割 | フォント | サイズ | ウェイト |
+|---|---|---|---|
+| 見出し（H1） | [フォント名] | [Xpx] | [Bold/Regular] |
+| 見出し（H2） | [フォント名] | [Xpx] | [Bold/Regular] |
+| 本文 | [フォント名] | [Xpx] | [Regular] |
+| キャプション | [フォント名] | [Xpx] | [Regular] |
+| モノスペース | [フォント名 / なし] | [-] | [-] |
+
+    typography:
+      heading_h1:
+        font: "[フォント名]"
+        size: "[Xpx]"
+        weight: "[700/400]"
+      heading_h2:
+        font: "[フォント名]"
+        size: "[Xpx]"
+        weight: "[700/400]"
+      body:
+        font: "[フォント名]"
+        size: "[Xpx]"
+        weight: "[400]"
+      caption:
+        font: "[フォント名]"
+        size: "[Xpx]"
+        weight: "[400]"
+      mono:
+        font: "[フォント名 / なし]"
+        usage: "[数値・コード・ページ番号 等 / なし]"
+
+## Layout
+
+- **スライドサイズ：** [16:9 / 4:3]（幅[X]px × 高さ[X]px）
+- **余白（上下）：** [Xpx]
+- **余白（左右）：** [Xpx]
+- **テキスト整列：** [左寄せ / 中央寄せ]
+
+    layout:
+      slide_size: "[16:9 / 4:3]"
+      width: "[X]px"
+      height: "[X]px"
+      padding_vertical: "[X]px"
+      padding_horizontal: "[X]px"
+      text_align: "[left / center]"
+
+## Slide Frame
+
+スライドの全ページに共通して適用される「枠」の要素を定義します。SLIDE-PATTERN-{name}.mdはコンテンツエリアの構造のみを定義するため、タイトルエリア・ページ番号・装飾はすべてここで一括管理します。これにより、どのパターンを使っても枠の見た目が統一されます。
+
+**タイトルエリア：** [配置と装飾の説明（例：上部左寄せ、直下にアクセントカラーのバーを配置）]
+**ページ番号：** [配置とフォーマット（例：右下・「01 / 6」形式 / なし）]
+**ページ番号スタイル：** [グラデーションテキスト / 単色テキスト（TextカラーやTextMutedカラー）、モノスペースフォント使用の有無]
+**ブランドフッター：** [配置と内容（例：左下・デザインシステム名をText Mutedカラーで表示 / なし）]
+**背景アクセント：** [半透明グラデーション丸などの装飾の有無・配置・使用カラー（例：右上にSecondaryカラー12%透明・左下にPrimaryカラー8%透明の丸 / なし）]
+**縦バー：** [見出し左側の縦バーの有無・スタイル（例：グラデーション縦バー・幅8px / なし）]
+
+    slide_frame:
+      title_area:
+        position: "[top-left / top-center]"
+        text_align: "[left / center]"
+        decoration: "[accent-bar / underline / none]"
+      page_number:
+        position: "[bottom-right / bottom-left / none]"
+        format: "[01 / 1 / 1/5 等]"
+        style: "[gradient-text / solid]"
+        font: "[mono / body]"
+      brand_footer:
+        position: "[bottom-left / bottom-right / none]"
+        content: "[デザインシステム名 / ブランド名 / なし]"
+      background_accent:
+        type: "[radial-gradient-circle / none]"
+        placement: "[right-top, left-bottom / none 等]"
+        color: "[Secondary薄め / Primary薄め 等]"
+      section_bar:
+        style: "[gradient-vertical / solid / none]"
+        width: "[Xpx / -]"
+
+## Component Style
+
+スライド内で使用するコンポーネントの基本スタイルを定義します。
+
+**カード：** [角丸・影・枠線の標準スタイル（例：border-radius: 22px、薄い影あり、border: 1px solid rgba(0,0,0,0.04)）]
+**箇条書きマーカー：** [ドットの色・形状（例：Primary / Secondary / Accentの3色丸ドット / Primaryカラーの単色丸ドット）]
+**番号スタイル：** [番号付きリストのスタイル（例：グラデーション円に白数字 / 単色円 / テキストのみ）]
+
+    component_style:
+      card:
+        border_radius: "[Xpx]"
+        shadow: "[0 1px 3px rgba(60,64,67,0.08),0 4px 16px rgba(60,64,67,0.05) / none]"
+        border: "[1px solid rgba(0,0,0,0.04) / none]"
+      bullet:
+        color: "[Primary / Primary-Secondary-Accent / gradient]"
+        shape: "[circle / square / line]"
+      number:
+        style: "[gradient-circle / solid-circle / text-only]"
+        color: "[gradient-main / Primary / none]"
+
+## Do / Don't
+
+**Do（やること）**
+- [このデザインで推奨されること]
+- [このデザインで推奨されること]
+
+**Don't（やってはいけないこと）**
+- [このデザインで避けるべきこと]
+- [このデザインで避けるべきこと]
+---
+
+### Do / Don't の生成方針
+
+- **Do** はデザインの特徴から自然に導かれるルールを記述する（例：ミニマルなデザインなら「1スライド1メッセージを徹底する」）
+- **Don't** はデザインと相反する要素を記述する（例：モノクロデザインなら「原色や派手なグラデーションを使わない」）
+- 各2〜4項目を目安にする
+
+## STEP 5：sample.htmlの生成
+
+SLIDE.mdで定義したデザイントークン（色・フォント・余白）を適用した6ページのHTMLスライドを生成し、STEP 4で作成した `SLIDE-md/SLIDE-md-{source}/` フォルダ内に `sample.html` として保存する。
+
+### ページ構成（固定）
+
+| ページ番号 | スライドの種類 | 主な内容 |
+|---|---|---|
+| 1 | デザインシステム概要 | カラーパレット・パーツ・タイポグラフィ・レイアウト・Do/Don'tを1画面に集約した仕様書ページ |
+| 2 | 表紙（タイトルスライド） | タイトル・サブタイトル・会社名や日付のプレースホルダー |
+| 3 | セクションタイトル | セクション番号・セクション名・説明文 |
+| 4 | 箇条書き（本文スライド） | 見出し・番号付きカード形式の4〜5項目リスト |
+| 5 | データチャート | 見出し・棒グラフ（左）＋円グラフ（右）（CSSのみで実装） |
+| 6 | まとめ | 見出し・3列カード（価値と説明）・締めのCTAボタン |
+
+### 全スライド共通の実装方針
+
+#### スライドサイズとフォント
+
+- **スライドサイズ：1920 × 1080 px（16:9）**
+- **フォント：本文・UIは `'Manrope', system-ui, sans-serif`、数値・コードは `'Roboto Mono', monospace`**
+- Google Fonts から `Manrope:wght@400;500;600;700;800` と `Roboto+Mono:wght@700` を `<link>` で読み込む
+- ただしSLIDE.mdで別のフォントが指定されている場合はそちらを優先する
+
+#### コンテンツ密度の原則
+
+1920×1080pxの大きなキャンバスを有効に使い、スカスカな印象にならないよう以下を守ること：
+
+- **見出しは大きく**：ページ内の主見出し（h1相当）は最低 `54px`、表紙タイトルは `100px` 以上を基準とする
+- **本文・説明テキストは読みやすく**：本文は最低 `18px`、カード内説明は `18〜22px` を基準とする（1920px基準でこのサイズ。0.75スケール後でも14〜16px相当になる）
+- **コンテンツがキャンバスを埋める**：余白は設計上必要な呼吸感のためにとるが、コンテンツエリアが上下左右に偏らず、スライド全体に広がるようにする
+- **カード・リストアイテムは縦に広げる**：`flex:1` や `min-height:0` を活用して、コンテンツカードがスライドの縦方向を埋めるようにする
+
+#### ブラウザ表示のスケーリング
+
+1920pxのスライドをブラウザで確認しやすいよう、以下のCSSをbodyに適用する：
+
+    body {
+      background: #E8EAED;
+      padding: 40px 20px;
+    }
+    .slide-wrapper {
+      width: 1920px;
+      transform-origin: top left;
+      transform: scale(0.75);
+      margin-bottom: -270px; /* 1080 × (1 - 0.75) = 270px */
+    }
+    .slide-outer {
+      margin: 0 auto 32px;
+      width: 1440px; /* 1920 × 0.75 */
+    }
+
+各スライドは `.slide-outer > .slide-wrapper > .slide` の構造で出力し、ブラウザ上では1440×810px相当で表示されるようにする。
+
+#### CSSカスタムプロパティの定義
+
+HTMLの `<style>` タグ内で以下のカスタムプロパティを定義する。SLIDE.mdの値を埋める：
+
+    :root {
+      --color-primary:    [SLIDE.mdのPrimaryカラー];
+      --color-secondary:  [SLIDE.mdのSecondaryカラー];  /* グラデーション中間色 */
+      --color-accent:     [SLIDE.mdのAccentカラー];     /* グラデーション終端色 */
+      --color-background: [SLIDE.mdのBackgroundカラー];
+      --color-text:       [SLIDE.mdのTextカラー];
+      --color-text-sub:   [Textカラーより少し薄い色];    /* 例：#444746 */
+      --color-text-muted: [さらに薄い色];               /* 例：#5E5E5E */
+      --color-surface:    #FFFFFF;
+      --color-border:     rgba(0,0,0,0.04);
+      --font-display:     [SLIDE.mdの見出しフォント], system-ui, sans-serif;
+      --font-mono:        'Roboto Mono', monospace;
+      --gradient-main: linear-gradient(90deg, [Primary], [Secondary], [Accent]);
+      --gradient-vert: linear-gradient(180deg, [Primary], [Secondary], [Accent]);
+      --slide-padding-v:  [SLIDE.mdの上下余白];
+      --slide-padding-h:  [SLIDE.mdの左右余白];
+    }
+
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      background: var(--color-background);
+      font-family: var(--font-display);
+      color: var(--color-text);
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+
+#### 全ページ共通の装飾要素
+
+すべてのスライド（ページ1を除く）に以下を適用する：
+
+**（A）背景アクセント丸**
+スライドの隅に `position:absolute` の半透明グラデーション円を2〜3個配置する。例：
+
+    <div style="position:absolute;top:-180px;right:-120px;width:520px;height:520px;
+      border-radius:50%;background:radial-gradient(circle,rgba([Secondary-RGB],0.12),transparent 65%);
+      pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-220px;left:180px;width:560px;height:560px;
+      border-radius:50%;background:radial-gradient(circle,rgba([Primary-RGB],0.08),transparent 65%);
+      pointer-events:none;"></div>
+
+**（B）セクション見出しバー**
+ページの見出し左に縦バーを置く（ページ2を除く）：
+
+    <div style="width:8px;height:40px;border-radius:4px;background:var(--gradient-vert);"></div>
+
+**（C）ページ番号（右下）**
+全ページ右下に `position:absolute; right:[左右余白]; bottom:32px` で配置：
+
+    <div style="position:absolute;right:80px;bottom:32px;display:flex;align-items:baseline;gap:6px;z-index:2;">
+      <span style="font-family:var(--font-mono);font-size:16px;font-weight:800;line-height:1;
+        background:var(--gradient-main);-webkit-background-clip:text;background-clip:text;
+        -webkit-text-fill-color:transparent;">0X</span>
+      <span style="font-family:var(--font-mono);font-size:12px;color:#9AA0A6;">/ 6</span>
+    </div>
+
+**（D）ブランドフッター（左下）**
+ページ2を除く全ページ左下に表示：
+
+    <div style="position:absolute;left:[左右余白];bottom:34px;display:flex;align-items:center;gap:10px;z-index:2;">
+      <span style="font-size:13px;font-weight:700;color:#9AA0A6;letter-spacing:0.02em;">[ブランド名またはデザインシステム名]</span>
+    </div>
+
+**（E）カードコンポーネント**
+コンテンツをカード形式で表示する場合の標準スタイル：
+
+    background:#FFFFFF; border:1px solid rgba(0,0,0,0.04); border-radius:22px;
+    box-shadow:0 1px 3px rgba(60,64,67,0.08),0 4px 16px rgba(60,64,67,0.05); padding:36px;
+
+- JavaScriptは使用しない
+- `<section class="slide">` を `.slide-wrapper` 内に置き、各ページを縦に並べる
+
+### ページ1：デザインシステム概要ページの仕様
+
+このページは「仕様書ページ」として生成する。カラーパレット・スライドで使うパーツ・タイポグラフィ・レイアウト・Do/Don'tを1画面に集約し、ユーザーがデザインシステムを一目で把握できるようにする。
+
+**レイアウト構造：**
+
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │  [ヘッダー] ロゴ/スパーク  DESIGN SYSTEM名（グラデーションテキスト）  │
+    │                                     Style Sheet / v1.0 · 16:9    │
+    ├─────────────────────────────────────────────────────────────────────┤
+    │  [基本カラーパレット 行]                                              │
+    │  ブランドの主要色 | ベースカラー（背景・テキスト・枠線）| データ・状態カラー │
+    ├────────────────────┬─────────────────────────┬──────────────────────┤
+    │ スライドで使うパーツ │ タイポグラフィ            │ Do & Don't           │
+    │ （flex:1.6）       │ （flex:1.05）            │ （flex:1）           │
+    │ ボタン・矢印・      │ タイプスケール一覧・       │ 緑背景のDo欄         │
+    │ グラデーション・    │ フォント名・              │ 赤背景のDon't欄       │
+    │ チップ・カード等    │ レイアウト仕様            │                      │
+    └────────────────────┴─────────────────────────┴──────────────────────┘
+
+**実装の詳細：**
+
+- **ヘッダー**：左にデザインシステム名をグラデーションテキスト（`font-size:48px; font-weight:800; background:var(--gradient-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent`）で表示し、右に「Style Sheet / v1.0 · 16:9」を `font-size:17px; color:#9AA0A6` で表示する
+- **カラーパレット行**：グループ（「ブランドの主要色」「ベースカラー」など）に分けてカラーカードを横一列に表示する。**全カードの横幅は統一**する — グループをまたいで全カードを1つの `display:grid; grid-template-columns:repeat(N,1fr) [グループ間スペーサー20px] repeat(M,1fr)` に配置し、グループ間にスペーサー列を挟む。ラベル行も同じ `grid-template-columns` を使い `grid-column` でspan指定して位置を一致させる。各カラーカード：`border-radius:11px; box-shadow:0 1px 2px rgba(60,64,67,0.06),0 2px 7px rgba(60,64,67,0.04); overflow:hidden` で囲み、上部にスウォッチ（`height:68px`）、下部にカラー名（`font-size:17px; font-weight:700`）とHEXコード（`font-size:15px; font-family:var(--font-mono); color:#5E5E5E`）を縦並び
+- **下段3カラム**：flexboxで `flex:1.6 / flex:1.05 / flex:1` に分割し、各カラムを白背景カード（`border-radius:20px; box-shadow:0 1px 3px rgba(60,64,67,0.08),0 4px 16px rgba(60,64,67,0.05)`）で囲む
+- **下段左「スライドで使うパーツ」**：`display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; align-content:space-between` で2列グリッドに配置し、コンテンツが上詰めにならないよう上下均等に分散する。ソースに特定のコンテンツがなくても、デザインシステムの雰囲気・カラー・フォントに合わせて **ボタン・タイトルバー・番号付きリスト・箇条書き・カード・チップ/ラベル・仕切り線・ページ番号** の8パーツを必ず生成する
+- **下段中「タイポグラフィ」**：タイプスケール（表紙タイトル→大見出し→中見出し→小見出し→本文大→本文小→キャプション）を `display:flex; flex-direction:column; justify-content:space-between; flex:1` で均等配置し、各行を `display:flex; justify-content:space-between` で左にサンプルテキスト・右にウェイト情報を表示する。下部にフォント名確認ブロックを追加する。さらに「レイアウト」としてスライドサイズ・余白・整列をドット線区切りで記載する
+- **下段右「Do & Don't」**：上半分に緑背景（`#E6F4EA`）のDo欄、下半分に赤背景（`#FCE8E6`）のDon't欄を配置する。DoアイコンはSuccessカラーの丸（`width:30px; height:30px`）に `font-size:18px` で `✓`、Don'tアイコンは赤丸（`width:30px; height:30px`）に `font-size:18px` で `✕` を表示する。Do/Don'tラベルは `font-size:20px; font-weight:800`、本文テキストは `font-size:18px; line-height:1.5`
+- **セクション見出し**：各カラムの左上に `width:6px; height:28px; border-radius:3px; background:var(--gradient-vert)` の縦バー＋タイトルを `font-size:26px; font-weight:800` で表示する
+- このページには全ページ共通のブランドフッター・ページ番号は**適用しない**（ページ1はそれ自体が仕様書のため）
+
+### ページ2〜6のコンテンツ方針
+
+**ページ2〜6のコンテンツはすべてダミーデータで生成する。**
+
+- ソースから読み取ったタイトル・本文・数値・固有名詞をそのままコンテンツに使用しないこと
+- 会社名・組織名は必ず **「サンプル株式会社」** に統一する（ソースが個人・チーム・ブランド名であっても同様）
+- ページタイトル・本文・グラフデータ・カード説明文はすべて汎用的なビジネスプレゼンテーション向けのダミーテキストにする
+- ただし、**デザインシステムのカラー・フォント・余白・スタイルは正確に反映**すること（あくまでコンテンツの文字情報がダミーなのであって、見た目のデザインはソースに忠実に）
+
+**ダミーコンテンツの例（参考）**
+
+| ページ | タイトル例 | 内容例 |
+|---|---|---|
+| 2（表紙） | 年度事業計画 / 新サービスのご紹介 | サブタイトル＋「サンプル株式会社」＋日付 |
+| 3（セクション） | Section 01 — Overview / 事業概要 | 概要説明文 |
+| 4（箇条書き） | 成長を支える3つの柱 / 重点施策 | 顧客体験・業務効率化・新規事業などのダミー項目 |
+| 5（グラフ） | 四半期業績の推移 / 売上構成比 | 架空の数値データ（Q1〜Q4など） |
+| 6（まとめ） | 今後の取り組み / 次のステップ | 強みの強化・新市場開拓・基盤整備などのダミーカード |
+
+### ページ2〜6の実装仕様
+
+**ページ2（表紙）**
+
+- `display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 160px`
+- ロゴやブランドのシンボル（`width:96px; height:96px; margin-bottom:30px`）を上部に表示する（SVGアイコンがない場合はグラデーション円で代替）
+- アイキャッチテキスト（`font-size:16px; font-weight:700; letter-spacing:0.32em; text-transform:uppercase; color:#9AA0A6`）でカテゴリや概要を表示する
+- メインタイトル `h1`：グラデーションテキスト（`font-size:118px; font-weight:800; letter-spacing:-0.03em; line-height:1; background:var(--gradient-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent`）
+- サブタイトル：`font-size:30px; font-weight:500; color:var(--color-text-sub); margin-top:30px`
+- グラデーションライン：`width:340px; height:10px; border-radius:999px; background:var(--gradient-main); margin:46px 0`
+- 日付・組織名：`font-family:var(--font-mono); font-size:18px; font-weight:600; color:var(--color-text-muted)` で並べ、区切りに小さな `●` を挿入する
+
+**ページ3（セクションタイトル）**
+
+- `display:flex; flex-direction:column; justify-content:center; padding:0 140px`
+- 背景装飾として巨大な透明数字を右側に `position:absolute; right:90px; top:50%; transform:translateY(-50%)` で配置：`font-family:var(--font-mono); font-size:480px; font-weight:800; opacity:0.10; background:var(--gradient-vert); -webkit-background-clip:text; -webkit-text-fill-color:transparent`
+- コンテンツ本体：`display:flex; align-items:stretch; gap:28px` で左に `width:10px; border-radius:5px; background:var(--gradient-vert)` の縦バー、右に以下を縦並び
+  - セクション番号：`font-family:var(--font-mono); font-size:18px; font-weight:700; letter-spacing:0.28em; color:#9AA0A6; text-transform:uppercase`
+  - 大見出し `h1`：`font-size:96px; font-weight:800; letter-spacing:-0.03em; line-height:1.04`
+  - 説明テキスト：`font-size:24px; font-weight:500; color:var(--color-text-sub); line-height:1.6; max-width:920px`
+
+**ページ4（箇条書き）**
+
+- `display:flex; flex-direction:column; padding:[上下余白] [左右余白]`
+- 見出しエリア：縦バー＋`h1`（`font-size:54px; font-weight:800; letter-spacing:-0.02em`）を `display:flex; align-items:center; gap:16px; margin-bottom:14px` で横並び
+- サブテキスト：`font-size:22px; font-weight:500; color:var(--color-text-muted); margin-bottom:54px; margin-left:24px`
+- リストエリア：`display:flex; flex-direction:column; gap:26px`
+- 各リストアイテム：白背景カード（`border-radius:18px`）内に左側にグラデーション円の番号（`width:54px; height:54px; border-radius:50%; background:var(--gradient-main); color:#fff; font-weight:800; font-size:24px; box-shadow:0 4px 12px rgba([Secondary-RGB],0.3)`）、右側に見出し（`font-size:28px; font-weight:700`）と説明文（`font-size:19px; color:var(--color-text-muted); line-height:1.55`）を配置
+
+**ページ5（グラフ）**
+
+- `display:flex; flex-direction:column; padding:[上下余白] [左右余白]`
+- 見出しエリア：縦バー＋`h1`＋サブテキスト（ページ4と同構造）
+- グラフエリア：`display:flex; gap:40px; flex:1; min-height:0`
+  - **棒グラフ（`flex:1.3`）**：白背景カード（`border-radius:22px`）内に縦棒を `align-items:flex-end` で並べる。最新月のバーのみグラデーション（`background:var(--gradient-vert); box-shadow:0 4px 12px rgba([Secondary-RGB],0.3)`）を使用し強調する。他のバーはPrimaryカラーのアルファ値違いで濃淡をつける
+  - **ドーナツグラフ（`flex:1`）**：白背景カード内に `conic-gradient` で円グラフを実装（外円`width:280px; height:280px`）。中心は白背景（`border-radius:50%; width:154px; height:154px`）に主要値（`font-size:44px; font-weight:800`）と凡例ラベル（`font-size:18px`）を表示する。右側に凡例をカラーブロック付きで縦列する
+
+**ページ6（まとめ）**
+
+- `display:flex; flex-direction:column; padding:[上下余白] [左右余白]`
+- 見出しエリア：縦バー＋`h1`＋サブテキスト（ページ4と同構造）
+- カードエリア：`display:flex; gap:32px; flex:1; min-height:0`
+- 各カード（白背景・`border-radius:22px`・`padding:40px 36px`）内に縦並びで：
+  - アイコン正方形：`width:64px; height:64px; border-radius:18px`（背景はPrimary/Secondary/Accentカラーを10〜15%透明にした色、中に1〜2文字のブランドカラーの漢字や英字を `font-size:30px; font-weight:800` で表示）
+  - 見出し：`font-size:30px; font-weight:800; letter-spacing:-0.01em`
+  - 説明文：`font-size:20px; color:var(--color-text-muted); line-height:1.6`
+- CTAボタン：`display:flex; justify-content:center; margin-top:50px` に `padding:16px 36px; border-radius:999px; background:var(--gradient-main); color:#fff; font-size:24px; font-weight:700; box-shadow:0 6px 20px rgba([Secondary-RGB],0.35)` で締めのメッセージを表示する
+
+### 生成完了の通知
+
+sample.html生成後、以下のようにユーザーに伝える：
+
+> 「`SLIDE-md/SLIDE-md-{source}/` フォルダにSLIDE.mdとsample.htmlを生成しました。
+>
+> - `SLIDE.md`：デザインシステムの定義書。AIツールに渡す際のメインファイルです。
+> - `sample.html`：ブラウザで開くとデザインを確認できます（各スライドが75%縮小で表示されます）。AIツールへの参考資料としても使えます。
+>
+> このSLIDE.mdとsample.html、および別途作成したスライドパターンファイルをAIツールに渡すことで、このデザインでスライドを生成できます。」
