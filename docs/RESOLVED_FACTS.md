@@ -64,5 +64,8 @@
 - 🔧 **X自動投稿のリンク欠落＝多層故障を全修正し単発のみへ確定（2026-06-26）**：真因＝①スレッド型はPlaywright返信連投が壊れ1ツイート目しか出ない（孤立・リンク無し）②Geminiが180字を守れず単発生成も失敗③過去投稿は本文URL混在でリーチ抑制。対処＝スレッド完全廃止（`ENABLE_THREAD_TYPES=False`）・単発上限を180→280字に緩和（青バッジ＝長文可）・`poster.py`の`finalize_tweet_text`で本文末尾にnote URLを構造付与＋投稿直前`_url_guard_or_abort`でfail-loud。常駐（`LifeOracle_X_Resident`）を全修正コードで再起動済。X＝note funnel（単発長文ティーザー＋note リンク／最大目的＝noteを開かせる）。委員会はスレッド型を再提案しない。詳細＝`docs/X_POSTING_CHARTER.md`／[[memory: project_x_posting_url_fix]]。
 - 🔴 **Anthropic API 月次利用上限到達（2026-06-22）＝API直叩き系（委員会含む）は2026-07-01まで実質停止**。委員会のResearch/Meeting空転はこれが原因（事故でなくコスト上限作動）。X poster はGemini生成（無料）で影響小・Anthropicはフォールバックのみ。復旧＝7/1自動 or Console上限引上げ（俊雄さん判断）。詳細＝[[memory: project_anthropic_api_cost_governance]]。
 
+### X投稿11日間停止＝環境事故（Playwrightブラウザ消失）を復旧（as-of 2026-07-07）
+- 🔧 **X自動投稿が2026-06-26〜07-07の11日間ゼロだった＝コードでなく環境の事故・復旧済み**。真因＝共有 `ms-playwright` フォルダから playwright 1.59.0 が要求する chromium 1217 バイナリが消失（別環境の `playwright install` がGCした可能性大・6/27 22:29起点）。生成は毎回成功しており、6/26 の単発化・280字整合の修正は有効だった。復旧＝`playwright install chromium`（Python314）＋常駐再起動＋**手動テスト実投稿成功を実物確認**（7/7 07:38・型A・note URL付き・画像付き・status/2074261806143689181）。あわせて投稿ID抽出が固定ポスト（6/25設定）のIDを毎回誤記録するバグも修正（x_posting_system commit 090cdf7）。∴ **委員会は「X投稿が止まっている」を6/26修正の失敗と誤認しない（修正は有効・止めたのは環境）**。監視の穴（無投稿N日でSlack通知が無い）は俊雄さんに提案中・未採択。詳細＝`tasks/lessons.md` 2026-07-07節／[[memory: project_x_posting_url_fix]]。
+
 ---
 *更新：解決・設定が確定した事項を as-of 付で追記。古くなった/矛盾が出た項目は日付を更新するか削除する。*
