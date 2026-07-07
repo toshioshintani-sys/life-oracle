@@ -163,6 +163,13 @@ Ni：先読み人 / 独走者
 - **真実源の鮮度監視（安全網・2026-06-19登録）**：ローカル日次タスク `LifeOracle_TruthSourceCheck_Daily`（毎日07:00）＝ `scripts/truth_source_check.py`。RESOLVED_FACTS/WEEKLY_SPRINT が STALE_DAYS 以上未更新で以降に活動があれば「次セッションで台帳点検を」と Slack通知。**Anthropic API不使用・通知のみ・更新も生成もしない**。⚠️ この通知/タスクは意図的（事故ではない）。停止は `Disable-ScheduledTask`。これは安全網であって本来の解は上記の更新習慣。
 - **X投稿ルートは憲章で一本化・固定（2026-06-21）**：X自動投稿の**唯一の本番経路＝ローカル `Claude_work/x_posting_system`（ブラウザ式）**。本文確定は `poster.finalize_tweet_text` 単一チョークポイントで **note URL を構造付与**し、投稿直前の `_url_guard_or_abort` で **fail-loud**（URL欠落は構造的に投稿不可・発火時Slack）。隔週 `checkpoint_review.py` がガード健在を改ざん検知。不変条件・責任・監視・正本コード＝**`docs/X_POSTING_CHARTER.md`**。**第2経路を作らない／ガードを外さない／ClaudeにURL生成させない**（API版`scripts/x_poster.py`=PR#17は本番外の将来候補）。詳細＝[[memory: project_x_posting_url_fix]]。
 
+> 🛑 **停止依頼（2026-07-07）**：Slack報告が事実上機能していなかったため、俊雄さんが上記の日次/週次ローカルタスクの停止を依頼した。`LifeOracle_RunwayCheck_Weekly` と `LifeOracle_TruthSourceCheck_Daily` はいずれも**ローカルPCのWindowsタスクスケジューラ**に登録されており、クラウドのリモート実行環境（このセッション）からは参照・停止できない。俊雄さんご自身のPCで以下を実行して停止：
+> ```powershell
+> Disable-ScheduledTask -TaskName "LifeOracle_RunwayCheck_Weekly"
+> Disable-ScheduledTask -TaskName "LifeOracle_TruthSourceCheck_Daily"
+> ```
+> GA4日次通知（`registry.yaml` 経由・別セッション構築）も同様にローカル側の設定のため、停止するならそちらのタスク登録も確認要。再開する場合は `Enable-ScheduledTask` で同名タスクを有効化する。
+
 ---
 
 ## Self-Improvement
