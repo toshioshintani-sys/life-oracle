@@ -2457,7 +2457,6 @@ button {
 }
 .note-promo--preview    { background: rgba(184,131,63,0.08); border: 1.5px dashed var(--border); }
 .note-promo--series     { background: rgba(61,122,90,0.09);  border: 1.5px solid rgba(61,122,90,0.35); }
-.note-promo--membership { background: rgba(140,95,40,0.10);  border: 1.5px solid var(--accent); }
 
 .note-promo-label {
   font-size: 10.5px;
@@ -2467,7 +2466,6 @@ button {
   text-transform: uppercase;
 }
 .note-promo--series .note-promo-label   { color: var(--light); }
-.note-promo--membership .note-promo-label { color: var(--accent); }
 
 .note-promo-heading {
   font-family: var(--serif);
@@ -2497,7 +2495,6 @@ button {
 }
 .note-promo-cta:hover { opacity: 0.85; }
 .note-promo--series .note-promo-cta     { background: var(--light); }
-.note-promo--membership .note-promo-cta { background: var(--accent-dark); }
 
 .note-promo-minimal {
   display: flex;
