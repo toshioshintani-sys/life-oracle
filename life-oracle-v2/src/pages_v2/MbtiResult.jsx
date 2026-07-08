@@ -197,27 +197,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
     prescriptionText,
   });
 
-  // ── サブページ（今日の一歩・note・みんなのひとこと だけカード）────────────
-  if (section === 'action') {
-    return (
-      <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
-        <p className="detail-eyebrow">今日ひとつだけ試すなら</p>
-        <p className="detail-phrase">{cf.todayAction}</p>
-        {mechanism && isShadow && mechanism.microInterventions?.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <p className="detail-eyebrow">明日のミクロアクション</p>
-            {mechanism.microInterventions.map((mi, i) => (
-              <div key={i} className="detail-item">
-                <p className="detail-headline" style={{ fontSize: 16 }}>{mi.action}</p>
-                <p className="detail-body">効くメカニズム：{mi.whyItWorks}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </ResultDetail>
-    );
-  }
-
+  // ── サブページ（note・みんなのひとこと だけカード）────────────────────
   if (section === 'wall') {
     return (
       <ResultDetail backLabel="結果に戻る" onBack={() => setSection(null)}>
@@ -394,6 +374,28 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
         </div>
       )}
 
+      {/* ── 今日ひとつだけ試すなら（2026-07-08 タップ不要のインライン表示に変更） ── */}
+      {/* 明日の一手(itteText)と重複する場合は本文行を省略し、ミクロアクションのみ足す */}
+      {((cf.todayAction && cf.todayAction !== itteText) || (mechanism && isShadow && mechanism.microInterventions?.length > 0)) && (
+        <div className="ashita-no-itte">
+          <p className="ashita-label">今日ひとつだけ試すなら</p>
+          {cf.todayAction && cf.todayAction !== itteText && (
+            <p className="ashita-text">{cf.todayAction}</p>
+          )}
+          {mechanism && isShadow && mechanism.microInterventions?.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <p className="detail-eyebrow">明日のミクロアクション</p>
+              {mechanism.microInterventions.map((mi, i) => (
+                <div key={i} className="detail-item" style={{ marginTop: 10 }}>
+                  <p className="detail-headline" style={{ fontSize: 15 }}>{mi.action}</p>
+                  <p className="detail-body" style={{ fontSize: 13 }}>効くメカニズム：{mi.whyItWorks}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── あなたを“神”にするプロンプト ── */}
       <div className="ashita-no-itte">
         <p className="ashita-label">あなたを“神”にする</p>
@@ -412,13 +414,8 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
         </p>
       </div>
 
-      {/* ── 今日の一歩以下はカード ── */}
+      {/* ── noteとみんなのひとことだけカード ── */}
       <div className="hub-cards">
-        {cf.todayAction && (
-          <HubCard icon="⚡" title="今日ひとつだけ試すなら"
-            preview={cf.todayAction.slice(0, 35) + '…'}
-            onClick={() => setSection('action')} />
-        )}
         <HubCard icon="📖" title="note で深く読む"
           preview="記事・バイアス解説"
           onClick={() => setSection('note')} />
