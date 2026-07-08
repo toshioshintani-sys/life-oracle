@@ -1153,6 +1153,13 @@ button {
   line-height: 1.7;
 }
 
+.topic-ok-message {
+  font-size: 14px;
+  color: #8c5f28;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
 .topic-choices {
   display: flex;
   flex-direction: column;

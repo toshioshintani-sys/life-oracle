@@ -42,6 +42,13 @@ export const ATTACK_PARENT_QUESTIONS = [
         attackTypeHints: { jin_68: 2, jin_70: 2 },
         tags: ['accepting'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'parent_ok',
+        label: '「そうなんだ」で終わり、特に気になるやりとりにはならない',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

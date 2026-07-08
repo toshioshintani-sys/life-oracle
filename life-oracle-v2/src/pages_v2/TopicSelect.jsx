@@ -5,10 +5,11 @@ const TOPICS = [
   { id: 'future',   label: '将来のこと',   desc: '選択・変化・これから'   },
 ];
 
-export function TopicSelect({ onSelect, onBack }) {
+export function TopicSelect({ onSelect, onBack, okMessage }) {
   return (
     <div className="topic-screen">
       <button className="back-button" onClick={onBack}>もどる</button>
+      {okMessage && <p className="topic-ok-message">{okMessage}</p>}
       <p className="topic-lead">今、気になっているのはどの領域ですか？</p>
       <div className="topic-choices">
         {TOPICS.map(t => (

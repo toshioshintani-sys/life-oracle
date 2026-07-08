@@ -42,6 +42,13 @@ export const ATTACK_CHILD_QUESTIONS = [
         attackTypeHints: { jin_77: 3 },
         tags: ['deflect'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'child_ok',
+        label: '特に困ることもなく、言われたことは「はーい」とすんなりこなす',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

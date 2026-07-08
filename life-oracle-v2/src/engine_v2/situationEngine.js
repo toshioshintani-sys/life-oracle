@@ -214,6 +214,12 @@ export function getNextQuestion(session, allQuestions) {
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
   if (universalRemaining.length > 0) return universalRemaining[0];
 
+  // フェーズ1.5：ドメインの入口質問（type==='entry'）を最優先で出す
+  // 2026-07-09追加：「順調」分岐ゲートの選択肢として使うため、出題順を保証する
+  // （attackEngine.js の getNextAttackQuestion と同じパターン）
+  const entryRemaining = available.filter(q => q.type === 'entry');
+  if (entryRemaining.length > 0) return entryRemaining[0];
+
   // フェーズ2a：上位2候補が接近していたら切り分け質問を優先
   const entries = getNormalizedEntries(session);
   const top1Norm = entries[0]?.[1] ?? 0;

@@ -44,6 +44,13 @@ export const SELF_QUESTIONS = [
         jungHints: { Si: 1 },
         tags: ['burnout_domain'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'self_ok',
+        label: '今日も特に何も考えず、いつも通り過ごせている',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

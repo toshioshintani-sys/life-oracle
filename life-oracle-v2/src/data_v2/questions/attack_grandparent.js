@@ -42,6 +42,13 @@ export const ATTACK_GRANDPARENT_QUESTIONS = [
         attackTypeHints: { jin_92: 3, jin_93: 1 },
         tags: ['traditional_order'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'grandparent_ok',
+        label: '会えばいつも通りの世間話をして、特に気になるやりとりは残らない',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

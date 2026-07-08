@@ -58,6 +58,13 @@ export const ATTACK_COLLEAGUE_QUESTIONS = [
         jungShadowHints: { Fi: 2, Fe: 1 },
         tags: ['emotional_unclear'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'colleague_ok',
+        label: '今日もその同僚とふつうに言葉を交わして、特に引っかからず終わる',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

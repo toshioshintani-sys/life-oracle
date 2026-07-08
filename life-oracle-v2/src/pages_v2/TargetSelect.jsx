@@ -25,10 +25,11 @@ const GROUPS = [
   },
 ];
 
-export function TargetSelect({ onSelect, onBack }) {
+export function TargetSelect({ onSelect, onBack, okMessage }) {
   return (
     <div className="target-screen">
       <button className="back-button" onClick={onBack}>もどる</button>
+      {okMessage && <p className="topic-ok-message">{okMessage}</p>}
       <p className="topic-lead">攻略したい相手は、どなたですか？</p>
       {GROUPS.map(group => (
         <div key={group.groupLabel} className="target-group">

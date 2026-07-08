@@ -137,6 +137,7 @@ export default function App() {
   const [attackQuestions, setAttackQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [oracleMessage, setOracleMessage] = useState(null);
+  const [gateOkMessage, setGateOkMessage] = useState(null); // 2026-07-09追加：「順調」選択時のトピック/相手選択画面への一言
   const [mbtiResult, setMbtiResult]       = useState(null);
   const [mbtiOccupation, setMbtiOccupation] = useState(null);
   const [mbtiGeneration, setMbtiGeneration] = useState(null);
@@ -195,6 +196,7 @@ export default function App() {
     setSituQuestions(qs);
     setCurrentQuestion(q);
     setOracleMessage(null);
+    setGateOkMessage(null);
     setFlow('situation');
     setScreen('quiz');
     trackEvent('quiz_start', { mode: 'situation', topic: topicId });
@@ -202,6 +204,17 @@ export default function App() {
 
   const handleSituAnswer = useCallback((question, choice) => {
     if (!situSession) return;
+
+    // 2026-07-09追加：入口質問で「順調」を選んだ場合はAkinatorループに入らず、
+    // トピック選択へ戻す（困っていない人に負の質問を重ねない）
+    if (choice.tags?.includes('topic_ok')) {
+      trackEvent('quiz_topic_ok', { mode: 'situation' });
+      setOracleMessage(null);
+      setGateOkMessage('そうですか、それは何よりです。他の場面はどうですか？');
+      setScreen('topic-select');
+      return;
+    }
+
     if (!recordAnswer(situSession, question, choice)) return;
 
     if (shouldFinish(situSession, SITU_MIN_QUESTIONS)) {
@@ -236,6 +249,7 @@ export default function App() {
     setAttackQuestions(qs);
     setCurrentQuestion(q);
     setOracleMessage(null);
+    setGateOkMessage(null);
     setFlow('attack');
     setScreen('quiz');
     trackEvent('quiz_start', { mode: 'attack', target: targetId });
@@ -243,6 +257,17 @@ export default function App() {
 
   const handleAttackAnswer = useCallback((question, choice) => {
     if (!attackSession) return;
+
+    // 2026-07-09追加：入口質問で「順調」を選んだ場合はAkinatorループに入らず、
+    // 相手選択へ戻す（関係が良好な相手に攻略前提の質問を重ねない）
+    if (choice.tags?.includes('topic_ok')) {
+      trackEvent('quiz_topic_ok', { mode: 'attack', target: attackSession?.targetId });
+      setOracleMessage(null);
+      setGateOkMessage('そうですか、良い関係を築けているんですね。他の相手はどうですか？');
+      setScreen('target-select');
+      return;
+    }
+
     if (!recordAttackAnswer(attackSession, question, choice)) return;
 
     if (shouldFinishAttack(attackSession, ATTACK_MIN_QUESTIONS)) {
@@ -397,11 +422,11 @@ export default function App() {
   }
 
   if (screen === 'topic-select') {
-    return <TopicSelect onSelect={handleTopicSelect} onBack={handleRetry} />;
+    return <TopicSelect onSelect={handleTopicSelect} onBack={handleRetry} okMessage={gateOkMessage} />;
   }
 
   if (screen === 'target-select') {
-    return <TargetSelect onSelect={handleTargetSelect} onBack={handleRetry} />;
+    return <TargetSelect onSelect={handleTargetSelect} onBack={handleRetry} okMessage={gateOkMessage} />;
   }
 
   if (screen === 'quiz') {

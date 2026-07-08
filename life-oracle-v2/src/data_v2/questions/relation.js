@@ -38,6 +38,13 @@ export const RELATION_QUESTIONS = [
         jungHints: { Fi: 1 },
         tags: ['general_drain'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'relation_ok',
+        label: '今日も誰かとぶつかることなく、いつも通り過ごせている',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

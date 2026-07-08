@@ -42,6 +42,13 @@ export const ATTACK_PARTNER_QUESTIONS = [
         attackTypeHints: { jin_103: 2, jin_109: 1 },
         tags: ['distract'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'partner_ok',
+        label: '不機嫌になっても、気づけばいつも通りに戻っている',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

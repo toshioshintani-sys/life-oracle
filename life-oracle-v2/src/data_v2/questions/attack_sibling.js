@@ -42,6 +42,13 @@ export const ATTACK_SIBLING_QUESTIONS = [
         attackTypeHints: { jin_88: 2, jin_89: 1 },
         tags: ['easy_going'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'sibling_ok',
+        label: '意見が食い違っても、たいていその場で笑って終わる',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

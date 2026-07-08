@@ -50,6 +50,13 @@ export const ATTACK_SUBORDINATE_QUESTIONS = [
         jungShadowHints: { Fe: 2 },
         tags: ['over_consult'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'subordinate_ok',
+        label: '『わかりました』とだけ言って、特に迷う様子もなく動き始める',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

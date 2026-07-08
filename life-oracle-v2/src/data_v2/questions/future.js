@@ -5,6 +5,48 @@
 
 export const FUTURE_QUESTIONS = [
 
+  // ── 入口 ────────────────────────────────────────────────────────────
+  {
+    id: 'f_entry_001',
+    startFor: 'future_decision',
+    type: 'entry',
+    text: '将来のことを考えたとき、今の自分に一番近いのはどれですか？',
+    discriminates: ['f_job_decision', 'f_independence', 'f_life_change'],
+    choices: [
+      {
+        id: 'job_decision',
+        label: '決めなければいけないことがあるのに、頭の中で同じところをぐるぐる回っている',
+        situationScores: { f_job_decision: 2 },
+        biasHints: { B6: 1 },
+        jungHints: { Ti: 1 },
+        tags: ['job_decision_domain'],
+      },
+      {
+        id: 'independence',
+        label: '今支えてくれているものがなくなったら、自分一人でやっていけるのか不安になる',
+        situationScores: { f_independence: 2 },
+        biasHints: { B1: 1 },
+        jungHints: { Fi: 1 },
+        tags: ['independence_domain'],
+      },
+      {
+        id: 'life_change',
+        label: 'このままでいいのかという感覚が、ふとした瞬間に浮かんでは消えていく',
+        situationScores: { f_life_change: 2 },
+        biasHints: { B2: 1 },
+        jungHints: { Ni: 1 },
+        tags: ['life_change_domain'],
+      },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'future_ok',
+        label: '将来のことを考えても、特に立ち止まることなく、いつも通り過ごせている',
+        tags: ['topic_ok'],
+      },
+    ],
+  },
+
   // ── f_job_decision ──────────────────────────────────────────────────────
 
   {

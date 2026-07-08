@@ -43,6 +43,13 @@ export const ATTACK_BOSS_QUESTIONS = [
         jungShadowHints: { Fi: 1 },
         tags: ['blame_shift'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'boss_ok',
+        label: '良ければ良い、悪ければ悪いと、そのつど素直に伝えてくれる',
+        tags: ['topic_ok'],
+      },
     ],
   },
 

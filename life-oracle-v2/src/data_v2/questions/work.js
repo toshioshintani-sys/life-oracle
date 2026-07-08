@@ -35,6 +35,13 @@ export const WORK_QUESTIONS = [
         jungHints: { Fe: 1 },
         tags: ['relief_escape'],
       },
+      {
+        // 2026-07-09追加：困っていない人の逃げ場（分岐ゲート）。
+        // 選択時はApp.jsx側でAkinatorループに入らずトピック選択へ戻す。
+        id: 'work_ok',
+        label: '特に何も引きずらない。いつも通りの気持ちで帰れている',
+        tags: ['topic_ok'],
+      },
     ],
   },
 
