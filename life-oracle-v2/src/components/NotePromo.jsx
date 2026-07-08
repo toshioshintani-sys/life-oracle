@@ -1,7 +1,7 @@
 // note 記事への送客 CTA（日付で自動切り替え）
 // Phase 1: ~5/28  → 予告バナー
-// Phase 2: 5/29~6/3 → シリーズ2話無料CTA
-// Phase 3: 6/4~   → メンバーシップ募集
+// Phase 2: 5/29~   → シリーズ記事へのプレーンな送客（課金要素なし）
+// Phase 3: メンバーシップ募集 — 2026-07-08 停止中。getPhase() 参照。
 
 const NOTE_BASE = 'https://note.com/lifeoraclejp';
 const NOTE_SERIES_URL = `${NOTE_BASE}`;       // 5/29時点のシリーズURLに差し替え可能
@@ -11,9 +11,13 @@ const SERIES_START    = new Date('2026-05-29T00:00:00+09:00');
 const MEMBERSHIP_START = new Date('2026-06-04T00:00:00+09:00');
 
 function getPhase() {
+  // 2026-07-08: メンバーシップCTA(月額980円)を一旦停止。診断の利用者がまだ少ない段階で
+  // 課金要素を見せると警戒感を与えるため。noteはアプリの補完的な位置づけに戻し、将来的には
+  // 自己啓発書などの情報提供・アフィリエイトへの切り替えを検討する（CLAUDE.md 参照）。
+  // MEMBERSHIP_START 到達後も 'series'（プレーンなnote記事リンクのみ）で止める。
+  // 再開する場合は下の行を戻す： if (now >= MEMBERSHIP_START) return 'membership';
   const now = new Date();
-  if (now >= MEMBERSHIP_START) return 'membership';
-  if (now >= SERIES_START)     return 'series';
+  if (now >= SERIES_START) return 'series';
   return 'preview';
 }
 
@@ -27,10 +31,10 @@ const PHASES = {
     variant: 'preview',
   },
   series: {
-    label:   '公開中 — 5/29・6/2は無料',
+    label:   '公開中',
     heading: '対人攻略シリーズを読む',
-    body:    '職場の人間関係を読み解く記事シリーズ。1記事500円、メンバーシップなら月額980円で読み放題。',
-    cta:     'note で読む（2本無料）',
+    body:    '職場の人間関係を読み解く記事シリーズ。noteでじっくり読めます。',
+    cta:     'note で読む',
     url:     NOTE_SERIES_URL,
     variant: 'series',
   },

@@ -430,7 +430,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             onClick={() => setSection('action')} />
         )}
         <HubCard icon="📖" title="note で深く読む"
-          preview="記事・シリーズ・メンバーシップ"
+          preview="記事・シリーズ"
           onClick={() => setSection('note')} />
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じタイプの人たちのコメント"
