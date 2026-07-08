@@ -400,23 +400,13 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
         <p className="ashita-text" style={{ fontSize: 14 }}>
           診断結果をもとに、ChatGPT で「自分を模した神」の一枚絵が作れます。
         </p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button
-            className="ashita-copy-btn"
-            onClick={() => {
-              navigator.clipboard?.writeText(deityPrompt).catch(() => {});
-              trackEvent('deity_prompt_copy', { mode: 'mbti', mbti_type: mbtiType });
-            }}
-          >プロンプトをコピー</button>
-          <button
-            className="ashita-copy-btn"
-            onClick={() => {
-              navigator.clipboard?.writeText(deityPrompt).catch(() => {});
-              window.open('https://chatgpt.com/', '_blank', 'noopener');
-              trackEvent('deity_prompt_open_chatgpt', { mode: 'mbti', mbti_type: mbtiType });
-            }}
-          >ChatGPTで開く</button>
-        </div>
+        <button
+          className="ashita-copy-btn"
+          onClick={() => {
+            navigator.clipboard?.writeText(deityPrompt).catch(() => {});
+            trackEvent('deity_prompt_copy', { mode: 'mbti', mbti_type: mbtiType });
+          }}
+        >プロンプトをコピー</button>
         <p className="detail-note" style={{ marginTop: 8 }}>
           コピーしたプロンプトを ChatGPT に貼り付けてください。
         </p>
@@ -430,7 +420,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
             onClick={() => setSection('action')} />
         )}
         <HubCard icon="📖" title="note で深く読む"
-          preview="記事・シリーズ"
+          preview="記事・バイアス解説"
           onClick={() => setSection('note')} />
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じタイプの人たちのコメント"

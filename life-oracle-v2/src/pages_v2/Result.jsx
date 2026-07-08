@@ -184,7 +184,7 @@ export function Result({ result, onRetry, onSwitchFlow }) {
       {/* ── noteとみんなのひとことだけカード ── */}
       <div className="hub-cards">
         <HubCard icon="📖" title="note で深く読む"
-          preview="記事・シリーズ"
+          preview="記事・バイアス解説"
           onClick={() => setSection('note')} />
         <HubCard icon="🗣" title="みんなのひとこと"
           preview="同じ状況の人たちのコメント"
