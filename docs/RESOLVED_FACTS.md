@@ -32,6 +32,12 @@
 - `committee-research.yml`(10:00 JST) / `committee-meeting.yml`(14:00) / `daily-report.yml`(08:00) は **main にあり定時稼働中**。「委員会のクラウド稼働準備」は完了＝未着手扱いしない。
 - committee.py は計画拘束（WEEKLY_SPRINT/NOT_DOING/本台帳を読む）＋DO-NOT-ADOPT除外＋執行レビュー込み。
 
+### 委員会の実行方式を週次ローカル無人実行へ移行（as-of 2026-07-09）
+- 🟢 **`committee-research.yml`/`committee-meeting.yml`（GitHub Actions・生API課金・毎日10:00/14:00）は、2026-07-02以降のAnthropicプリペイド残高枯渇を機に、`scripts/committee_native/`（Claude Code `claude -p --permission-mode bypassPermissions` によるTaskツール5担当会議・サブスク課金枠）へ後継移行した。** ローカル週次タスク `LifeOracle_Committee_Weekly`（毎週月曜19:00 JST）が起動し、`tasks/committee/LEDGER.md` への追記・（必要なら）本台帳の訂正追記・git push・Slack通知までを無人で行う。プロンプト本体＝`scripts/committee_native/weekly_prompt.md`、ランナー＝`scripts/committee_native/run_weekly.ps1`。
+- 2026-07-09に技術検証済み：`claude -p`のTaskツールは実ファイル読取を伴うサブエージェント起動に成功（12.5秒・permission_denials 0件）。同日、この方式で試験的に会議1回を実施しLEDGER.mdへ反映・push済み（コミット40bc4dc）。
+- ⚠️ GitHub Actions側の`committee-research.yml`/`committee-meeting.yml`は本台帳の別項（「委員会1ヶ月停止の真因」節）の通り現在も失敗継続中。**無効化するかは俊雄さんの判断待ち**（CI変更のため）。「委員会が動いていない」という報告が今後来た場合、まずこのローカル週次タスクとLEDGER.mdの最新日付を確認すること（GitHub Actionsの失敗は既知・対応不要）。
+- 毎週の頻度に決定した理由：2026-06-20〜07-09の19日間、日次自動運用の停止が誰にも気づかれなかった実績、および1回の会議で決定事項が10件超発生し日次では消化しきれない実態から、俊雄さんの判断で週次に変更。
+
 ### Anthropic API キー — GitHub Secret 同期済み（as-of 2026-06-13）
 - 2026-06-11〜13 に 401(invalid x-api-key) で委員会が4日停止 → ローカルの有効キーを `ANTHROPIC_API_KEY` Secret に同期して復旧。
 - ⚠️ **キーをローテしたら GitHub Secret も `gh secret set ANTHROPIC_API_KEY` で必ず更新**（ローカル .env だけだとクラウドが401で止まる）。

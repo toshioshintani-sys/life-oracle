@@ -7,3 +7,6 @@ __pycache__/
 .env
 .env.local
 .env.*.local
+
+# 委員会週次無人実行のログ(2026-07-09)
+scripts/committee_native/logs/

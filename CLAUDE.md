@@ -157,6 +157,7 @@ Ni：先読み人 / 独走者
 
 - **セッション/会議の冒頭で読む**：`docs/WEEKLY_SPRINT.md`（今週の律速＝サムネ追加＋発信の仕組み化／やる3・やらない3）と `docs/NOT_DOING.md`（採択禁止リスト＝毎日自動投稿復活・X全自動・品質を削る量産・早すぎる収益化拡大ほか／再開トリガー付き）。
 - **委員会**：`scripts/committee.py` は会議冒頭で上記を読み、律速に沿って採択・NOT_DOING該当案を自動除外・執行レビューで採択→実行を閉じる。
+- **委員会の実行方式（2026-07-09変更）**：GitHub Actions（生API課金・毎日）から、ローカル週次タスク `LifeOracle_Committee_Weekly`（毎週月曜19:00 JST・`scripts/committee_native/run_weekly.ps1`）へ移行。`claude -p --permission-mode bypassPermissions` でTaskツールによる5担当会議を無人実行し、LEDGER.md追記・push・Slack通知まで行う（サブスク課金枠・生API不使用）。GitHub Actions側(`committee-research.yml`/`committee-meeting.yml`)の無効化可否は別途判断中。詳細＝`docs/RESOLVED_FACTS.md`「委員会の実行方式を週次ローカル無人実行へ移行」節。
 - **予約ランウェイ監視（通知のみ）**：`scripts/runway_check.py` ＝ ローカル週次タスク `LifeOracle_RunwayCheck_Weekly`（毎週日曜18:00）。各シリーズの予約最終日が**21日未満**で俊雄さんに Slack 通知。真実源＝ローカル記事ファイル（note.com APIは予約を隠すため）。**記事生成・公開は一切しない。⚠️この週次タスクは意図的に登録したもの＝事故ではない**（再開/停止は `Enable/Disable-ScheduledTask`）。
 - North Star＝「届け方の設計」。記事は約4-5ヶ月分予約済み＝量は律速でない。**律速はサムネ追加。**
 - **委員会への情報連絡は「指示待ち」でなく「実行」（原則1）。** 委員会はクラウドで `RESOLVED_FACTS.md`／`WEEKLY_SPRINT.md`／`NOT_DOING.md` を**毎回読む**だけで、ここでの会話は知らない。よって**セッションで確定事実・決定・前提崩し（例：計測の実態、SEO真因、機能の実装状況）が出たら、その台帳を更新してpushするまでがそのタスクの完了**。「更新しますか？」と俊雄さんに聞かない（聞くのは原則1違反）。委員会が古い前提でループしていたら、それは台帳が古い＝こちらの未更新が原因。唯一の人ゲートはmainへのpush承認のみ。
