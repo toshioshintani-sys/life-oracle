@@ -3,7 +3,6 @@ import { cognitiveFunctionMap, famousPeople, MBTI_TO_JUNG, JUNG_LABEL } from '..
 import { biasInfo }          from '../data_v2/meta/biasInfo.js';
 import mechanismsJson        from '../data_v2/meta/prescriptions_mechanism.json';
 import CrossFlowActions      from '../components/CrossFlowActions.jsx';
-import EmailCaptureForm      from '../components/EmailCaptureForm.jsx';
 import { NotePromo }         from '../components/NotePromo.jsx';
 import { ResultDetail }      from '../components/ResultDetail.jsx';
 import { OracleWall }        from './OracleWall.jsx';
@@ -437,8 +436,6 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           preview="同じタイプの人たちのコメント"
           onClick={() => setSection('wall')} />
       </div>
-
-      <EmailCaptureForm flow="mbti" meta={{ occupation, generation }} />
 
       <CrossFlowActions
         currentFlow="mbti"
