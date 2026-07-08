@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { cognitiveFunctionMap, famousPeople } from '../data_v2/meta/cognitiveFunctions.js';
+import { cognitiveFunctionMap, famousPeople, MBTI_TO_JUNG, JUNG_LABEL } from '../data_v2/meta/cognitiveFunctions.js';
 import { biasInfo }          from '../data_v2/meta/biasInfo.js';
 import mechanismsJson        from '../data_v2/meta/prescriptions_mechanism.json';
 import CrossFlowActions      from '../components/CrossFlowActions.jsx';
@@ -11,13 +11,6 @@ import { incrementOnce }     from '../lib/stats.js';
 import { trackEvent }        from '../lib/analytics.js';
 
 const MECHANISMS = mechanismsJson.mechanisms;
-
-const MBTI_TO_JUNG = {
-  ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
-  ESTP: 'Se-光', ESFP: 'Se-影', ENTP: 'Ne-光', ENFP: 'Ne-影',
-  ISTJ: 'Si-光', ISFJ: 'Si-影', ISTP: 'Ti-光', INTP: 'Ti-影',
-  INTJ: 'Ni-光', INFJ: 'Ni-影', ISFP: 'Fi-光', INFP: 'Fi-影',
-};
 
 const TYPE_READING = {
   ENTJ: 'あなたの答えを見ていると、一つのことが見えました。あなたは「決める」ことで、周囲が動き出すのを知っている人です。',
@@ -166,7 +159,12 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
   const reading         = TYPE_READING[mbtiType] ?? null;
   const killerLine      = KILLER_LINE[mbtiType] ?? null;
   const typeProfile     = typeProfiles?.[jungTypeId] ?? null;
-  const typeName        = isShadow ? cf.shadowName : cf.lightName;
+  // 2026-07-08 修正：表示名は JUNG_LABEL[jungTypeId] を正とする（cf.shadowName は誤ったv1由来の
+  // 値を含むため直接使わない。cf.lightName は両モデル一致のためフォールバックとして使用可）。
+  const jungFunction    = jungTypeId?.split('-')[0];
+  const lightLabel      = JUNG_LABEL[`${jungFunction}-光`] ?? cf.lightName;
+  const shadowLabel     = JUNG_LABEL[`${jungFunction}-影`] ?? cf.shadowName;
+  const typeName        = isShadow ? shadowLabel : lightLabel;
   const mechanism       = MECHANISMS[jungTypeId] ?? null;
   const prescriptionKey = occupation && jungTypeId && generation
     ? `${occupation}_${jungTypeId}_${generation}` : '';
@@ -277,8 +275,8 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
           <p className="hub-oracle-famous">{famous.join(' · ')} と同じパターン</p>
         )}
         <div className="hub-poles">
-          <span className="hub-pole hub-pole--light">光：{cf.lightName}</span>
-          <span className="hub-pole hub-pole--shadow">影：{cf.shadowName}</span>
+          <span className="hub-pole hub-pole--light">光：{lightLabel}</span>
+          <span className="hub-pole hub-pole--shadow">影：{shadowLabel}</span>
         </div>
       </div>
 

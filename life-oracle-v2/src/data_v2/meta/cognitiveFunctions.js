@@ -20,6 +20,30 @@ export const cognitiveFunctionMap = {
   ISFP: { dominant: 'Fi', shadow: 'Fe', lightName: '求道者',      shadowName: '八方美人',   todayAction: '今日1つだけ、周りの期待でなく「自分がやりたいこと」を選ぶ',                                   noteUrl: null },
 };
 
+// 2026-07-08 追加：MBTI→ユング機能タイプ(jungTypeId)と、その正しいペルソナ名の対応表。
+// 背景：上の cognitiveFunctionMap.shadowName は「同じMBTIタイプの対抗機能の影」（v1の設計）を
+// 指しており、v2で採用した「同じ機能の光/影表現」（例 Fi-光=求道者・Fi-影=頑固者）の概念とは
+// 別物。両者は8機能中6機能で値がズレる（ENTJ/ENFJ/ESFP/ISFJ/INTP/INFPの表示名バグの原因）。
+// 表示名は必ずこの JUNG_LABEL[jungTypeId] を正とする。cognitiveFunctionMap.shadowName を
+// 直接表示に使わない（cognitiveFunctionMap.lightName は両モデルで一致するため実害なし）。
+export const MBTI_TO_JUNG = {
+  ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
+  ESTP: 'Se-光', ESFP: 'Se-影', ENTP: 'Ne-光', ENFP: 'Ne-影',
+  ISTJ: 'Si-光', ISFJ: 'Si-影', ISTP: 'Ti-光', INTP: 'Ti-影',
+  INTJ: 'Ni-光', INFJ: 'Ni-影', ISFP: 'Fi-光', INFP: 'Fi-影',
+};
+
+export const JUNG_LABEL = {
+  'Te-光': '指揮者',      'Te-影': '鉄砲玉',
+  'Ti-光': '職人',        'Ti-影': '堂々巡り',
+  'Fe-光': '聴き手',      'Fe-影': '八方美人',
+  'Fi-光': '求道者',      'Fi-影': '頑固者',
+  'Se-光': '今を楽しむ人', 'Se-影': '思いつき人',
+  'Si-光': 'コツコツ人',  'Si-影': '現状維持人',
+  'Ne-光': '発明家',      'Ne-影': '三日坊主',
+  'Ni-光': '先読み人',    'Ni-影': '独走者',
+};
+
 export const famousPeople = {
   ENFP: { people: ['坂本龍馬', 'ウォルト・ディズニー'] },
   INFP: { people: ['宮崎駿', 'マイケル・ジャクソン'] },

@@ -1,22 +1,5 @@
 import { useState } from 'react';
-
-const MBTI_TO_JUNG = {
-  ESTJ: 'Te-光', ENTJ: 'Te-影', ESFJ: 'Fe-光', ENFJ: 'Fe-影',
-  ESTP: 'Se-光', ESFP: 'Se-影', ENTP: 'Ne-光', ENFP: 'Ne-影',
-  ISTJ: 'Si-光', ISFJ: 'Si-影', ISTP: 'Ti-光', INTP: 'Ti-影',
-  INTJ: 'Ni-光', INFJ: 'Ni-影', ISFP: 'Fi-光', INFP: 'Fi-影',
-};
-
-const JUNG_LABEL = {
-  'Te-光': '指揮者',      'Te-影': '鉄砲玉',
-  'Ti-光': '職人',        'Ti-影': '堂々巡り',
-  'Fe-光': '聴き手',      'Fe-影': '八方美人',
-  'Fi-光': '求道者',      'Fi-影': '頑固者',
-  'Se-光': '今を楽しむ人', 'Se-影': '思いつき人',
-  'Si-光': 'コツコツ人',  'Si-影': '現状維持人',
-  'Ne-光': '発明家',      'Ne-影': '三日坊主',
-  'Ni-光': '先読み人',    'Ni-影': '独走者',
-};
+import { MBTI_TO_JUNG, JUNG_LABEL } from '../data_v2/meta/cognitiveFunctions.js';
 
 const MBTI_TYPES = [
   'ESTJ', 'ENTJ', 'ESFJ', 'ENFJ',
