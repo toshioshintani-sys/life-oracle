@@ -561,3 +561,16 @@ Body: {
 - `ライフオラクル/tasks/lessons.md` → 両者が読む共有ナレッジ（このファイル）
 
 **再発防止**：新しいルールを追加するときは「実装系か？コンテンツ系か？共通か？」を最初に判断してから書くファイルを決める
+
+---
+
+## 2026-07-09 ｜skill化：無人claude実行と一括編集の型を全プロジェクト資産に昇格 ★★★
+
+**発見**：このセッションの2つの作業パターンが他プロジェクトでも再利用可能と判明し、ユーザーレベルskillに結晶化した。
+1. `~/.claude/skills/headless-claude-runner/` — 委員会のサブスク課金移行（committee_native）で確立した無人 claude -p 自動化の手順と罠8件（Workflowツールはheadless不可・ANTHROPIC_API_KEY残留でAPI課金化・model未指定でHaiku落ち等）
+2. `~/.claude/skills/pilot-fanout-edit/` — ②③分岐ゲート実装（cc0b4e1）で実証した「1件パイロット実機検証→実差分をfew-shotに12並列展開→12/12一発クリーン」の一括編集規律
+3. 既存 `true-council` skill に committee_native を参照実装2として追記（Claude Codeネイティブな週次会議形）
+
+**なぜ重要か**：どちらも「次に同種の作業が来た時、罠を一から再発見する」コストが高い知見。skill の description に USE WHEN/DO NOT FIRE を明記する方式（proposal-stress-test と同じ）で、条件合致時に自己発動する。
+
+**永続化先**：上記3 skill 本体（このlessonsはポインタのみ）。
