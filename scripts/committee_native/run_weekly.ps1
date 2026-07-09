@@ -33,6 +33,10 @@ try {
     $prompt = Get-Content -Raw -Encoding UTF8 $promptFile
     $claudeBin = (Get-Command claude -ErrorAction Stop).Source
 
+    # サブスク課金の保証：環境にANTHROPIC_API_KEYが居ると claude -p がAPI課金に化けるため除去
+    # （world-oracle-staging/agents/_runtime/agent_base.py の _call_via_subscription と同じ防御）
+    Remove-Item Env:\ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
+
     $result = & $claudeBin -p --permission-mode bypassPermissions --model claude-sonnet-5 --output-format json $prompt 2>&1
     $exitCode = $LASTEXITCODE
 
