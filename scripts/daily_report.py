@@ -87,7 +87,9 @@ def _extract_note_key(note_url: str) -> str | None:
 
 
 def _fetch_note_likes(note_key: str) -> int | None:
-    data = http_get(f"https://note.com/api/v2/notes/{note_key}", timeout=10)
+    # 2026-07-13: v2エンドポイントがnote.com側で廃止され全件404化＝スキ数が常に0と誤報していたため
+    # v3へ切替（レスポンス構造はdata.like_countで同一・実機curlで確認済み）。
+    data = http_get(f"https://note.com/api/v3/notes/{note_key}", timeout=10)
     if isinstance(data, dict):
         return data.get("data", {}).get("like_count")
     return None
