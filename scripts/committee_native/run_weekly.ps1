@@ -1,9 +1,13 @@
-# ライフオラクル制作委員会 — 週次会議ランナー（無人実行）
+﻿# ライフオラクル制作委員会 — 週次会議ランナー（無人実行）
 # タスクスケジューラ LifeOracle_Committee_Weekly（毎週月曜19:00 JST）から起動される。
 # GitHub Actions（生API課金）の後継＝ローカルのClaude Codeサブスク課金枠でTaskツールによる
 # 5担当会議を実行する。2026-07-09 制定。
 
 $ErrorActionPreference = "Stop"
+# 2026-07-13修正：このファイルにBOMなしUTF-8で日本語パスを書くと、Task Scheduler経由で実際に
+# 起動されるクラシックPowerShell(powershell.exe)が誤ったコードページで読み、パス文字列が壊れて
+# "見つかりません" エラーになる実障害があった。このファイル自体をUTF-8 BOM付きで保存することで解消する
+# （$PSScriptRoot基点への変更は別の空値エラーを誘発したため、ハードコードパス＋BOMに戻した）。
 $repoRoot = "C:\Users\user\Desktop\Claude_work\ライフオラクル"
 $promptFile = Join-Path $repoRoot "scripts\committee_native\weekly_prompt.md"
 $logDir = Join-Path $repoRoot "scripts\committee_native\logs"
@@ -37,6 +41,10 @@ try {
     # （world-oracle-staging/agents/_runtime/agent_base.py の _call_via_subscription と同じ防御）
     Remove-Item Env:\ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
 
+    # 2026-07-13: stdin経由(パイプ)を試したが claude.ps1 がラッパースクリプトのため
+    # 正しく転送されず異常な結果になったため、実績のある位置引数渡しに戻した。
+    # プロンプト本文はJIS X 0208圏内で長くなりすぎない（＋埋め込みダブルクォートを避ける）よう
+    # weekly_prompt.md 側で管理すること。
     $result = & $claudeBin -p --permission-mode bypassPermissions --model claude-sonnet-5 --output-format json $prompt 2>&1
     $exitCode = $LASTEXITCODE
 
