@@ -28,15 +28,16 @@
 ### gachijin パイプライン — 引退（as-of 2026-06-13・[[NOT_DOING.md]] #8）
 - gachi は2026-11月まで予約完了済み＝パイプラインは役目を終えている。`gachijin-pipeline` / `gachijin-scheduler` の古いCI失敗（直近実行2026-05-08）は**無視してよい**。修復を律速・最優先として採択しない。daily_report も `RETIRED_WORKFLOW_KEYWORDS` で報告・再実行から除外済み。
 
-### 委員会のクラウド自動稼働 — 稼働中（as-of 2026-06-13）
-- `committee-research.yml`(10:00 JST) / `committee-meeting.yml`(14:00) / `daily-report.yml`(08:00) は **main にあり定時稼働中**。「委員会のクラウド稼働準備」は完了＝未着手扱いしない。
+### 委員会のクラウド自動稼働 — 稼働中（as-of 2026-06-13、2026-07-13時点は下記参照）
+- 2026-06-13時点：`committee-research.yml`(10:00 JST) / `committee-meeting.yml`(14:00) / `daily-report.yml`(08:00) は main にあり定時稼働中だった。「委員会のクラウド稼働準備」は完了＝未着手扱いしない。
 - committee.py は計画拘束（WEEKLY_SPRINT/NOT_DOING/本台帳を読む）＋DO-NOT-ADOPT除外＋執行レビュー込み。
+- ⚠️ **2026-07-13以降：`committee-research.yml`/`committee-meeting.yml`の schedule は無効化済み**（下記「委員会の実行方式を週次ローカル無人実行へ移行」節の追記参照）。`daily-report.yml`(08:00 JST)は稼働中のまま・対象外。
 
 ### 委員会の実行方式を週次ローカル無人実行へ移行（as-of 2026-07-09）
 - 🟢 **`committee-research.yml`/`committee-meeting.yml`（GitHub Actions・生API課金・毎日10:00/14:00）は、2026-07-02以降のAnthropicプリペイド残高枯渇を機に、`scripts/committee_native/`（Claude Code `claude -p --permission-mode bypassPermissions` によるTaskツール5担当会議・サブスク課金枠）へ後継移行した。** ローカル週次タスク `LifeOracle_Committee_Weekly`（毎週月曜19:00 JST）が起動し、`tasks/committee/LEDGER.md` への追記・（必要なら）本台帳の訂正追記・git push・Slack通知までを無人で行う。プロンプト本体＝`scripts/committee_native/weekly_prompt.md`、ランナー＝`scripts/committee_native/run_weekly.ps1`。
 - 2026-07-09に技術検証済み：`claude -p`のTaskツールは実ファイル読取を伴うサブエージェント起動に成功（12.5秒・permission_denials 0件）。同日、この方式で試験的に会議1回を実施しLEDGER.mdへ反映・push済み（コミット40bc4dc）。
-- ⚠️ GitHub Actions側の`committee-research.yml`/`committee-meeting.yml`は本台帳の別項（「委員会1ヶ月停止の真因」節）の通り現在も失敗継続中。**無効化するかは俊雄さんの判断待ち**（CI変更のため）。「委員会が動いていない」という報告が今後来た場合、まずこのローカル週次タスクとLEDGER.mdの最新日付を確認すること（GitHub Actionsの失敗は既知・対応不要）。
 - 毎週の頻度に決定した理由：2026-06-20〜07-09の19日間、日次自動運用の停止が誰にも気づかれなかった実績、および1回の会議で決定事項が10件超発生し日次では消化しきれない実態から、俊雄さんの判断で週次に変更。
+- 🟢 **【2026-07-13追記・決着】GitHub Actions側`committee-research.yml`/`committee-meeting.yml`の schedule 実行を無効化した（`workflow_dispatch`のみ残し手動テストは可能）。** 理由＝ローカル週次タスクへの移行後も毎日失敗し続け、成果ゼロのSlack通知とGitHubの失敗通知メールを無駄に発生させ続けていた（俊雄さんが「ほぼ何もできませんでしたの案内」として問題視・停止を明示的に指示）。**「無効化するかは俊雄さんの判断待ち」は解消済み＝再提案しない。** 委員会の実行は完全にローカル週次（`LifeOracle_Committee_Weekly`）に一本化。再開する場合はワークフローファイルの`schedule`コメントを外す。
 
 ### Anthropic API キー — GitHub Secret 同期済み（as-of 2026-06-13）
 - 2026-06-11〜13 に 401(invalid x-api-key) で委員会が4日停止 → ローカルの有効キーを `ANTHROPIC_API_KEY` Secret に同期して復旧。

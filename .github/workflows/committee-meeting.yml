@@ -1,12 +1,15 @@
 name: Committee 14:00 Meeting
 
-# 毎日 14:00 JST = 05:00 UTC。10:00 の各担当レポートを持ち寄り、
-# 議長（秘書）が議事録を生成して Slack に報告し、LEDGER に追記する。
-# scheduled ワークフローは main ブランチにマージ後に発火する。
+# 2026-07-13: 毎日の schedule 実行を停止。
+# 委員会の実行方式は 2026-07-09 にローカル週次タスク
+# (LifeOracle_Committee_Weekly / scripts/committee_native/) へ移行済みで、
+# このワークフローは移行後も失敗し続け、成果ゼロの Slack 通知と
+# GitHub の失敗通知メールだけを毎日発生させていた。無効化は俊雄さんの判断。
+# 再開する場合は下記 schedule のコメントを外す。
 on:
-  schedule:
-    - cron: '0 5 * * *'
-  workflow_dispatch: {}
+  # schedule:
+  #   - cron: '0 5 * * *'  # 毎日 14:00 JST = 05:00 UTC
+  workflow_dispatch: {}   # 手動テストは引き続き可能
 
 jobs:
   meeting:
