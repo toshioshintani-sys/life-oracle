@@ -262,6 +262,40 @@ def get_gsc_stats() -> dict | None:
         return {"error": str(exc)}
 
 
+def check_gsc_sitemap() -> dict | None:
+    """sitemap.xml が GSC に送信済みか確認し、未送信なら自動送信する。認証情報が無ければ None。"""
+    try:
+        creds = _gsc_credentials()
+        if creds is None:
+            return None
+        import google.auth.transport.requests as gtr
+        creds.refresh(gtr.Request())
+        token = creds.token
+        site = urllib.parse.quote(GSC_SITE, safe="")
+        sitemap_url = GSC_SITE + "sitemap.xml"
+        headers = {"Authorization": f"Bearer {token}"}
+
+        list_url = f"https://searchconsole.googleapis.com/webmasters/v3/sites/{site}/sitemaps"
+        req = urllib.request.Request(list_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read())
+        registered = [s["path"] for s in data.get("sitemap", [])]
+        if sitemap_url in registered:
+            return {"status": "already_registered", "path": sitemap_url}
+
+        # 未送信 → 自動送信
+        feedpath = urllib.parse.quote(sitemap_url, safe="")
+        submit_url = f"https://searchconsole.googleapis.com/webmasters/v3/sites/{site}/sitemaps/{feedpath}"
+        submit_req = urllib.request.Request(submit_url, method="PUT", headers=headers)
+        with urllib.request.urlopen(submit_req, timeout=20):
+            pass
+        return {"status": "submitted", "path": sitemap_url}
+    except ImportError:
+        return {"error": "google-auth 未インストール"}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 # ─── X / Twitter ─────────────────────────────────────────────────────────────
 
 def get_x_stats() -> dict | None:
@@ -535,6 +569,17 @@ def main() -> int:
     print("[5/5] Netlify 状態を取得中...")
     netlify = get_netlify_status()
     print(f"  → {netlify}")
+
+    print("GSC サイトマップ登録状況を確認中...")
+    gsc_sitemap = check_gsc_sitemap()
+    if gsc_sitemap and gsc_sitemap.get("status") == "submitted":
+        autofix_log.append(f"GSC サイトマップ未登録だったため自動送信: {gsc_sitemap['path']}")
+        print(f"  → 自動送信: {gsc_sitemap['path']}")
+    elif gsc_sitemap and "error" in gsc_sitemap:
+        manual_actions.append(f"GSC サイトマップ確認エラー → Search Console を確認: {gsc_sitemap['error']}")
+        print(f"  → エラー: {gsc_sitemap['error']}")
+    else:
+        print(f"  → {gsc_sitemap}")
 
     # 自動修復: GitHub Actions 再実行
     if github.get("failed"):
