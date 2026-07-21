@@ -231,22 +231,30 @@ def get_gsc_stats() -> dict | None:
         start = end - timedelta(days=27)
         site = urllib.parse.quote(GSC_SITE, safe="")
         url = f"https://searchconsole.googleapis.com/webmasters/v3/sites/{site}/searchAnalytics/query"
-        body = json.dumps({"startDate": str(start), "endDate": str(end),
-                           "dimensions": ["query"], "rowLimit": 10}).encode()
-        req = urllib.request.Request(url, data=body, method="POST",
-                                     headers={"Authorization": f"Bearer {token}",
-                                              "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            data = json.loads(resp.read())
-        rows = data.get("rows", [])
+
+        def _query(dimensions, row_limit):
+            body = json.dumps({"startDate": str(start), "endDate": str(end),
+                               "dimensions": dimensions, "rowLimit": row_limit}).encode()
+            req = urllib.request.Request(url, data=body, method="POST",
+                                         headers={"Authorization": f"Bearer {token}",
+                                                  "Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                return json.loads(resp.read()).get("rows", [])
+
+        # サイト全体の合計は次元なし(dimensions=[])で別取得する。
+        # dimensions=["query"]の行だけを合計すると、Googleが低頻度クエリを
+        # 匿名化のため行ごと伏せる仕様により合計が過小になる（2026-07-20判明）。
+        total_rows = _query([], 1)
+        totals = total_rows[0] if total_rows else {"clicks": 0, "impressions": 0}
+        query_rows = _query(["query"], 10)
         return {
             "period": f"{start}〜{end}",
-            "clicks": sum(r["clicks"] for r in rows),
-            "impressions": sum(r["impressions"] for r in rows),
-            "query_count": len(rows),
+            "clicks": totals.get("clicks", 0),
+            "impressions": totals.get("impressions", 0),
+            "query_count": len(query_rows),
             "top": [{"query": r["keys"][0], "clicks": r["clicks"],
                      "impressions": r["impressions"], "position": round(r["position"], 1)}
-                    for r in rows[:8]],
+                    for r in query_rows[:8]],
         }
     except ImportError:
         return {"error": "google-auth 未インストール"}
