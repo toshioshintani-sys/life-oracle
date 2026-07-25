@@ -52,6 +52,12 @@ export const useCamera = ({at = 0, duration = 30, scaleTo = 1, xTo = 0, yTo = 0}
 export const useBeat = (every = 15) => Math.floor(useCurrentFrame() / every);
 
 // ---- 小物 ---------------------------------------------------------------
-export const yen = (n) => `¥${Math.round(n).toLocaleString('ja-JP')}`;
+// 通貨。日本以外のプロジェクトでは symbol / locale を差し替える（props で渡す）。
+export const money = (n, {symbol = '¥', locale = 'ja-JP', decimals = 0} = {}) =>
+  `${symbol}${Number(n).toLocaleString(locale, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })}`;
+export const yen = (n) => money(n);
 export const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 export {Easing};

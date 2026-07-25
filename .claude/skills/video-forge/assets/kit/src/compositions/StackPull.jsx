@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {Mark} from '../lib/Mark.jsx';
 import {getBrand, JP_FONT} from '../lib/brand.js';
-import {useCount, useEnter, useProgress, yen} from '../lib/motion.js';
+import {money, useCount, useEnter, useProgress} from '../lib/motion.js';
 
 // 「積み上がった月額から1本を引き抜くと総額が減る」
 // 主役の動き＝数字の減少。signature move＝抜いた1本の金額が年額に転がる。
@@ -27,7 +27,17 @@ const T = {
   outro: 196,
 };
 
-const Row = ({row, index, brand, isTarget, maxPrice, shiftBy}) => {
+// 画面に出る文字と通貨は全て差し替えられる（日本語以外・円以外のプロジェクトのため）。
+// props の labels は部分指定でよい（指定したキーだけ上書きされる）。
+const DEFAULT_LABELS = {
+  total: '毎月の合計',
+  cut: 'やめた1本ぶん',
+  year: '1年でこれだけ変わる',
+  perMonth: '月',
+  perYear: '年',
+};
+
+const Row = ({row, index, brand, isTarget, maxPrice, shiftBy, fmt}) => {
   const enter = useEnter(T.rowsIn + index * 7, {damping: 30, from: 70});
   const bar = useProgress(T.rowsIn + 4 + index * 7, 22);
   const focus = useProgress(T.focus, 10);
@@ -84,14 +94,27 @@ const Row = ({row, index, brand, isTarget, maxPrice, shiftBy}) => {
         }}
       >
         <div style={{fontSize: 42, fontWeight: 600, color: brand.ink}}>{row.name}</div>
-        <div style={{fontSize: 46, fontWeight: 800, color: isTarget ? brand.gold : brand.ink}}>{yen(row.price)}</div>
+        <div style={{fontSize: 46, fontWeight: 800, color: isTarget ? brand.gold : brand.ink}}>{fmt(row.price)}</div>
       </div>
     </div>
   );
 };
 
-export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex, closing}) => {
-  const brand = getBrand(brandKey);
+export const StackPull = ({
+  brand: brandInput,
+  fontFamily,
+  eyebrow,
+  headline,
+  rows,
+  targetIndex,
+  closing,
+  labels,
+  currency,
+}) => {
+  // brand はプリセット名でも、その場のブランド定義オブジェクトでもよい（src/lib/brand.js）
+  const brand = getBrand(brandInput);
+  const L = {...DEFAULT_LABELS, ...(labels ?? {})};
+  const fmt = (n) => money(n, currency);
   const frame = useCurrentFrame();
 
   const total = rows.reduce((s, r) => s + r.price, 0);
@@ -121,7 +144,7 @@ export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex
   return (
     <AbsoluteFill
       style={{
-        fontFamily: JP_FONT,
+        fontFamily: fontFamily ?? JP_FONT,
         color: brand.ink,
         background: `linear-gradient(165deg, ${brand.bgFrom} 0%, ${brand.bgTo} 100%)`,
       }}
@@ -149,7 +172,7 @@ export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex
             {headline}
           </div>
           <div style={{position: 'absolute', inset: 0, opacity: lead}}>
-            <div style={{fontSize: 40, color: brand.inkMuted, marginBottom: 6}}>毎月の合計</div>
+            <div style={{fontSize: 40, color: brand.inkMuted, marginBottom: 6}}>{L.total}</div>
             <div
               style={{
                 fontSize: 140,
@@ -159,7 +182,7 @@ export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex
                 color: frame >= T.totalDown ? brand.accent : brand.ink,
               }}
             >
-              {yen(shown)}
+              {fmt(shown)}
             </div>
           </div>
         </div>
@@ -174,6 +197,7 @@ export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex
               isTarget={i === targetIndex}
               maxPrice={maxPrice}
               shiftBy={i > targetIndex ? shiftBy : 0}
+              fmt={fmt}
             />
           ))}
         </div>
@@ -188,12 +212,12 @@ export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex
           }}
         >
           <div style={{fontSize: 44, color: brand.inkMuted, marginBottom: 8}}>
-            {yearP > 0.5 ? '1年でこれだけ変わる' : 'やめた1本ぶん'}
+            {yearP > 0.5 ? L.year : L.cut}
           </div>
           <div style={{fontSize: 116, fontWeight: 800, color: brand.gold, letterSpacing: -1}}>
-            −{yen(diffValue)}
+            −{fmt(diffValue)}
             <span style={{fontSize: 48, fontWeight: 700, color: brand.inkMuted, marginLeft: 14}}>
-              / {yearP > 0.5 ? '年' : '月'}
+              / {yearP > 0.5 ? L.perYear : L.perMonth}
             </span>
           </div>
         </div>
@@ -202,8 +226,9 @@ export const StackPull = ({brand: brandKey, eyebrow, headline, rows, targetIndex
       <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 108}}>
         <div style={{opacity: outro.opacity, transform: `translateY(${outro.y}px)`, textAlign: 'center'}}>
           <div style={{fontSize: 42, fontWeight: 700, marginBottom: 12}}>{closing}</div>
+          {/* 名前・URL は未設定なら出さない（ブランド定義が無いプロジェクトでも成立させる） */}
           <div style={{fontSize: 34, color: brand.inkMuted, letterSpacing: 2}}>
-            {brand.name} / {brand.url}
+            {[brand.name, brand.url].filter(Boolean).join(' / ')}
           </div>
         </div>
       </AbsoluteFill>

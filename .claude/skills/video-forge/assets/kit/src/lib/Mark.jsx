@@ -2,8 +2,11 @@ import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 
 // ブランドマーク。外部アセットを持たず SVG で描く（差分がテキストで追える）。
+// mark: 'compass' | 'cancel' | 'none'。他プロジェクトのマークを足すならここに1分岐増やす。
 export const Mark = ({brand, size = 96}) => {
   const frame = useCurrentFrame();
+
+  if (!brand.mark || brand.mark === 'none') return null;
 
   if (brand.mark === 'compass') {
     // ライフオラクル：羅針盤（ブランドシグネチャ・変更しない）

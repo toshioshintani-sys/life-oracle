@@ -61,13 +61,18 @@ export const compositions = [stackPull, name];
 |---|---|
 | `src/lib/motion.js` | `useEnter`（spring入場）/ `useProgress` / `useCount`（数字を動かす）/ `useCamera` / `useBeat` / `yen` |
 | `src/lib/text.jsx` | `SplitText`（文字・行単位のスタガー）/ `Wipe`（マスクで書き出す） |
-| `src/lib/brand.js` | ブランド色・日本語フォント |
+| `src/lib/brand.js` | `getBrand()`＝プリセット名／その場の定義オブジェクト／`neutral` を解決・フォント |
 | `src/lib/Mark.jsx` | ブランドマーク（羅針盤／解約リング） |
 
 **使い回すのは部品であってレイアウトではない。**
 
 ## 落とし穴
 
+- **`--props` は defaultProps を丸ごと置き換えず、キー単位でマージされる**。
+  `brand` を書かずに渡すと **defaultProps のブランドがそのまま残る**（別プロジェクトの色で出てしまう）。
+  neutral にしたいなら `"brand": null` と明示する。
+- **画面に出る文字を composition に直書きしない**。ラベル・通貨は props にする
+  （`StackPull.jsx` の `DEFAULT_LABELS` / `currency` が実例）。日本語決め打ちだと他言語プロジェクトで詰む。
 - **`map()` の中で直接フックを呼ばない**。要素は子コンポーネントに切り出す。
   props の要素数が変わるとフック数が変わり React が壊れる（`StackPull.jsx` の `Row` が実例）。
 - **`useEnter(0)` は0フレーム目が opacity 0**。1フレーム目から見せたい要素はアニメーションさせない。
