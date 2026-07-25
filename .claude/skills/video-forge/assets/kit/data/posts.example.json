@@ -1,0 +1,20 @@
+[
+  {
+    "id": "StackPull",
+    "slug": "stack-pull-subsuku",
+    "props": {
+      "brand": "subsuku",
+      "eyebrow": "固定費、動かす",
+      "headline": "毎月、\n何にいくら？",
+      "rows": [
+        {"name": "動画配信", "price": 1026},
+        {"name": "音楽", "price": 1080},
+        {"name": "クラウド保存", "price": 1300},
+        {"name": "読み放題", "price": 980},
+        {"name": "使ってないアプリ", "price": 1490}
+      ],
+      "targetIndex": 4,
+      "closing": "解約手順をまとめています"
+    }
+  }
+]
