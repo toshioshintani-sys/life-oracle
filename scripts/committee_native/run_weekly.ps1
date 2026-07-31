@@ -51,6 +51,22 @@ try {
     $result | Out-File -FilePath $logFile -Encoding utf8
 
     if ($exitCode -ne 0) {
+        # 失敗の中身を見て、**何をすればいいか**まで通知に書く（2026-07-31 追加）。
+        #
+        # 2026-07-14 にCLIの認証が失効し、7/20・7/27 の週次会議が2回連続で開かれなかった。
+        # 通知自体は飛んでいたのに「exit code 1」としか書いておらず、2週間気づかれなかった。
+        # 週次は次の機会が7日後なので、1回見落とすと丸ごと1週間失う。原因の種類まで言わせる。
+        $raw = ($result | Out-String)
+        if ($raw -match 'authentication_error|OAuth access token has expired|Invalid authentication credentials|401') {
+            Send-FailureSlack ("**CLIの認証が失効しています。**今週の会議は開かれていません。`n`n" +
+                "対処（俊雄さんの操作が必要）：ターミナルで claude auth login を実行しブラウザで承認。`n" +
+                "毎回切れるのを止めるなら claude setup-token で長期トークンへ切替（無人実行用・サブスク必要）。`n`n" +
+                "※ claude auth status は「ログイン済み」と出ます。保存済みトークンが失効していても" +
+                "status は通るので、それだけでは判定できません。`n" +
+                "※ 同じ認証を使うサブスクやめたの価格判定（毎朝7:30）も同時に止まります。`n" +
+                "ログ: $logFile")
+            exit 1
+        }
         Send-FailureSlack "claude -p が exit code $exitCode で終了。ログ: $logFile"
         exit 1
     }
