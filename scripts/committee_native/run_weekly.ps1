@@ -45,10 +45,28 @@ try {
     # 正しく転送されず異常な結果になったため、実績のある位置引数渡しに戻した。
     # プロンプト本文はJIS X 0208圏内で長くなりすぎない（＋埋め込みダブルクォートを避ける）よう
     # weekly_prompt.md 側で管理すること。
-    $result = & $claudeBin -p --permission-mode bypassPermissions --model claude-sonnet-5 --output-format json $prompt 2>&1
-    $exitCode = $LASTEXITCODE
+    #
+    # 2026-08-03 追加：**入出力とも UTF-8 を明示する。**
+    # この日の会議は exit 0 で終わったのに、実際には 8.6秒・1ターンで
+    # 「直前のメッセージにはファイル内容の断片だけで、具体的な依頼が見当たりません」と
+    # 返ってきた＝**日本語プロンプトが壊れて届いていた**。7/13 の成功時は 602秒・21ターン。
+    # Task Scheduler が起動するクラシック PowerShell は既定の符号化が CP932 なので、
+    # $OutputEncoding を UTF-8 にしないと、ネイティブコマンドへ渡す引数が化ける。
+    # ログ側（Console.OutputEncoding）も同じ理由で化けていた。
+    $prevOut = [Console]::OutputEncoding
+    $prevOutputEncoding = $OutputEncoding
+    try {
+        [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+        $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+        $result = & $claudeBin -p --permission-mode bypassPermissions --model claude-sonnet-5 --output-format json $prompt 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        [Console]::OutputEncoding = $prevOut
+        $OutputEncoding = $prevOutputEncoding
+    }
 
-    $result | Out-File -FilePath $logFile -Encoding utf8
+    # -Encoding utf8 は Windows PowerShell 5.1 だと BOM 付きになるので、BOMなしで書く
+    [System.IO.File]::WriteAllText($logFile, ($result | Out-String), [System.Text.UTF8Encoding]::new($false))
 
     if ($exitCode -ne 0) {
         # 失敗の中身を見て、**何をすればいいか**まで通知に書く（2026-07-31 追加）。
@@ -68,6 +86,37 @@ try {
             exit 1
         }
         Send-FailureSlack "claude -p が exit code $exitCode で終了。ログ: $logFile"
+        exit 1
+    }
+
+    # exit 0 でも「実際には何もしていない」回を検出する（2026-08-03 追加）。
+    #
+    # この日の会議は exit 0・is_error false で終わったが、中身は 8.6秒・1ターンで
+    # 「具体的な依頼が見当たりません」と聞き返しただけだった。プロンプトが壊れて届いており、
+    # 会議は開かれていない。**見た目だけ緑**の典型で、これが通ると誰も気づかない。
+    # 正常時の実績は 602秒・21ターン（2026-07-13）なので、桁で判別できる。
+    # 週次は次の機会が7日後なので、1回の空振りが丸ごと1週間の損失になる。
+    try {
+        $j = ($result | Out-String) | ConvertFrom-Json
+        $sec = [int](($j.duration_ms | Measure-Object -Sum).Sum / 1000)
+        $turns = [int]$j.num_turns
+        if ($turns -le 1 -or $sec -lt 60) {
+            Send-FailureSlack ("**委員会が空振りしました。**exit 0 ですが会議は開かれていません。`n`n" +
+                "所要 $sec 秒 / ターン数 $turns（正常時の実績は約600秒・21ターン）。`n" +
+                "プロンプトが壊れて届いた疑いがあります（日本語の符号化・引数の切り詰め）。`n" +
+                "ログ: $logFile")
+            exit 1
+        }
+    } catch {
+        # JSONとして読めない場合。**「空振り」と断定はしない。**
+        # 過去ログを全件かけたところ、唯一の本番成功回（2026-07-13・602秒/21ターン）も
+        # 解釈不可だった。日本語の報告文が化けてJSONを壊していたためで、会議自体は成立していた。
+        # ＝この分岐で「失敗」と言い切ると、成功した回まで失敗と報告することになる。
+        # 上の符号化修正でこれは解消される見込みだが、直らなければ判定不能のまま黙るより
+        # 「見に行ってほしい」と伝えるほうがよいので、通知は出して exit 1 にする。
+        Send-FailureSlack ("委員会の出力をJSONとして解釈できませんでした。**会議が成立したかどうか判定できません。**`n" +
+            "ログを直接確認してください（会議が成立していれば数百秒・20ターン前後の記録が残ります）。`n" +
+            "ログ: $logFile")
         exit 1
     }
 } catch {
