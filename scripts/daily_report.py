@@ -49,7 +49,7 @@ GITHUB_REPO    = os.environ.get("GITHUB_REPOSITORY", "toshioshintani-sys/life-or
 
 # 役目を終えた（予約完了で停止した）ワークフロー。失敗を報告も再実行もしない。
 # gachi は2026-11月まで予約完了済み＝gachijin パイプラインは引退（docs/NOT_DOING.md #8 と同期）。
-RETIRED_WORKFLOW_KEYWORDS = ("gachijin",)
+RETIRED_WORKFLOW_KEYWORDS = ("gachijin", "committee")
 
 
 # ─── HTTP helpers ────────────────────────────────────────────────────────────

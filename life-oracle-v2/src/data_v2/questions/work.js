@@ -337,7 +337,7 @@ export const WORK_QUESTIONS = [
       },
       {
         id: 'yes_rewarded',
-        label: '一応報われている。ただ続けるモチベーションが薄い',
+        label: '一応報われている。ただ、次も同じように頑張れる気がしない',
         situationScores: { w_work_empty: 2 },
         tags: ['rewarded_but_empty'],
       },

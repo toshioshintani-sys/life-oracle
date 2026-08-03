@@ -71,7 +71,7 @@ export const SELF_QUESTIONS = [
       },
       {
         id: 'accept',
-        label: '素直に嬉しいと思う',
+        label: '「ありがとう」と返して、そのまま次のことに気持ちが向かう',
         situationScores: { s_self_esteem: -2 },
         tags: ['praise_accept'],
       },
@@ -101,7 +101,7 @@ export const SELF_QUESTIONS = [
       },
       {
         id: 'congrats',
-        label: '素直によかったと思う',
+        label: '「良かったね」で終わって、特にそれ以上は考えない',
         situationScores: { s_self_esteem: -2 },
         tags: ['social_congrats'],
       },
