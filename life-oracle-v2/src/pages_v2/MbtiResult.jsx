@@ -326,8 +326,8 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
                   </div>
                   <p className="mbti-bias-short">{info?.short}</p>
                   <p className="mbti-bias-msg">{msg ?? info?.description}</p>
-                  {info?.noteUrl && new Date() >= new Date(info.noteScheduledAt ?? 0) && (
-                    <a href={info.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link">
+                  {(info?.magazineUrl || (info?.noteUrl && new Date() >= new Date(info.noteScheduledAt ?? 0))) && (
+                    <a href={info.magazineUrl ?? info.noteUrl} target="_blank" rel="noopener noreferrer" className="bias-note-link">
                       このバイアスを深掘りする →
                     </a>
                   )}

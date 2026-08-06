@@ -6,23 +6,29 @@
 import { biasInfo } from '../data_v2/meta/biasInfo.js';
 
 const NOTE_BASE = 'https://note.com/lifeoraclejp';
+// 2026-08-06: 行き先を note トップページから「マガジン案内所」記事に変更。
+// トップページだと読者が自分に必要な記事を探せず放り出される（35マガジンを悩み別に
+// 並べたこの記事が入口として作られている）。
+const MAGAZINE_INDEX_URL = 'https://note.com/lifeoraclejp/n/n79e74fb97c65';
 
-function publishedBiasCount() {
+// マガジンが用意されているバイアスの数。記事本数ではなくテーマ数を出す
+// （本数は週次同期で増減するため、表示が実態とズレない方を採る）。
+function biasThemeCount() {
   const now = new Date();
   return Object.values(biasInfo)
-    .filter((b) => b.noteUrl && now >= new Date(b.noteScheduledAt ?? 0))
+    .filter((b) => b.magazineUrl || (b.noteUrl && now >= new Date(b.noteScheduledAt ?? 0)))
     .length;
 }
 
 export function NotePromo({ minimal = false }) {
-  const count = publishedBiasCount();
+  const count = biasThemeCount();
   const p = count > 0
     ? {
-        label:   `バイアス解説${count}本 公開中`,
+        label:   `バイアス解説 ${count}テーマ`,
         heading: '行動経済学バイアス解説を読む',
-        body:    '損失回避・現在バイアス・確証バイアスなど、無意識の判断のクセをnote記事で深掘り。全て無料で読めます。',
-        cta:     'バイアス解説記事を読む →',
-        url:     NOTE_BASE,
+        body:    '損失回避・現在バイアス・確証バイアスなど、無意識の判断のクセをテーマ別のマガジンにまとめています。全て無料で読めます。',
+        cta:     '悩み別に記事を探す →',
+        url:     MAGAZINE_INDEX_URL,
         variant: 'series', // 既存CSS(.note-promo--series)の色味を流用
       }
     : {

@@ -33,9 +33,11 @@ for (const t of allTypes) {
 
 export function NoteIndex({ onBack }) {
   const now = new Date();
+  // 2026-08-06: バイアスごとの note マガジンへ繋ぐ。マガジンは公開済みなので
+  // noteScheduledAt の日付ゲートは magazineUrl が無い場合にだけ効かせる。
   const biasArticles = Object.entries(biasInfo)
-    .filter(([, b]) => b.noteUrl && now >= new Date(b.noteScheduledAt ?? 0))
-    .map(([id, b]) => ({ id, name: b.name, short: b.short, noteUrl: b.noteUrl }));
+    .filter(([, b]) => b.magazineUrl || (b.noteUrl && now >= new Date(b.noteScheduledAt ?? 0)))
+    .map(([id, b]) => ({ id, name: b.name, short: b.short, noteUrl: b.magazineUrl ?? b.noteUrl }));
 
   return (
     <div className="note-index-screen">
