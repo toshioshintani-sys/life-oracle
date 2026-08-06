@@ -93,7 +93,14 @@ function shouldInsertBias(session) {
 
 /** 未使用バイアス問を返す（出題数が少ないバイアス優先） */
 function pickBiasQuestion(session) {
-  const available = BIAS_QUESTIONS.filter(q => !session.asked.has(q.id));
+  // このセッションで抽選されたバイアスだけを対象にする（session.biasPool）。
+  // SIT（究極の選択型）は accidents/triggers 専用で B1〜B12 とは別枠なので常に許可する。
+  // biasPool を持たない古いセッション形状でも動くよう、無い場合は全件を対象にする。
+  const pool = session.biasPool;
+  const available = BIAS_QUESTIONS.filter(q =>
+    !session.asked.has(q.id) &&
+    (!pool || q.bias === 'SIT' || pool.includes(q.bias))
+  );
   if (available.length === 0) return null;
 
   const biasCounts = {};
@@ -104,9 +111,14 @@ function pickBiasQuestion(session) {
       if (q) biasCounts[q.bias] = (biasCounts[q.bias] ?? 0) + 1;
     });
 
-  return available.sort((a, b) =>
-    (biasCounts[a.bias] ?? 0) - (biasCounts[b.bias] ?? 0)
-  )[0];
+  // 出題数が同じバイアス同士は、配列の並び順ではなく biasPool の並び順（セッションごとに
+  // シャッフル済み）で決める。配列順のままだと後ろのバイアスばかり出題が減り、
+  // 「思考のクセ」に出てくる確率がバイアスごとに3倍以上ずれる（2026-08-06 実測）。
+  const order = (bias) => (pool ? pool.indexOf(bias) : 0);
+  return available.sort((a, b) => {
+    const d = (biasCounts[a.bias] ?? 0) - (biasCounts[b.bias] ?? 0);
+    return d !== 0 ? d : order(a.bias) - order(b.bias);
+  })[0];
 }
 
 /** 次に出題する軸問を選ぶ */

@@ -1,5 +1,29 @@
 // セッション状態オブジェクト
 
+// 診断で測れる行動経済学バイアス（biasInfo の B1〜B12 と対応）
+export const ALL_BIAS_IDS = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12'];
+
+// 1セッションで出題するバイアスの数。
+// 2000セッションのシミュレーションで 4/5/6/8 を比較し、4 が最良だった（2026-08-06）:
+//   pool=4 → 1バイアスあたり3.50問・上位2件の同点率23.4%・バイアス間の偏り1.36倍
+//   pool=6 → 2.50問・33.8%・1.91倍 ／ pool=8 → 2.00問・64.9%・2.63倍
+// 4 なら拡張前（4バイアス固定×約4問）と同じ観測数を保てるため、診断の精度を落とさずに
+// 測れるバイアスだけを3倍にできる。どの4個を聞くかは毎回抽選なので12個すべてが世に出る。
+export const BIAS_POOL_SIZE = 4;
+
+/**
+ * 12個のバイアスから BIAS_POOL_SIZE 個を抽選する（Fisher-Yates）
+ * @returns {string[]}
+ */
+export function pickBiasPool() {
+  const ids = [...ALL_BIAS_IDS];
+  for (let i = ids.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+  return ids.slice(0, BIAS_POOL_SIZE);
+}
+
 /**
  * 初期セッションを生成する
  * @param {'self'|'observe'} flow
@@ -65,6 +89,14 @@ export function createSession(flow = 'self') {
 
     // 最大出題数（バイアス込み）
     maxQuestions: 22,
+
+    // このセッションで出題するバイアスの候補（12個から BIAS_POOL_SIZE 個を抽選）
+    // 2026-08-06: バイアスを4個→12個に拡張した際に追加。
+    // 1セッションで出るバイアス質問は約15問しかないため、12個すべてを対象にすると
+    // 1バイアスあたり1問程度しか観測できず、「思考のクセ」の上位2件が同点だらけで
+    // ほぼ運で決まってしまう。抽選で絞ることで1バイアスあたり2〜3問を確保しつつ、
+    // 利用者ごとに違うバイアスが出るので12個すべてが世に出る。
+    biasPool: pickBiasPool(),
 
     // ユーザーが申告した「知りたいこと」（Entry画面の選択）
     intent: null,
