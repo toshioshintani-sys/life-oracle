@@ -19,4 +19,16 @@ export const biasInfo = {
   B10: { name: '後知恵バイアス',   short: '結果を知ってから「やっぱりそうだと思った」', messageKey: 'hindsight', description: '出来事の結末を知った後で、まるで前から予測できていたかのように感じてしまうバイアス。',                         magazineUrl: 'https://note.com/lifeoraclejp/m/mbff55e9aba6f', noteUrl: 'https://note.com/lifeoraclejp/n/n5b8d496a189e', noteScheduledAt: '2026-10-28T22:00:00Z' },
   B11: { name: 'ハロー効果',       short: '一つの目立つ印象が全体評価に広がる',   messageKey: 'halo',           description: '見た目・肩書き・第一印象などの一つの特徴が、他の側面の評価まで引っ張ってしまうバイアス。',                     magazineUrl: 'https://note.com/lifeoraclejp/m/m4a858200eaa9', noteUrl: 'https://note.com/lifeoraclejp/n/ne84d052da664', noteScheduledAt: '2026-07-12T22:00:00Z' },
   B12: { name: '認知的不協和',     short: '自分の行動と気持ちのズレを正当化したくなる', messageKey: 'dissonance', description: '行動と信念が食い違うとき、不快感を解消するために考え方の方を変えてしまうバイアス。',                         magazineUrl: 'https://note.com/lifeoraclejp/m/m151779b9e37a', noteUrl: 'https://note.com/lifeoraclejp/n/n4968406c2fd1', noteScheduledAt: '2026-09-27T22:00:00Z' },
+
+  // 2026-08-21 追加：noteのマガジン35個に対しアプリが12個しか測れていなかったため、
+  //   なじみのある8個を追加。型別メッセージ(bias_messages.json)は未作成だが、
+  //   結果画面は msg ?? description のフォールバックがあるので description が表示される。
+  B13: { name: '感情ヒューリスティック', short: '「なんとなく」で決めてしまう', messageKey: 'affect', description: '好き嫌いや気分が、論理的な検討より先に判断を決めてしまうバイアス。素早く動ける反面、条件の良し悪しを見落としやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/m9dfb36023446' },
+  B14: { name: '計画錯誤', short: '見積もりがいつも甘くなる', messageKey: 'planning', description: 'かかる時間や費用を実際より少なく見積もるバイアス。前向きに動き出せる一方、締切間際に無理が集中しやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/m24d7faa1e582' },
+  B15: { name: 'ツァイガルニク効果', short: '終わっていないことが頭に残る', messageKey: 'zeigarnik', description: '完了したことより中断していることのほうが記憶に残り続ける現象。やり遂げる力になる反面、休んでいても頭が休まらない。', magazineUrl: 'https://note.com/lifeoraclejp/m/mb45aecf0697b' },
+  B16: { name: 'スポットライト効果', short: '自分への注目を大きく見積もる', messageKey: 'spotlight', description: '実際より多くの人が自分を見ていると感じるバイアス。身だしなみや言動が整う反面、失敗を過剰に引きずりやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/m03b8a4af0b6a' },
+  B17: { name: 'バンドワゴン効果', short: '多くの人が選ぶものに寄っていく', messageKey: 'bandwagon', description: '多数派であること自体が選ぶ理由になるバイアス。流れに乗る力がある反面、自分の基準が薄れやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/m9bcab3fd344a' },
+  B18: { name: 'バーナム効果', short: '誰にでも当てはまる言葉が自分宛てに聞こえる', messageKey: 'barnum', description: '一般的な記述を自分だけへのメッセージとして受け取る現象。素直に受け止められる反面、根拠の薄い言葉にも動かされやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/m47d0bf063412' },
+  B19: { name: 'ダニング・クルーガー効果', short: '知識が浅いほど自信が高くなる', messageKey: 'dunning', description: '習熟の初期ほど自分の理解度を高く見積もるバイアス。行動が早い反面、基礎の確認を飛ばしやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/mb86ee292fc2d' },
+  B20: { name: '正常性バイアス', short: '「自分は大丈夫」と危険を小さく見る', messageKey: 'normalcy', description: '異常や警告を平常の範囲に収めてしまうバイアス。動揺せずにいられる反面、逃げ時・休み時を逃しやすい。周りが動かないと自分も動かない集団状況で強く出る。', magazineUrl: 'https://note.com/lifeoraclejp/m/m715f2a9b2c81' },
 };
