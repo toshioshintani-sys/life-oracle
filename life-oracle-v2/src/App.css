@@ -3801,6 +3801,27 @@ a:focus-visible {
   color: rgba(244, 236, 218, 0.62);
 }
 
+/* 「人に話すなら」＝そのまま口に出せる一行（2026-08-21 追加）。
+   説明文より一段明るくし、引用のように少し引き込んで台詞だと分かる形にする。 */
+.mbti-bias-talk {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-left: 2px solid rgba(214, 173, 84, 0.55);
+  background: rgba(214, 173, 84, 0.06);
+  border-radius: 0 6px 6px 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(244, 236, 218, 0.92);
+}
+
+.mbti-bias-talk-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(241, 215, 144, 0.75);
+  margin-bottom: 2px;
+}
+
 .hub-card-icon {
   width: 34px;
   height: 34px;
