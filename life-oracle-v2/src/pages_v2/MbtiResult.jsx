@@ -332,7 +332,7 @@ export function MbtiResult({ result, occupation, generation, onRetry, onSwitchFl
                   </div>
                   <p className="mbti-bias-short">{info?.short}</p>
                   <p className="mbti-bias-msg">{msg ?? info?.description}</p>
-                  {/* 2026-08-21「知ったかぶり作戦」：名前を覚えただけでは会話で使えないので、
+                  {/* 2026-08-23「知ったかぶり作戦」：名前を覚えただけでは会話で使えないので、
                       そのまま人に言える台詞の形で渡す。拡散の主因は social currency＝
                       「自分が賢く見える情報」を人は共有する（Berger, Contagious）。 */}
                   {info?.talkLine && (

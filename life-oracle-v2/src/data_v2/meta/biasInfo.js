@@ -6,7 +6,7 @@
 // noteUrl: Gachijin series day1 URLs（Supabase job_outputs より取得）。magazineUrl が無い場合のフォールバック。
 // noteScheduledAt: note.com での公開予定日時（UTC）。noteUrl を使う場合のみ有効
 
-// talkLine: 診断結果のカードに出す「人に話せる一行」（2026-08-21 追加）。
+// talkLine: 診断結果のカードに出す「人に話せる一行」（2026-08-23 追加）。
 //   知った名前を誰かに話したくなる＝social currency が拡散の主因（Berger）。
 //   名前だけ覚えても会話では使えないので、そのまま言える台詞の形で渡す。
 export const biasInfo = {
@@ -23,7 +23,7 @@ export const biasInfo = {
   B11: { name: 'ハロー効果',       short: '一つの目立つ印象が全体評価に広がる',   messageKey: 'halo',           description: '見た目・肩書き・第一印象などの一つの特徴が、他の側面の評価まで引っ張ってしまうバイアス。',                     magazineUrl: 'https://note.com/lifeoraclejp/m/m4a858200eaa9', noteUrl: 'https://note.com/lifeoraclejp/n/ne84d052da664', noteScheduledAt: '2026-07-12T22:00:00Z', talkLine: '話がうまい人が仕事もできる、とは限らないらしい' },
   B12: { name: '認知的不協和',     short: '自分の行動と気持ちのズレを正当化したくなる', messageKey: 'dissonance', description: '行動と信念が食い違うとき、不快感を解消するために考え方の方を変えてしまうバイアス。',                         magazineUrl: 'https://note.com/lifeoraclejp/m/m151779b9e37a', noteUrl: 'https://note.com/lifeoraclejp/n/n4968406c2fd1', noteScheduledAt: '2026-09-27T22:00:00Z', talkLine: '納得したんじゃなくて、納得したことにしてるのかも' },
 
-  // 2026-08-21 追加：noteのマガジン35個に対しアプリが12個しか測れていなかったため、
+  // 2026-08-23 追加：noteのマガジン35個に対しアプリが12個しか測れていなかったため、
   //   なじみのある8個を追加。型別メッセージ(bias_messages.json)は未作成だが、
   //   結果画面は msg ?? description のフォールバックがあるので description が表示される。
   B13: { name: '感情ヒューリスティック', short: '「なんとなく」で決めてしまう', messageKey: 'affect', description: '好き嫌いや気分が、論理的な検討より先に判断を決めてしまうバイアス。素早く動ける反面、条件の良し悪しを見落としやすい。', magazineUrl: 'https://note.com/lifeoraclejp/m/m9dfb36023446', talkLine: '理由は後づけで、先に好き嫌いが決まってるんだって' },
