@@ -8,6 +8,53 @@
 
 ---
 
+## 2026-06-21 【X投稿】note記事のリンクがXに入らない重大バグ → 修正スクリプト追加
+
+**状況**：X自動投稿（ローカルの `x_posting_system`）でサムネイル画像とツイート本文は送られているが、**note記事のURLがツイートに含まれていない**という重大事案が発生。
+
+**原因**：ローカルの `x_posting_system/main.py`（GitHubリポジトリ外）が Claude で生成したツイート本文をそのまま投稿しており、生成後に note URL を付与する処理が欠けていた。Claude のプロンプトが URL の出力を求めていないため、Claude 側も URL を出力しない。結果として本文のみ（URL なし）で投稿される。
+
+**解決策**：`scripts/x_poster.py` を新規作成。
+- ツイート本文は Claude で生成（URL は含めないよう指示）
+- `build_tweet_text()` 関数が本文末尾に **必ず** note URL を付与してから投稿（URL 漏れを構造的に防止）
+- `--dry-run` オプションで投稿前確認が可能
+- Twitter media upload API（v1.1）+ tweet post API（v2）を OAuth 1.0a で呼び出す
+
+**使い方**：
+```bash
+# ドライラン（投稿なし・内容確認）
+python -X utf8 scripts/x_poster.py \
+  --note-url "https://note.com/lifeoraclejp/n/nXXXXXX" \
+  --title "記事タイトル" \
+  --description "記事の説明" \
+  --dry-run
+
+# 実際に投稿（サムネあり）
+python -X utf8 scripts/x_poster.py \
+  --note-url "https://note.com/lifeoraclejp/n/nXXXXXX" \
+  --title "記事タイトル" \
+  --image path/to/thumbnail.png
+```
+
+**必要な環境変数**：
+- `TWITTER_API_KEY` / `TWITTER_API_SECRET`
+- `TWITTER_ACCESS_TOKEN` / `TWITTER_ACCESS_SECRET`
+- `ANTHROPIC_API_KEY`（ツイート本文生成）
+
+**ローカル x_posting_system の修正ポイント**（既存コードを直す場合）：
+ツイート投稿直前の箇所に以下を追加するだけ：
+```python
+# note URL を必ず末尾に付与（バグ修正）
+tweet_text = tweet_text.rstrip() + "\n" + note_url
+```
+
+**再発防止**：
+- X 投稿コードは「本文生成」と「URL付与」を必ず分離する。Claude に URL を生成させない（安定性が低い）。
+- `build_tweet_text()` のように URL 付与を専用関数に閉じ込め、投稿パスで必ず通るようにする。
+- ローカルの `x_posting_system` は GitHub 管理外 → 次回は `scripts/x_poster.py`（リポジトリ管理）を使う。
+
+---
+
 Claude Code・Cowork の両方がセッション開始時に必ず読む共有教訓ファイルです。
 エラーや非効率を踏んだら、即ここに追記してください。
 
