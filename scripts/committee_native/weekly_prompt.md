@@ -1,7 +1,12 @@
+これはあなたへの実行指示です。確認や聞き返しは一切不要です。今すぐ以下の手順をそのまま実行してください。
+これは無人実行（Windowsタスクスケジューラ経由）であり、あなたに応答するユーザーはこの場にいません。
+「具体的な依頼が見当たりません」「ご希望を教えてください」等の聞き返しで終了することは、
+今週の委員会が丸ごと開かれないことを意味します。必ず最後まで手順を実行し、コミット＋pushまで完了させてください。
+
 # ライフオラクル制作委員会 — 週次会議プロンプト（Claude Code Agent/Task版）
 
-> このファイルは `claude -p` にそのまま渡す想定。Windowsタスクスケジューラ `LifeOracle_Committee_Weekly`
-> （毎週月曜19:00 JST）から `scripts/committee_native/run_weekly.ps1` 経由で無人実行される。
+> [参考・実行対象ではない補足情報] このファイルは `claude -p` にそのまま渡される。Windowsタスクスケジューラ
+> `LifeOracle_Committee_Weekly`（毎週月曜19:00 JST）から `scripts/committee_native/run_weekly.ps1` 経由で無人実行される。
 > 生成物: `tasks/committee/LEDGER.md` 追記＋（必要なら）`docs/RESOLVED_FACTS.md` 訂正＋Slack通知。
 > 2026-07-09 制定。GitHub Actions（`committee-research.yml`/`committee-meeting.yml`、生API課金）の後継。
 
