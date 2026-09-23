@@ -1,0 +1,395 @@
+{
+  "successes": [
+    {
+      "jin_no": 4,
+      "key": "nf809a285a0d7",
+      "orig_price": 500,
+      "body_before": 12856,
+      "body_after": 12393
+    },
+    {
+      "jin_no": 5,
+      "key": "na1e95f66a032",
+      "orig_price": 500,
+      "body_before": 12808,
+      "body_after": 12345
+    },
+    {
+      "jin_no": 6,
+      "key": "n3e57bb2020c2",
+      "orig_price": 500,
+      "body_before": 13430,
+      "body_after": 12967
+    },
+    {
+      "jin_no": 7,
+      "key": "nb888fd274ba7",
+      "orig_price": 500,
+      "body_before": 13282,
+      "body_after": 12819
+    },
+    {
+      "jin_no": 8,
+      "key": "n055318acad27",
+      "orig_price": 500,
+      "body_before": 12596,
+      "body_after": 12133
+    },
+    {
+      "jin_no": 9,
+      "key": "n5a926ccc362a",
+      "orig_price": 500,
+      "body_before": 12892,
+      "body_after": 12429
+    },
+    {
+      "jin_no": 10,
+      "key": "nbd006f28b2e8",
+      "orig_price": 500,
+      "body_before": 12370,
+      "body_after": 11907
+    },
+    {
+      "jin_no": 11,
+      "key": "n6069cbabdb4b",
+      "orig_price": 500,
+      "body_before": 12691,
+      "body_after": 12228
+    },
+    {
+      "jin_no": 12,
+      "key": "nbabfc7943fad",
+      "orig_price": 500,
+      "body_before": 13714,
+      "body_after": 13251
+    },
+    {
+      "jin_no": 13,
+      "key": "n2f6434bfb3c6",
+      "orig_price": 500,
+      "body_before": 12198,
+      "body_after": 11735
+    },
+    {
+      "jin_no": 14,
+      "key": "n55488c6f5829",
+      "orig_price": 500,
+      "body_before": 12957,
+      "body_after": 12494
+    },
+    {
+      "jin_no": 15,
+      "key": "n072a64d81572",
+      "orig_price": 500,
+      "body_before": 12091,
+      "body_after": 11628
+    },
+    {
+      "jin_no": 16,
+      "key": "n3c517b39a83f",
+      "orig_price": 500,
+      "body_before": 13069,
+      "body_after": 12606
+    },
+    {
+      "jin_no": 17,
+      "key": "n00894216dd63",
+      "orig_price": 500,
+      "body_before": 11811,
+      "body_after": 10684
+    },
+    {
+      "jin_no": 18,
+      "key": "n16f8580d0d42",
+      "orig_price": 500,
+      "body_before": 10696,
+      "body_after": 9573
+    },
+    {
+      "jin_no": 19,
+      "key": "n64f341a50b0b",
+      "orig_price": 500,
+      "body_before": 10807,
+      "body_after": 9688
+    },
+    {
+      "jin_no": 20,
+      "key": "nc127cb8b535f",
+      "orig_price": 500,
+      "body_before": 11339,
+      "body_after": 10216
+    },
+    {
+      "jin_no": 21,
+      "key": "nc65bfc0b7b28",
+      "orig_price": 500,
+      "body_before": 11622,
+      "body_after": 10497
+    },
+    {
+      "jin_no": 22,
+      "key": "n3d8098040596",
+      "orig_price": 500,
+      "body_before": 10951,
+      "body_after": 9832
+    },
+    {
+      "jin_no": 23,
+      "key": "nc5b0d099ca6c",
+      "orig_price": 500,
+      "body_before": 11106,
+      "body_after": 9985
+    },
+    {
+      "jin_no": 24,
+      "key": "n82d7348a4ace",
+      "orig_price": 500,
+      "body_before": 10859,
+      "body_after": 9740
+    },
+    {
+      "jin_no": 25,
+      "key": "nbe59c97d82a8",
+      "orig_price": 500,
+      "body_before": 11039,
+      "body_after": 9920
+    },
+    {
+      "jin_no": 26,
+      "key": "nea2ffa55bfb3",
+      "orig_price": 500,
+      "body_before": 10772,
+      "body_after": 9647
+    },
+    {
+      "jin_no": 27,
+      "key": "n451e6248dfe7",
+      "orig_price": 500,
+      "body_before": 11238,
+      "body_after": 10115
+    },
+    {
+      "jin_no": 28,
+      "key": "n4b103114e16b",
+      "orig_price": 500,
+      "body_before": 11201,
+      "body_after": 10082
+    },
+    {
+      "jin_no": 29,
+      "key": "nd41595a5d47e",
+      "orig_price": 500,
+      "body_before": 10827,
+      "body_after": 9706
+    },
+    {
+      "jin_no": 30,
+      "key": "nafdb856ea71a",
+      "orig_price": 500,
+      "body_before": 10721,
+      "body_after": 9596
+    },
+    {
+      "jin_no": 31,
+      "key": "nda83927e6614",
+      "orig_price": 500,
+      "body_before": 11019,
+      "body_after": 9892
+    },
+    {
+      "jin_no": 32,
+      "key": "n9d6cc12dbc6c",
+      "orig_price": 500,
+      "body_before": 11178,
+      "body_after": 10053
+    },
+    {
+      "jin_no": 33,
+      "key": "n47faeefd960a",
+      "orig_price": 500,
+      "body_before": 11046,
+      "body_after": 9925
+    },
+    {
+      "jin_no": 34,
+      "key": "n57b9924565c8",
+      "orig_price": 500,
+      "body_before": 10861,
+      "body_after": 9740
+    },
+    {
+      "jin_no": 35,
+      "key": "n2d1c0a267293",
+      "orig_price": 500,
+      "body_before": 10880,
+      "body_after": 9759
+    },
+    {
+      "jin_no": 36,
+      "key": "nbc490995ced7",
+      "orig_price": 500,
+      "body_before": 10958,
+      "body_after": 9839
+    },
+    {
+      "jin_no": 37,
+      "key": "n5a37014153ea",
+      "orig_price": 500,
+      "body_before": 11089,
+      "body_after": 9960
+    },
+    {
+      "jin_no": 38,
+      "key": "nd02a1dbf4cf3",
+      "orig_price": 500,
+      "body_before": 11254,
+      "body_after": 10129
+    },
+    {
+      "jin_no": 39,
+      "key": "n19def23e102f",
+      "orig_price": 500,
+      "body_before": 11072,
+      "body_after": 9945
+    },
+    {
+      "jin_no": 40,
+      "key": "n789903f6aab5",
+      "orig_price": 500,
+      "body_before": 11182,
+      "body_after": 10057
+    },
+    {
+      "jin_no": 41,
+      "key": "n7276197916d2",
+      "orig_price": 500,
+      "body_before": 10962,
+      "body_after": 9831
+    },
+    {
+      "jin_no": 42,
+      "key": "n551380d85ee6",
+      "orig_price": 500,
+      "body_before": 11058,
+      "body_after": 9925
+    },
+    {
+      "jin_no": 43,
+      "key": "nfaf2812db9a9",
+      "orig_price": 500,
+      "body_before": 11197,
+      "body_after": 10072
+    },
+    {
+      "jin_no": 44,
+      "key": "nfeaf785b8fe6",
+      "orig_price": 500,
+      "body_before": 10828,
+      "body_after": 9705
+    },
+    {
+      "jin_no": 45,
+      "key": "n3a188bd56e71",
+      "orig_price": 500,
+      "body_before": 11368,
+      "body_after": 10247
+    },
+    {
+      "jin_no": 46,
+      "key": "n03f173de901c",
+      "orig_price": 500,
+      "body_before": 11053,
+      "body_after": 9932
+    },
+    {
+      "jin_no": 47,
+      "key": "n7a6831083add",
+      "orig_price": 500,
+      "body_before": 11161,
+      "body_after": 10022
+    },
+    {
+      "jin_no": 48,
+      "key": "n907139ae8814",
+      "orig_price": 500,
+      "body_before": 11131,
+      "body_after": 10002
+    },
+    {
+      "jin_no": 49,
+      "key": "nf28d8c45de00",
+      "orig_price": 500,
+      "body_before": 11084,
+      "body_after": 9963
+    },
+    {
+      "jin_no": 50,
+      "key": "n088511787e5e",
+      "orig_price": 500,
+      "body_before": 10750,
+      "body_after": 9629
+    },
+    {
+      "jin_no": 51,
+      "key": "nb54d19014e55",
+      "orig_price": 500,
+      "body_before": 10769,
+      "body_after": 9650
+    },
+    {
+      "jin_no": 52,
+      "key": "ne035e1d7f682",
+      "orig_price": 500,
+      "body_before": 11076,
+      "body_after": 9953
+    },
+    {
+      "jin_no": 53,
+      "key": "neee07aaa04cf",
+      "orig_price": 500,
+      "body_before": 10783,
+      "body_after": 9662
+    },
+    {
+      "jin_no": 54,
+      "key": "n0502b16cfbbc",
+      "orig_price": 500,
+      "body_before": 10627,
+      "body_after": 9508
+    },
+    {
+      "jin_no": 55,
+      "key": "ndf2b0a76270c",
+      "orig_price": 500,
+      "body_before": 11016,
+      "body_after": 9897
+    },
+    {
+      "jin_no": 56,
+      "key": "n00026b630a7e",
+      "orig_price": 500,
+      "body_before": 10337,
+      "body_after": 9216
+    },
+    {
+      "jin_no": 57,
+      "key": "n2b5a13d80cbe",
+      "orig_price": 500,
+      "body_before": 11041,
+      "body_after": 9920
+    },
+    {
+      "jin_no": 58,
+      "key": "n3ba05cf848f9",
+      "orig_price": 500,
+      "body_before": 12768,
+      "body_after": 11641
+    }
+  ],
+  "failures": [],
+  "counts": {
+    "applied": 55,
+    "skip_already_free": 1,
+    "fail": 0
+  }
+}
