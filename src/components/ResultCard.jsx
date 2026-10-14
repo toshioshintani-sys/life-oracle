@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import html2canvas from 'html2canvas';
+import { domToPng } from 'modern-screenshot';
 import { cognitiveFunctionMap, typeLabels, biasInfo } from '../data/types';
 
 export default function ResultCard({ typeName, top2Biases }) {
@@ -9,13 +9,13 @@ export default function ResultCard({ typeName, top2Biases }) {
   const handleSaveImage = async () => {
     if (!cardRef.current) return;
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#1a1a2e',
+      const dataUrl = await domToPng(cardRef.current, {
         scale: 2,
+        backgroundColor: '#1a1a2e',
       });
       const link = document.createElement('a');
       link.download = `ライフオラクル_${typeName}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
     } catch (e) {
       console.error('画像保存に失敗しました', e);
